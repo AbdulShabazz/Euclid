@@ -5,3 +5,6 @@ Error	C2491	'PrimeNumberGen::current_prime': definition of dllimport static data
 SOLU:
 uint64_t PrimeNumberGen::current_prime = ... >> uint64_t current_prime = ...
 std::vector<uint64_t> PrimeNumberGen::primes = ... >> std::vector<uint64_t> primes = ...
+
+SYMP: EuclidConsoleDebugger.cpp: Unresolved external symbol "public: __cdecl PrimeNumberGen::PrimeNumberGen(void)" (??0PrimeNumberGen@@QEAA@XZ)
+SOLU: Congiguration Properties > Configuration Type > Static Library (.lib) >> Congiguration Properties > Configuration Type > Dynamic Library (.dll)
