@@ -9,12 +9,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Private">
+    <Filter Include="Source">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Public">
-      <UniqueIdentifier>{17c80e0a-ccad-47c4-97f1-0836ae23cba0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -25,26 +22,26 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Public\Euclid.h">
-      <Filter>Public</Filter>
+      <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Public\framework.h">
-      <Filter>Public</Filter>
+      <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Public\pch.h">
-      <Filter>Public</Filter>
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Private\BUGFIX.txt">
-      <Filter>Private</Filter>
+      <Filter>Source</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\dllmain.cpp">
-      <Filter>Private</Filter>
+      <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Private\pch.cpp">
-      <Filter>Private</Filter>
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
