@@ -1,2 +1,2 @@
-#define EUCLID_API __declspec(dllexport)
-#define EUCLID_API __declspec(dllimport)
+#define API_EXPORT __declspec(dllexport)
+#define API_EXPORT __declspec(dllimport)
