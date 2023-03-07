@@ -39,4 +39,12 @@
       <Filter>Private</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="BUGFIX.txt">
+      <Filter>Private</Filter>
+    </Text>
+    <Text Include="Notes.txt">
+      <Filter>Private</Filter>
+    </Text>
+  </ItemGroup>
 </Project>
