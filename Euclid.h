@@ -5,6 +5,12 @@
 #include <type_traits>
 #include <initializer_list>
 
+// The following ifdef block is the standard way of creating macros which make exporting
+// from a DLL simpler. All files within this DLL are compiled with the EUCLID_EXPORTS
+// symbol defined on the command line. This symbol should not be defined on any project
+// that uses this DLL. This way any other project whose source files include this file see
+// EUCLID_API functions as being imported from a DLL, whereas this DLL sees symbols
+
 #ifdef EUCLID_EXPORTS
 #   define API_EXPORT __declspec(dllexport)
 #else
@@ -130,7 +136,7 @@ public:
 	static uint64_t&& NextPrimeUInt64(const uint64_t& index)
 	{
 		// If index is 0, return current prime.
-		if (!index) 
+		if (!index)
 		{
 			// Skip even numbers. Skip even numbers.
 			uint64_t next_prime = current_prime + 2;
@@ -188,11 +194,4 @@ public:
 		}
 		return true;
 	}
-	/*
-protected:
-	/*static uint64_t current_prime;
-	static std::vector<uint64_t> primes;*/
 };
-
-//uint64_t PrimeNumberGen::current_prime;
-//std::vector<uint64_t> PrimeNumberGen::primes;
