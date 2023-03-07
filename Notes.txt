@@ -1,0 +1,2 @@
+
+Build EuclidProverLib as a DLL (to debug), only export LIB and C++20 headers for use in static builds (Performance). Or export C++17 compliant source.
