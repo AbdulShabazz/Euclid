@@ -1,0 +1,59 @@
+
+template<BracketType EuclidBracket>
+	class API_EXPORT EuclidProver
+	{
+	public:
+		explicit EuclidProver() : _openBrace { BracketTraits<EuclidBracket>::Open },
+			_closeBrace{ BracketTraits<EuclidBracket>::Close }
+		{
+			/*
+			static_assert(std::is_same_v<decltype(EuclidBracket), BracketType>, "Invalid bracket type");
+			_openBrace = BracketTraits<EuclidBracket>::Open;
+			_closeBrace = BracketTraits<EuclidBracket>::Close;*/
+		}
+		bool Axiom(const std::vector<char>& InAxiomVecConstCharRef) const
+		{
+			bool AxiomAcceptedFlag = false;
+			return AxiomAcceptedFlag;
+		}
+		bool Axiom(const std::initializer_list<char>& InAxiomInitListConstCharRef) const
+		{
+			const std::vector<char>& InAxiomVecConstCharRef{ InAxiomInitListConstCharRef };
+			return Axiom(InAxiomVecConstCharRef);
+		}
+		bool Lemma(const std::vector<char>& InLemmaVecConstCharRef) const
+		{
+			bool LemmaAcceptedFlag = false;
+			return LemmaAcceptedFlag;
+		}
+		bool Lemma(const std::initializer_list<char>& InLemmaInitListConstCharRef) const
+		{
+			const std::vector<char>& InLemmaVecConstCharRef{ InLemmaInitListConstCharRef };
+			return Lemma(InLemmaVecConstCharRef);
+		}
+		bool Prove(const std::vector<char>& InProofTargetVecConstCharRef,
+			std::vector<std::vector<char>>& OutPath2DVecCharRef)
+		{
+			bool ResultFoundFlag = false;
+			return ResultFoundFlag;
+		}
+		bool ProveViaReduce(const std::vector<char>& InProofTargetVecChar,
+			std::vector<std::vector<char>>& OutReducePathVec2DCharRef)
+		{
+			bool ResultFoundFlag = false;
+			return ResultFoundFlag;
+		}
+		bool ProveViaExpand(const std::vector<char>& InProofTargetVecConstChar,
+			std::vector<std::vector<char>>& OutExpandPathVec2DCharRef)
+		{
+			bool ResultFoundFlag = false;
+			return ResultFoundFlag;
+		}
+		void PrintPath(const std::vector<std::vector<char>>& InPathVec2DConstChar) const
+		{
+
+		}
+	private:
+		const char _openBrace;// = BracketTraits<EuclidBracket>::Open;
+		const char _closeBrace;// = BracketTraits<EuclidBracket>::Close;
+	};
