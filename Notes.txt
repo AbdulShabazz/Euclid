@@ -1,2 +1,27 @@
 
 Build EuclidProverLib as a DLL (to debug), only export LIB and C++20 headers for use in static builds (Performance). Or export C++17 compliant source.
+
+Algorithm
+
+	Step 1 // Separate lhs/rhs
+		axiom_0[lhs,rhs] ... >> { axiom_0: [lhs] }, { axiom_0: [rhs] } ... { axiom_M: [lhs] }, { axiom_M: [rhs] }
+		lemma_0[lhs,rhs] ... >> { lemma_0: [lhs] }, { lemma_0: [rhs] } ... { lemma_N: [lhs] }, { lemma_N: [rhs] }
+		ProofTarget[lhs,rhs] ... -> { ProofTarget: [lhs] }, { ProofTarget: [rhs] } ...
+
+	Step 2 // Construct additional lemmas
+		iff { [axiom/lemma]_[m/n]: [lhs/rhs] } in { [axiom/lemma]_![m/n]: [rhs/lhs] } >> { lemma_k: [rhs/lhs] }, where m in M; n in N; k > M + N
+
+	Optional Step 3 Prove Via (Reduce, Expand, Reduce + Expand)
+		spawn_thread iff: Step 3 Reduce, repeat Step 3 Reduce
+		spawn_thread iff: Step 3 Expand, repeat Step 3 Expand
+		spawn_thread iff: Step 3 Reduce and or Step 3 Expand, repeat Step 3 Reduce and or Step 3 Expand
+
+	Optional Step 3 Prove Via Reduce // Find a substitution candidate (find longer > shorter)
+	spawn_thread iff: { [axiom/lemma]_[m/n]: [lhs/rhs] } in { ProofTarget: [lhs/rhs] }
+		if { ProofTarget: [lhs] } == { ProofTarget: [rhs] } Proof found
+		if { ProofTarget: [lhs] } != { ProofTarget: [rhs] } repeat Step 3 Reduce
+
+	Optional Step 3 Prove Via Expand // Find a substitution candidate (shorter > longer)
+	spawn_thread iff: { [axiom/lemma]_[m/n]: [lhs/rhs] } in { ProofTarget: [lhs/rhs] }
+		if { ProofTarget: [lhs] } == { ProofTarget: [rhs] }, Proof found
+		if { ProofTarget: [lhs] } != { ProofTarget: [rhs] }, repeat Step 3 Expand
