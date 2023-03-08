@@ -46,5 +46,8 @@
     <Text Include="Notes.txt">
       <Filter>Private</Filter>
     </Text>
+    <Text Include="~reserve.txt">
+      <Filter>Private</Filter>
+    </Text>
   </ItemGroup>
 </Project>
