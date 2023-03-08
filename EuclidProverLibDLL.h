@@ -273,16 +273,10 @@ namespace EuclidProverLib
 	*/
 	template<BracketType EuclidBracket>
 	class API_EXPORT EuclidProver;
-	
-	template<>
-	class API_EXPORT EuclidProver<BracketType::CurlyBraces>
+
+	class API_EXPORT EuclidProver__Proto
 	{
 	public:
-		explicit EuclidProver() : _openBrace{ BracketTraits<BracketType::CurlyBraces>::Open },
-			_closeBrace{ BracketTraits<BracketType::CurlyBraces>::Close }
-		{
-
-		}
 		bool Axiom(const std::vector<char>& InAxiomVecConstCharRef) const
 		{
 			bool AxiomAcceptedFlag = false;
@@ -325,102 +319,53 @@ namespace EuclidProverLib
 		{
 
 		}
-	private:
+	protected:
+		explicit EuclidProver__Proto(
+			const char openBrace, 
+			const char closeBrace) : 
+			_openBrace{ openBrace }, 
+			_closeBrace{ closeBrace }
+		{
+
+		}
 		const char _openBrace;
 		const char _closeBrace;
 	};
-
+	
 	template<>
-	class API_EXPORT EuclidProver<BracketType::Parentheses>
+	class API_EXPORT EuclidProver<BracketType::CurlyBraces> : public EuclidProver__Proto
 	{
 	public:
-		bool Axiom(const std::vector<char>& InAxiomVecConstCharRef) const
-		{
-			bool AxiomAcceptedFlag = false;
-			return AxiomAcceptedFlag;
-		}
-		bool Axiom(const std::initializer_list<char>& InAxiomInitListConstCharRef) const
-		{
-			const std::vector<char>& InAxiomVecConstCharRef{ InAxiomInitListConstCharRef };
-			return Axiom(InAxiomVecConstCharRef);
-		}
-		bool Lemma(const std::vector<char>& InLemmaVecConstCharRef) const
-		{
-			bool LemmaAcceptedFlag = false;
-			return LemmaAcceptedFlag;
-		}
-		bool Lemma(const std::initializer_list<char>& InLemmaInitListConstCharRef) const
-		{
-			const std::vector<char>& InLemmaVecConstCharRef{ InLemmaInitListConstCharRef };
-			return Lemma(InLemmaVecConstCharRef);
-		}
-		bool Prove(const std::vector<char>& InProofTargetVecConstCharRef,
-			std::vector<std::vector<char>>& OutPath2DVecCharRef)
-		{
-			bool ResultFoundFlag = false;
-			return ResultFoundFlag;
-		}
-		bool ProveViaReduce(const std::vector<char>& InProofTargetVecChar,
-			std::vector<std::vector<char>>& OutReducePathVec2DCharRef)
-		{
-			bool ResultFoundFlag = false;
-			return ResultFoundFlag;
-		}
-		bool ProveViaExpand(const std::vector<char>& InProofTargetVecConstChar,
-			std::vector<std::vector<char>>& OutExpandPathVec2DCharRef)
-		{
-			bool ResultFoundFlag = false;
-			return ResultFoundFlag;
-		}
-		void PrintPath(const std::vector<std::vector<char>>& InPathVec2DConstChar) const
+		explicit EuclidProver() : 
+			EuclidProver__Proto{
+				BracketTraits<BracketType::CurlyBraces>::Open,
+				BracketTraits<BracketType::CurlyBraces>::Close }
 		{
 
 		}
 	};
 
 	template<>
-	class API_EXPORT EuclidProver<BracketType::SquareBrackets>
+	class API_EXPORT EuclidProver<BracketType::Parentheses> : public EuclidProver__Proto
 	{
 	public:
-		bool Axiom(const std::vector<char>& InAxiomVecConstCharRef) const
+		explicit EuclidProver() :
+			EuclidProver__Proto{
+				BracketTraits<BracketType::Parentheses>::Open,
+				BracketTraits<BracketType::Parentheses>::Close }
 		{
-			bool AxiomAcceptedFlag = false;
-			return AxiomAcceptedFlag;
+
 		}
-		bool Axiom(const std::initializer_list<char>& InAxiomInitListConstCharRef) const
-		{
-			const std::vector<char>& InAxiomVecConstCharRef{ InAxiomInitListConstCharRef };
-			return Axiom(InAxiomVecConstCharRef);
-		}
-		bool Lemma(const std::vector<char>& InLemmaVecConstCharRef) const
-		{
-			bool LemmaAcceptedFlag = false;
-			return LemmaAcceptedFlag;
-		}
-		bool Lemma(const std::initializer_list<char>& InLemmaInitListConstCharRef) const
-		{
-			const std::vector<char>& InLemmaVecConstCharRef{ InLemmaInitListConstCharRef };
-			return Lemma(InLemmaVecConstCharRef);
-		}
-		bool Prove(const std::vector<char>& InProofTargetVecConstCharRef,
-			std::vector<std::vector<char>>& OutPath2DVecCharRef)
-		{
-			bool ResultFoundFlag = false;
-			return ResultFoundFlag;
-		}
-		bool ProveViaReduce(const std::vector<char>& InProofTargetVecChar,
-			std::vector<std::vector<char>>& OutReducePathVec2DCharRef)
-		{
-			bool ResultFoundFlag = false;
-			return ResultFoundFlag;
-		}
-		bool ProveViaExpand(const std::vector<char>& InProofTargetVecConstChar,
-			std::vector<std::vector<char>>& OutExpandPathVec2DCharRef)
-		{
-			bool ResultFoundFlag = false;
-			return ResultFoundFlag;
-		}
-		void PrintPath(const std::vector<std::vector<char>>& InPathVec2DConstChar) const
+	};
+
+	template<>
+	class API_EXPORT EuclidProver<BracketType::SquareBrackets> : public EuclidProver__Proto
+	{
+	public:
+		explicit EuclidProver() :
+			EuclidProver__Proto{
+				BracketTraits<BracketType::SquareBrackets>::Open,
+				BracketTraits<BracketType::SquareBrackets>::Close }
 		{
 
 		}
