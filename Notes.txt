@@ -1,12 +1,14 @@
-
+_
 Build EuclidProverLib as a DLL (to debug), only export LIB and C++20 headers for use in static builds (Performance). Or export C++17 compliant source.
 
 Algorithm
 
+	Step 0 // Add only unique axiom_ and lemma_ signatures...
+
 	Step 1 // Separate lhs/rhs
-		axiom_0[lhs,rhs] ... >> { axiom_0: [lhs] }, { axiom_0: [rhs] } ... { axiom_M: [lhs] }, { axiom_M: [rhs] }
-		lemma_0[lhs,rhs] ... >> { lemma_0: [lhs] }, { lemma_0: [rhs] } ... { lemma_N: [lhs] }, { lemma_N: [rhs] }
-		ProofTarget[lhs,rhs] ... -> { ProofTarget: [lhs] }, { ProofTarget: [rhs] } ...
+		axiom_0[lhs,=,rhs] ... >> { axiom_0: [lhs] }, { axiom_0: [rhs] } ... { axiom_M: [lhs] }, { axiom_M: [rhs] }
+		lemma_0[lhs,=,rhs] ... >> { lemma_0: [lhs] }, { lemma_0: [rhs] } ... { lemma_N: [lhs] }, { lemma_N: [rhs] }
+		ProofTarget[lhs,=,rhs] ... >> { ProofTarget: [lhs] }, { ProofTarget: [rhs] } ...
 
 	Step 2 // Construct additional lemmas
 		iff { [axiom/lemma]_[m/n]: [lhs/rhs] } in { [axiom/lemma]_![m/n]: [rhs/lhs] } >> { lemma_k: [rhs/lhs] }, where m in M; n in N; k > M + N
@@ -25,3 +27,34 @@ Algorithm
 	spawn_thread iff: { [axiom/lemma]_[m/n]: [lhs/rhs] } in { ProofTarget: [lhs/rhs] }
 		if { ProofTarget: [lhs] } == { ProofTarget: [rhs] }, Proof found
 		if { ProofTarget: [lhs] } != { ProofTarget: [rhs] }, repeat Step 3 Expand
+
+NOTES
+
+To improve performance, Proof search is conducted on arrays of primes. 
+
+Example:
+
+	// Brackets '{} [] ()' and Equals '=' are a special builtin type
+	tokens: '{', '}', '1', '2', '+', '='
+	primes:  2,   3,   7,  11,  13,   5
+	
+Example:
+
+	prove: { 1 } + { 1 } = { 2 }
+
+Limitations: platform resolution.
+
+Example:
+
+	limited internal representation
+	2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11 
+	
+	recommended scale-invariant internal representation: 
+	'2_1 7_2 3_3 13_4 2_5 7_6 3_7 5_8 2_9 11_10 3_11'
+
+obj
+{ 
+TokenValueString:'1',
+ProofString:'1_{0}',
+RegExString:'{0}_(\d+)\s'
+}
