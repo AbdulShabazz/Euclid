@@ -19,6 +19,7 @@
 
 #include <stdint.h>
 #include <cmath>
+#include <unordered_map>
 
 namespace EuclidProverLib
 {
@@ -224,17 +225,22 @@ namespace EuclidProverLib
 	Example:
 	int main()
 	{
+		using namespace EuclidProverLib;
+
 		// Instantiate Prover (module)
 		EuclidProver<BracketType::CurlyBraces> Euclid{};
+
 		// Add axioms
 		Euclid.Axiom({ '{', '1', '}','+','{', '1', '}','=','{', '2', '}' }); // axiom_0
 		Euclid.Axiom({ '{', '2', '}','+','{', '2', '}','=','4' }); // axiom_1
+		
 		// Add supporting lemmas
 		Euclid.Lemma({ '{', '1', '}','+','{', '0', '}','=','{', '1', '}' }); // lemma_0
+		
 		// Conduct proof
-		std::vector<char> proof_target = { '{', '4', '}', '=', '{', '1', '}','+','{', '1', '}','+','{', '1', '}', '+', '{', '1', '}' };
+		std::vector<char> proof = { '{', '4', '}', '=', '{', '1', '}','+','{', '1', '}','+','{', '1', '}', '+', '{', '1', '}' };
 		std::vector<std::vector<char>> path;
-		if (Euclid.Prove(proof_target, path))
+		if (Euclid.Prove(proof, path))
 		{
 			std::cout << "Proof:\n";
 			Euclid.PrintPath(path);
@@ -246,7 +252,7 @@ namespace EuclidProverLib
 
 		// Optional Solver: Expand
 		std::vector<std::vector<char>> expand_path;
-		if (Euclid.ProveViaExpand(proof_target, expand_path))
+		if (Euclid.ProveViaExpand(proof, expand_path))
 		{
 			std::cout << "Proof via Expand:\n";
 			Euclid.PrintPath(expand_path);
@@ -258,7 +264,7 @@ namespace EuclidProverLib
 
 		// Optional Solver: Reduce
 		std::vector<std::vector<char>> reduce_path;
-		if (Euclid.ProveViaReduce(proof_target, reduce_path))
+		if (Euclid.ProveViaReduce(proof, reduce_path))
 		{
 			std::cout << "Proof via Reduce:\n";
 			Euclid.PrintPath(reduce_path);
@@ -277,39 +283,111 @@ namespace EuclidProverLib
 	class API_EXPORT EuclidProver__Proto
 	{
 	public:
-		bool Axiom(const std::vector<char>& InAxiomVecConstCharRef) const
+		bool Axiom(const std::vector<char>& InAxiomVecConstCharRef)
 		{
+			const char& delim = '=';
 			bool AxiomAcceptedFlag = false;
+			bool LeftHandSideFlag = true;
+			std::vector<char> lhs{};
+			std::vector<char> rhs{};
+			for (const char& token : InAxiomVecConstCharRef)
+			{
+				if (token == delim)
+				{
+					LeftHandSideFlag = false;
+					if (rhs.size() > 0)
+					{
+						AxiomRHS.push_back(rhs);
+						rhs = {};
+					}
+					continue;
+				}
+				if (!TokenLibraryCharToUInt64tMap.contains(token))
+				{
+					TokenLibraryCharToUInt64tMap.insert({ token,
+						PrimeNumberGen::NextPrimeUInt64() });
+				}
+				LeftHandSideFlag ? 
+					lhs.push_back(token) : 
+					rhs.push_back(token) ;
+			}
+			if (lhs.size() < 1 || 
+				rhs.size() < 1) 
+			{
+				throw std::invalid_argument("Missing equals '=' in axiom or lemma designation. Vectors must have size greater than 0");
+			}
+			else
+			{
+				AxiomAcceptedFlag = true;
+			}
+			AxiomLHS.push_back(lhs);
+			AxiomRHS.push_back(rhs);			
 			return AxiomAcceptedFlag;
 		}
-		bool Axiom(const std::initializer_list<char>& InAxiomInitListConstCharRef) const
+		bool Axiom(const std::initializer_list<char>& InAxiomInitListConstCharRef)
 		{
 			const std::vector<char>& InAxiomVecConstCharRef{ InAxiomInitListConstCharRef };
 			return Axiom(InAxiomVecConstCharRef);
 		}
-		bool Lemma(const std::vector<char>& InLemmaVecConstCharRef) const
+		bool Lemma(const std::vector<char>& InLemmaVecConstCharRef)
 		{
 			bool LemmaAcceptedFlag = false;
+			const char& delim = '=';
+			bool LeftHandSideFlag = true;
+			std::vector<char> lhs{};
+			std::vector<char> rhs{};
+			for (const char& token : InLemmaVecConstCharRef)
+			{
+				if (token == delim)
+				{
+					LeftHandSideFlag = false;
+					if (rhs.size() > 0)
+					{
+						LemmaRHS.push_back(rhs);
+						rhs = {};
+					}
+					continue;
+				}
+				if (!TokenLibraryCharToUInt64tMap.contains(token))
+				{
+					TokenLibraryCharToUInt64tMap.insert({ token,
+						PrimeNumberGen::NextPrimeUInt64() });
+				}
+				LeftHandSideFlag ?
+					lhs.push_back(token) :
+					rhs.push_back(token);
+			}
+			if (lhs.size() < 1 ||
+				rhs.size() < 1)
+			{
+				throw std::invalid_argument("Missing equals '=' in axiom or lemma designation. Vectors must have size greater than 0");
+			}
+			else
+			{
+				LemmaAcceptedFlag = true;
+			}
+			LemmaLHS.push_back(lhs);
+			LemmaRHS.push_back(rhs);
 			return LemmaAcceptedFlag;
 		}
-		bool Lemma(const std::initializer_list<char>& InLemmaInitListConstCharRef) const
+		bool Lemma(const std::initializer_list<char>& InLemmaInitListConstCharRef)
 		{
 			const std::vector<char>& InLemmaVecConstCharRef{ InLemmaInitListConstCharRef };
 			return Lemma(InLemmaVecConstCharRef);
 		}
-		bool Prove(const std::vector<char>& InProofTargetVecConstCharRef,
+		bool Prove(const std::vector<char>& InProofVecConstCharRef,
 			std::vector<std::vector<char>>& OutPath2DVecCharRef)
 		{
 			bool ResultFoundFlag = false;
 			return ResultFoundFlag;
 		}
-		bool ProveViaReduce(const std::vector<char>& InProofTargetVecChar,
+		bool ProveViaReduce(const std::vector<char>& InProofVecChar,
 			std::vector<std::vector<char>>& OutReducePathVec2DCharRef)
 		{
 			bool ResultFoundFlag = false;
 			return ResultFoundFlag;
 		}
-		bool ProveViaExpand(const std::vector<char>& InProofTargetVecConstChar,
+		bool ProveViaExpand(const std::vector<char>& InProofVecConstChar,
 			std::vector<std::vector<char>>& OutExpandPathVec2DCharRef)
 		{
 			bool ResultFoundFlag = false;
@@ -330,6 +408,13 @@ namespace EuclidProverLib
 		}
 		const char _openBrace;
 		const char _closeBrace;
+		std::vector<std::vector<char>> LemmaLHS{};
+		std::vector<std::vector<char>> LemmaRHS{};
+		std::vector<std::vector<char>> AxiomLHS{};
+		std::vector<std::vector<char>> AxiomRHS{};
+		std::vector<std::vector<char>> ProofLHS{};
+		std::vector<std::vector<char>> ProofRHS{};
+		std::unordered_map <char, uint64_t> TokenLibraryCharToUInt64tMap;
 	};
 	
 	template<>
