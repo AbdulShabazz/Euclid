@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <cmath>
 #include <unordered_map>
+#include <thread>
 
 namespace EuclidProverLib
 {
@@ -32,22 +33,22 @@ namespace EuclidProverLib
 	template <>
 	struct BracketTraits<BracketType::CurlyBraces>
 	{
-		static constexpr char Open = '{';
-		static constexpr char Close = '}';
+		static constexpr std::string Open = "{";
+		static constexpr std::string Close = "}";
 	};
 
 	template <>
 	struct BracketTraits<BracketType::SquareBrackets>
 	{
-		static constexpr char Open = '[';
-		static constexpr char Close = ']';
+		static constexpr std::string Open = "[";
+		static constexpr std::string Close = "]";
 	};
 
 	template <>
 	struct BracketTraits<BracketType::Parentheses>
 	{
-		static constexpr char Open = '(';
-		static constexpr char Close = ')';
+		static constexpr std::string Open = "(";
+		static constexpr std::string Close = ")";
 	};
 
 	class API_EXPORT CurlyBraceScopeChecker
@@ -55,11 +56,11 @@ namespace EuclidProverLib
 	public:
 		/**
 		Example:
-		std::vector<char> chars = { '{', '}', '{', '{', '}', '}' };
-		CurlyBraceScopeChecker::AreProperlyScoped<BracketType::CurlyBraces>(chars); // returns true 
+		std::vector<std::string> stringvec_ = { "{", "}", "{", "{", "}", "}" };
+		CurlyBraceScopeChecker::AreProperlyScoped<BracketType::CurlyBraces>(stringvec_); // returns true 
 		*/
 		template <BracketType type>
-		static bool AreProperlyScoped(const std::vector<char>& chars)
+		static bool AreProperlyScoped(const std::vector<std::string>& chars)
 		{
 			static_assert(std::is_same_v<decltype(type), BracketType>, "Invalid bracket type");
 			const char openBrace = BracketTraits<type>::Open;
@@ -85,16 +86,16 @@ namespace EuclidProverLib
 	public:
 		/**
 		Example:
-		std::vector<char> input = { '{', '{', '{', '1', '}', '}', '+', '{', '{', '1', '}', '}', '}', '=', '{', '{', '2', '}', '}' };
-		const auto& output = CurlyBraceElide::Elide<BracketType::CurlyBraces>(input); // { '{', '1', '}', '+', '{', '1', '}', '=', '{', '2', '}' }
+		std::vector<std::string> input = { "{", "{", "{", "1", "}", "}", "+", "{", "{", "1", "}", "}", "}", "=", "{", "{", "2", "}", "}" };
+		const auto& output = CurlyBraceElide::Elide<BracketType::CurlyBraces>(input); // { "{", "1", "}", "+", "{", "1", "}", "=", "{", "2", "}" }
 		*/
 		template <BracketType type>
-		static std::vector<char>/*&&*/ Elide(const std::vector<char>& input)
+		static std::vector<std::string>/*&&*/ Elide(const std::vector<std::string>& input)
 		{
 			static_assert(std::is_same_v<decltype(type), BracketType>, "Invalid bracket type");
 			const char openBrace = BracketTraits<type>::Open;
 			const char closeBrace = BracketTraits<type>::Close;
-			std::vector<char> output;
+			std::vector<std::string> output;
 			bool OpenScopeFlag = false;
 			for (char c : input)
 			{
@@ -122,13 +123,13 @@ namespace EuclidProverLib
 		}
 		/**
 		Example:
-		const auto& output = CurlyBraceElide::Elide<BracketType::CurlyBraces>({ '{', '{', '{', '1', '}', '}', '+', '{', '{', '1', '}', '}', '}', '=', '{', '{', '2', '}', '}' }); // { '{', '1', '}', '+', '{', '1', '}', '=', '{', '2', '}' }
+		const auto& output = CurlyBraceElide::Elide<BracketType::CurlyBraces>({ "{", "{", "{", "1", "}", "}", "+", "{", "{", "1", "}", "}", "}", "=", "{", "{", "2", "}", "}" }); // { "{", "1", "}", "+", "{", "1", "}", "=", "{", "2", "}" }
 		*/
 		template <BracketType type>
-		static std::vector<char>/*&&*/ Elide(const std::initializer_list<char>& input)
+		static std::vector<std::string>/*&&*/ Elide(const std::initializer_list<std::string>& input)
 		{
 			static_assert(std::is_same_v<decltype(type), BracketType>, "Invalid bracket type");
-			const std::vector<char>& input2(input);
+			const std::vector<std::string>& input2(input);
 			return Elide<type>(input2);// std::move(Elide<type>(input2));
 		}
 	};
@@ -231,15 +232,15 @@ namespace EuclidProverLib
 		EuclidProver<BracketType::CurlyBraces> Euclid{};
 
 		// Add axioms
-		Euclid.Axiom({ '{', '1', '}','+','{', '1', '}','=','{', '2', '}' }); // axiom_0
-		Euclid.Axiom({ '{', '2', '}','+','{', '2', '}','=','4' }); // axiom_1
+		Euclid.Axiom({ "{", "1", "}","+","{", "1", "}","=","{", "2", "}" }); // axiom_0
+		Euclid.Axiom({ "{", "2", "}","+","{", "2", "}","=","4" }); // axiom_1
 		
 		// Add supporting lemmas
-		Euclid.Lemma({ '{', '1', '}','+','{', '0', '}','=','{', '1', '}' }); // lemma_0
+		Euclid.Lemma({ "{", "1", "}","+","{", "0", "}","=","{", "1", "}" }); // lemma_0
 		
 		// Conduct proof
-		std::vector<char> proof = { '{', '4', '}', '=', '{', '1', '}','+','{', '1', '}','+','{', '1', '}', '+', '{', '1', '}' };
-		std::vector<std::vector<char>> path;
+		std::vector<std::string> proof = { "{", "4", "}", "=", "{", "1", "}","+","{", "1", "}","+","{", "1", "}", "+", "{", "1", "}" };
+		std::vector<std::vector<std::string>> path;
 		if (Euclid.Prove(proof, path))
 		{
 			std::cout << "Proof:\n";
@@ -251,7 +252,7 @@ namespace EuclidProverLib
 		}
 
 		// Optional Solver: Expand
-		std::vector<std::vector<char>> expand_path;
+		std::vector<std::vector<std::string>> expand_path;
 		if (Euclid.ProveViaExpand(proof, expand_path))
 		{
 			std::cout << "Proof via Expand:\n";
@@ -263,7 +264,7 @@ namespace EuclidProverLib
 		}
 
 		// Optional Solver: Reduce
-		std::vector<std::vector<char>> reduce_path;
+		std::vector<std::vector<std::string>> reduce_path;
 		if (Euclid.ProveViaReduce(proof, reduce_path))
 		{
 			std::cout << "Proof via Reduce:\n";
@@ -280,179 +281,229 @@ namespace EuclidProverLib
 	template<BracketType EuclidBracket>
 	class API_EXPORT EuclidProver;
 
-	class API_EXPORT EuclidProver__Proto
+	template<>
+	class API_EXPORT EuclidProver<BracketType::CurlyBraces>
 	{
 	public:
-		bool Axiom(const std::vector<char>& InAxiomVecConstCharRef)
+		bool Axiom(const std::vector<std::string>& InAxiomVecConstCharRef)
 		{
-			const char& delim = '=';
 			bool AxiomAcceptedFlag = false;
-			bool LeftHandSideFlag = true;
-			std::vector<char> lhs{};
-			std::vector<char> rhs{};
-			for (const char& token : InAxiomVecConstCharRef)
+			uint64_t AxiomLHSPrimeCompositeUInt64 = 1;
+			uint64_t AxiomRHSPrimeCompositeUInt64 = 1;
+			if (SplitEquation(InAxiomVecConstCharRef,
+				AxiomLHSPrimeCompositeUInt64,
+				AxiomRHSPrimeCompositeUInt64,
+				AxiomRHS,
+				AxiomRHSPrimeComposite))
 			{
-				if (token == delim)
+				AxiomAcceptedFlag = isValid();
+				if (AxiomAcceptedFlag)
 				{
-					LeftHandSideFlag = false;
-					if (rhs.size() > 0)
-					{
-						AxiomRHS.push_back(rhs);
-						rhs = {};
-					}
-					continue;
+					LemmaLHS.push_back(lhs);
+					LemmaRHS.push_back(lhs);
+					LemmaLHSPrimeComposite.push_back(AxiomLHSPrimeCompositeUInt64);
+					LemmaRHSPrimeComposite.push_back(AxiomRHSPrimeCompositeUInt64);
 				}
-				if (!TokenLibraryCharToUInt64tMap.contains(token))
-				{
-					TokenLibraryCharToUInt64tMap.insert({ token,
-						PrimeNumberGen::NextPrimeUInt64() });
-				}
-				LeftHandSideFlag ? 
-					lhs.push_back(token) : 
-					rhs.push_back(token) ;
 			}
-			if (lhs.size() < 1 || 
-				rhs.size() < 1) 
-			{
-				throw std::invalid_argument("Missing equals '=' in axiom or lemma designation. Vectors must have size greater than 0");
-			}
-			else
-			{
-				AxiomAcceptedFlag = true;
-			}
-			AxiomLHS.push_back(lhs);
-			AxiomRHS.push_back(rhs);			
 			return AxiomAcceptedFlag;
 		}
-		bool Axiom(const std::initializer_list<char>& InAxiomInitListConstCharRef)
+		bool Axiom(const std::initializer_list<std::string>& InAxiomInitListConstStdStringRef)
 		{
-			const std::vector<char>& InAxiomVecConstCharRef{ InAxiomInitListConstCharRef };
-			return Axiom(InAxiomVecConstCharRef);
+			const std::vector<std::string>& InAxiomVecConstStdStringRef{ InAxiomInitListConstStdStringRef };
+			return Axiom(InAxiomVecConstStdStringRef);
 		}
-		bool Lemma(const std::vector<char>& InLemmaVecConstCharRef)
+		bool Lemma(const std::vector<std::string>& InLemmaConstStdStringVecRef)
 		{
 			bool LemmaAcceptedFlag = false;
-			const char& delim = '=';
-			bool LeftHandSideFlag = true;
-			std::vector<char> lhs{};
-			std::vector<char> rhs{};
-			for (const char& token : InLemmaVecConstCharRef)
+			uint64_t AxiomLHSPrimeCompositeUInt64 = 1;
+			uint64_t AxiomRHSPrimeCompositeUInt64 = 1;
+			if (SplitEquation(InLemmaConstStdStringVecRef,
+				AxiomLHSPrimeCompositeUInt64,
+				AxiomRHSPrimeCompositeUInt64, 
+				LemmaRHS,
+				LemmaRHSPrimeComposite))
 			{
-				if (token == delim)
+				LemmaAcceptedFlag = isValid();
+				if(LemmaAcceptedFlag)
 				{
-					LeftHandSideFlag = false;
-					if (rhs.size() > 0)
+					LemmaLHSPrimeComposite.push_back(AxiomLHSPrimeCompositeUInt64);
+					LemmaRHSPrimeComposite.push_back(AxiomRHSPrimeCompositeUInt64);
+				}
+			}
+			return LemmaAcceptedFlag;
+		}
+		bool Lemma(const std::initializer_list<std::string>& InLemmaInitListConstCharRef)
+		{
+			const std::vector<std::string>& InLemmaVecConstCharRef{ InLemmaInitListConstCharRef };
+			return Lemma(InLemmaVecConstCharRef);
+		}
+		bool Prove(const std::vector<std::string>& InProofVecConstCharRef,
+			std::vector<std::vector<std::string>>& OutPath2DVecCharRef)
+		{
+			bool ResultFoundFlag = false;
+			return ResultFoundFlag;
+		}
+		bool ProveViaReduce(const std::vector<std::string>& InProofVecChar,
+			std::vector<std::vector<std::string>>& OutReducePathVec2DCharRef)
+		{
+			bool ResultFoundFlag = false;
+			return ResultFoundFlag;
+		}
+		bool ProveViaExpand(const std::vector<std::string>& InProofVecConstChar,
+			std::vector<std::vector<std::string>>& OutExpandPathVec2DCharRef)
+		{
+			bool ResultFoundFlag = false;
+			return ResultFoundFlag;
+		}
+		void PrintPath(const std::vector<std::vector<std::string>>& InPathVec2DConstChar) const
+		{
+
+		}
+	private:
+		const std::string _openBrace = "{";
+		const std::string _closeBrace = "}";
+		std::vector<std::string> lhs;
+		std::vector<std::string> rhs;
+		std::vector<std::vector<std::string>> LemmaLHS{};
+		std::vector<std::vector<std::string>> LemmaRHS{};
+		std::vector<std::vector<std::string>> AxiomLHS{};
+		std::vector<std::vector<std::string>> AxiomRHS{};
+		std::vector<std::vector<std::string>> ProofLHS{};
+		std::vector<std::vector<std::string>> ProofRHS{};
+		std::vector<uint64_t> AxiomLHSPrimeComposite{};
+		std::vector<uint64_t> AxiomRHSPrimeComposite{};
+		std::vector<uint64_t> LemmaLHSPrimeComposite{};
+		std::vector<uint64_t> LemmaRHSPrimeComposite{};
+		std::vector<uint64_t> ProofLHSPrimeComposite{};
+		std::vector<uint64_t> ProofRHSPrimeComposite{};
+		std::unordered_map <std::string, uint64_t> TokenLibraryStdStringToUInt64tMap; 
+		bool isValid() const 
+		{
+			return (lhs.size() > 0 && rhs.size() > 0);
+		}
+		uint64_t GetPrimeToken(const std::string& str)
+		{
+			uint64_t ResultUInt64{};
+			auto iter = TokenLibraryStdStringToUInt64tMap.find(str);
+			if (iter == TokenLibraryStdStringToUInt64tMap.end())
+			{
+				uint64_t prime = PrimeNumberGen::NextPrimeUInt64();
+				TokenLibraryStdStringToUInt64tMap[str] = prime;
+				ResultUInt64 = prime;
+			}
+			else
+			{
+				ResultUInt64 = iter->second;
+			}
+			return ResultUInt64;
+		}
+		bool FoundTentativeMatchFlag(const uint64_t& InAxiomRHSPrimeCompositeUInt64,
+			const uint64_t& InAxiomLHSPrimeCompositeUInt64)
+		{
+			return ((InAxiomRHSPrimeCompositeUInt64 / InAxiomLHSPrimeCompositeUInt64) % 1 == 0);
+		}
+		bool SplitEquation(const std::vector<std::string>& inAxiomConstStdStrVecRef,
+			uint64_t& OutAxiomLHSPrimeCompositeUInt64,
+			uint64_t& OutAxiomRHSPrimeCompositeUInt64,
+			std::vector<std::vector<std::string>>& OutAxiomRHS,
+			std::vector<uint64_t>& OutAxiomRHSPrimeComposite)
+		{
+			bool FoundEqualsSignFlag = false;
+			bool NoOpenBracesFlag = true;
+			int openBraces = 0;
+			for (const std::string& str : inAxiomConstStdStrVecRef)
+			{
+				if (str == "=")
+				{
+					FoundEqualsSignFlag = true;
+					if (rhs.size())
 					{
-						LemmaRHS.push_back(rhs);
+						OutAxiomRHS.push_back(rhs);
+						OutAxiomRHSPrimeComposite.push_back(OutAxiomRHSPrimeCompositeUInt64);
+						OutAxiomRHSPrimeCompositeUInt64 = 1;
 						rhs = {};
 					}
 					continue;
 				}
-				if (!TokenLibraryCharToUInt64tMap.contains(token))
+
+				if (!FoundEqualsSignFlag) 
 				{
-					TokenLibraryCharToUInt64tMap.insert({ token,
-						PrimeNumberGen::NextPrimeUInt64() });
+					lhs.push_back(str); 
+					uint64_t prime = GetPrimeToken(str);
+					uint64_t LhsSizeUInt64 = static_cast<uint64_t>(lhs.size());
+					uint64_t PowerUInt64 = std::pow<uint64_t>(prime, LhsSizeUInt64);
+					OutAxiomLHSPrimeCompositeUInt64 *= PowerUInt64;
 				}
-				LeftHandSideFlag ?
-					lhs.push_back(token) :
-					rhs.push_back(token);
+				else 
+				{
+					rhs.push_back(str);
+					uint64_t prime = GetPrimeToken(str);
+					uint64_t RhsSizeUInt64 = static_cast<uint64_t>(rhs.size());
+					uint64_t PowerUInt64 = std::pow<uint64_t>(prime, RhsSizeUInt64);
+					OutAxiomRHSPrimeCompositeUInt64 *= PowerUInt64;
+				}
 			}
-			if (lhs.size() < 1 ||
-				rhs.size() < 1)
+			int lhsOpenBraces = 0;
+			int rhsOpenBraces = 0;
+			auto countOpenBraces = [](const std::vector<std::string>& conststringvec,
+				int& openBraces,
+				const std::string& OpenBrace,
+				const std::string& CloseBrace)
 			{
-				throw std::invalid_argument("Missing equals '=' in axiom or lemma designation. Vectors must have size greater than 0");
-			}
-			else
+				for (const std::string& str : conststringvec)
+				{
+					if (str == OpenBrace)
+					{
+						openBraces++;
+					}
+					else if (str == CloseBrace)
+					{
+						openBraces--;
+					}
+				}
+			};
+			std::thread lhsThread(countOpenBraces, 
+				std::cref(lhs), 
+				std::ref(lhsOpenBraces), 
+				std::cref(_openBrace), 
+				std::cref(_closeBrace));
+			std::thread rhsThread(countOpenBraces, 
+				std::cref(rhs), 
+				std::ref(rhsOpenBraces), 
+				std::cref(_openBrace), 
+				std::cref(_closeBrace));
+			lhsThread.join();
+			rhsThread.join();
+			//bool NoOpenBracesFlag = true;
+			if (lhsOpenBraces)
 			{
-				LemmaAcceptedFlag = true;
+				std::cout << "Warning - Missing equals '=' in lhs axiom or lemma. Axioms and lemmas must have 'lhs... = rhs...'." << std::endl;
+				NoOpenBracesFlag = false;
 			}
-			LemmaLHS.push_back(lhs);
-			LemmaRHS.push_back(rhs);
-			return LemmaAcceptedFlag;
-		}
-		bool Lemma(const std::initializer_list<char>& InLemmaInitListConstCharRef)
-		{
-			const std::vector<char>& InLemmaVecConstCharRef{ InLemmaInitListConstCharRef };
-			return Lemma(InLemmaVecConstCharRef);
-		}
-		bool Prove(const std::vector<char>& InProofVecConstCharRef,
-			std::vector<std::vector<char>>& OutPath2DVecCharRef)
-		{
-			bool ResultFoundFlag = false;
-			return ResultFoundFlag;
-		}
-		bool ProveViaReduce(const std::vector<char>& InProofVecChar,
-			std::vector<std::vector<char>>& OutReducePathVec2DCharRef)
-		{
-			bool ResultFoundFlag = false;
-			return ResultFoundFlag;
-		}
-		bool ProveViaExpand(const std::vector<char>& InProofVecConstChar,
-			std::vector<std::vector<char>>& OutExpandPathVec2DCharRef)
-		{
-			bool ResultFoundFlag = false;
-			return ResultFoundFlag;
-		}
-		void PrintPath(const std::vector<std::vector<char>>& InPathVec2DConstChar) const
-		{
-
-		}
-	protected:
-		explicit EuclidProver__Proto(
-			const char openBrace, 
-			const char closeBrace) : 
-			_openBrace{ openBrace }, 
-			_closeBrace{ closeBrace }
-		{
-
-		}
-		const char _openBrace;
-		const char _closeBrace;
-		std::vector<std::vector<char>> LemmaLHS{};
-		std::vector<std::vector<char>> LemmaRHS{};
-		std::vector<std::vector<char>> AxiomLHS{};
-		std::vector<std::vector<char>> AxiomRHS{};
-		std::vector<std::vector<char>> ProofLHS{};
-		std::vector<std::vector<char>> ProofRHS{};
-		std::unordered_map <char, uint64_t> TokenLibraryCharToUInt64tMap;
-	};
-	
-	template<>
-	class API_EXPORT EuclidProver<BracketType::CurlyBraces> : public EuclidProver__Proto
-	{
-	public:
-		explicit EuclidProver() : 
-			EuclidProver__Proto{
-				BracketTraits<BracketType::CurlyBraces>::Open,
-				BracketTraits<BracketType::CurlyBraces>::Close }
-		{
-
+			if (rhsOpenBraces)
+			{
+				std::cout << "Warning - Missing equals '=' in rhs axiom or lemma. Axioms and lemmas must have 'lhs... = rhs...'." << std::endl;
+				NoOpenBracesFlag = false;
+			}
+			return (NoOpenBracesFlag && FoundEqualsSignFlag);
 		}
 	};
 
 	template<>
-	class API_EXPORT EuclidProver<BracketType::Parentheses> : public EuclidProver__Proto
+	class API_EXPORT EuclidProver<BracketType::Parentheses>
 	{
 	public:
-		explicit EuclidProver() :
-			EuclidProver__Proto{
-				BracketTraits<BracketType::Parentheses>::Open,
-				BracketTraits<BracketType::Parentheses>::Close }
-		{
-
-		}
+	private:
+		const std::string _openBrace = "(";
+		const std::string _closeBrace = ")";
 	};
 
 	template<>
-	class API_EXPORT EuclidProver<BracketType::SquareBrackets> : public EuclidProver__Proto
+	class API_EXPORT EuclidProver<BracketType::SquareBrackets>
 	{
 	public:
-		explicit EuclidProver() :
-			EuclidProver__Proto{
-				BracketTraits<BracketType::SquareBrackets>::Open,
-				BracketTraits<BracketType::SquareBrackets>::Close }
-		{
-
-		}
+	private:
+		const std::string _openBrace = "[";
+		const std::string _closeBrace = "]";
 	};
 }
