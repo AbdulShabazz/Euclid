@@ -52,9 +52,4 @@ Example:
 	recommended scale-invariant internal representation: 
 	'2_1 7_2 3_3 13_4 2_5 7_6 3_7 5_8 2_9 11_10 3_11'
 
-obj
-{ 
-TokenValueString:'1',
-ProofString:'1_{0}',
-RegExString:'{0}_(\d+)\s'
-}
+Todo: Add an optional constraint flag parameter to axioms and or lemmas to require or ignore their use
