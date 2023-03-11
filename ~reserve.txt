@@ -1,4 +1,64 @@
-
+//
+		bool Lemma(const std::vector<std::string>& InLemmaVecConstStdStringRef)
+		{
+			bool LemmaAcceptedFlag = false;
+			const std::string& delim = "=";
+			bool LeftHandSideFlag = true;
+			std::vector<std::string> lhs{};
+			std::vector<std::string> rhs{};
+			bool FirstIndexFlag = false;
+			uint64_t nCompositeIndexUInt64 = 0;
+			for (const std::string& token : InLemmaVecConstStdStringRef)
+			{
+				if (FirstIndexFlag && LeftHandSideFlag)
+				{
+					LemmaLHSPrimeComposite.push_back(1); // lhs[0] == PrimeCompositeUInt64 //
+					FirstIndexFlag = false;
+				}
+				if (token == delim)
+				{
+					LeftHandSideFlag = false;
+					if (rhs.size() > 0)
+					{
+						LemmaRHS.push_back(rhs);
+						rhs = {}; 
+						nCompositeIndexUInt64++;
+						LemmaRHSPrimeComposite.push_back(1);
+					}
+					continue;
+				}
+				if (!TokenLibraryStdStringToUInt64tMap.contains(token))
+				{
+					TokenLibraryStdStringToUInt64tMap.insert({ token,
+						PrimeNumberGen::NextPrimeUInt64() });
+				}
+				if (LeftHandSideFlag)
+				{
+					lhs.push_back(token);
+					LemmaLHSPrimeComposite[nCompositeIndexUInt64] *= TokenLibraryStdStringToUInt64tMap.at(token);
+				}
+				else
+				{
+					rhs.push_back(token);
+					LemmaRHSPrimeComposite[nCompositeIndexUInt64] *= TokenLibraryStdStringToUInt64tMap.at(token);
+				}
+			}
+			if (lhs.size() < 1 ||
+				rhs.size() < 1)
+			{
+				std::cout << "Warning - Missing equals '=' in axiom or lemma. Axioms and lemmas must have 'lhs... = rhs...' layout." << std::endl;
+				/* LemmaAcceptedFlag : false */ 
+			}
+			else
+			{
+				LemmaLHS.push_back(lhs);
+				LemmaRHS.push_back(rhs);
+				LemmaAcceptedFlag = true;
+			}
+			
+			return LemmaAcceptedFlag;
+		}
+//
 template<BracketType EuclidBracket>
 	class API_EXPORT EuclidProver
 	{
