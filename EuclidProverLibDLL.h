@@ -222,6 +222,9 @@ namespace EuclidProverLib
 		}
 	};
 
+	template<BracketType EuclidBracket>
+	class API_EXPORT EuclidProver;
+
 	/**
 	Example:
 	int main()
@@ -234,10 +237,10 @@ namespace EuclidProverLib
 		// Add axioms
 		Euclid.Axiom({ "{", "1", "}","+","{", "1", "}","=","{", "2", "}" }); // axiom_0
 		Euclid.Axiom({ "{", "2", "}","+","{", "2", "}","=","4" }); // axiom_1
-		
+
 		// Add supporting lemmas
 		Euclid.Lemma({ "{", "1", "}","+","{", "0", "}","=","{", "1", "}" }); // lemma_0
-		
+
 		// Conduct proof
 		std::vector<std::string> proof = { "{", "4", "}", "=", "{", "1", "}","+","{", "1", "}","+","{", "1", "}", "+", "{", "1", "}" };
 		std::vector<std::vector<std::string>> path;
@@ -258,7 +261,7 @@ namespace EuclidProverLib
 			std::cout << "Proof via Expand:\n";
 			Euclid.PrintPath(expand_path);
 		}
-		else 
+		else
 		{
 			std::cout << "Proof via Expand failed\n";
 		}
@@ -278,9 +281,6 @@ namespace EuclidProverLib
 		return 0;
 	}
 	*/
-	template<BracketType EuclidBracket>
-	class API_EXPORT EuclidProver;
-
 	template<>
 	class API_EXPORT EuclidProver<BracketType::CurlyBraces>
 	{
@@ -364,6 +364,8 @@ namespace EuclidProverLib
 		const std::string _closeBrace = "}";
 		std::vector<std::string> lhs;
 		std::vector<std::string> rhs;
+		std::vector<std::vector<std::string>> ProofStackLHS{};
+		std::vector<std::vector<std::string>> ProofStackRHS{};
 		std::vector<std::vector<std::string>> LemmaLHS{};
 		std::vector<std::vector<std::string>> LemmaRHS{};
 		std::vector<std::vector<std::string>> AxiomLHS{};
