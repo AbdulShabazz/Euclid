@@ -159,6 +159,7 @@
     <ClInclude Include="EuclidProverLibDLL.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="__x86i64Int.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
