@@ -27,6 +27,9 @@
     <ClInclude Include="pch.h">
       <Filter>Public</Filter>
     </ClInclude>
+    <ClInclude Include="__x86i64Int.h">
+      <Filter>Public</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EuclidProverLibDLL.cpp">
