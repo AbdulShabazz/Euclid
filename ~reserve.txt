@@ -1,3 +1,9 @@
+
+//
+		__x86i64Int(const char* str) : __x86i64Int(std::string(str))
+		{
+
+		}
 //
 		bool Lemma(const std::vector<std::string>& InLemmaVecConstStdStringRef)
 		{
