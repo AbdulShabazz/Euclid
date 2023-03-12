@@ -53,3 +53,6 @@ Example:
 	'2_1 7_2 3_3 13_4 2_5 7_6 3_7 5_8 2_9 11_10 3_11'
 
 Todo: Add an optional constraint flag parameter to axioms and or lemmas to require or ignore their use
+
+NOTES
++ Add a strict specifier: st{ { 2 } - { 1 } } = { 1 }
