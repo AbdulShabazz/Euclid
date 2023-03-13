@@ -1,4 +1,39 @@
 
+//
+	template<typename Number>
+	concept NumericDataType = std::is_arithmetic_v<Number>;
+
+	template<NumericDataType Number = uint64_t>
+	class __x86i64Int
+//
+		__x86i64Int(const uint64_t val = 0) : __x86i64Int{ std::to_string(val) } {}
+//
+		__x86i64Int& operator++() // postfix inc
+		{
+			*this += 1;
+			return *this;
+		}
+//
+		__x86i64Int& operator++(int) // prefix inc
+		{
+			__x86i64Int temp(*this);
+			++(*this);
+			return temp;
+		}
+//
+		// constructor
+		__x86i64Int(const Number x = 0)
+		{
+			while (x > 0)
+			{
+				digits_.push_back(x % BASE);
+				x /= BASE;
+			}
+			if (digits_.empty())
+			{
+				digits_.push_back(0);
+			}
+		}
 // README.md
 Example expressed as C++ Code
 
