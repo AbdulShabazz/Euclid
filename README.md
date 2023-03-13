@@ -77,7 +77,7 @@ Examples
 
 { variable } = Variable
 
-Example: 
+Example expressed as plain text: 
 
 ```c++
 	// Axiom
