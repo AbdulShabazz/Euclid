@@ -1,3 +1,70 @@
+
+// README.md
+Example expressed as C++ Code
+
+```c++
+
+	// Create empty ProofStep[lineNumber][proofStep] vector to store proof
+	std::vector<std::vector<std::string>> ProofStep;
+
+ 	// Instantiate Prover (module)
+	EuclidProver<BracketType::CurlyBraces> Euclid;
+
+	// Use chars, as opposed to std::strings, for efficiency and minor performance gains
+	/* char */ std::string PlayerCharacterSideKick = "1";
+	/* char */ std::string QuadUtilityVehicle = "1";
+	/* char */ std::string VehicleDriveDisabled = "1";
+	/* char */ std::string EuropaLAnd = "1";
+	/* char */ std::string StyxRiver = "2";
+	/* char */ std::string NotInEuropaLand = "2";
+	/* char */ std::string OutOfStyxBoat = "4";
+
+	// Add axioms
+	Euclid.Axiom({"{", "1", "}","+","{", "1", "}","=","{", "2", "}"}); // axiom_0
+	Euclid.Axiom({ "{", "2", "}","+","{", "2", "}","=","4" }); // axiom_1
+
+	// Add supporting lemmas
+	Euclid.Lemma({ "{", "1", "}","+","{", "0", "}","=","{", "1", "}" }); // lemma_0
+
+	// Theorem to Prove
+	const std::vector<std::string> Prove = { "{", "4", "}", "=", "{", "1", "}","+","{", "1", "}","+","{", "1", "}", "+", "{", "1", "}" };
+
+	if (Euclid.Prove(Prove, ProofStep))
+	{
+		std::cout << "Proof found:\n";
+		Euclid.PrintPath(ProofStep);
+	}
+	else
+	{
+		std::cout << "Proof failed\n";
+	}
+
+	// Optional Solver: Expand
+	std::vector<std::vector<std::string>> ProofStep;
+	if (Euclid.ProveViaExpand(Prove, ProofStep))
+	{
+		std::cout << "Proof via Expand:\n";
+		Euclid.PrintPath(ProofStep);
+	}
+	else
+	{
+		std::cout << "Proof via Expand failed\n";
+	}
+
+	// Optional Solver: Reduce
+	std::vector<std::vector<std::string>> ProofStep;
+	if (Euclid.ProveViaReduce(Prove, ProofStep))
+	{
+		std::cout << "Proof via Reduce:\n";
+		Euclid.PrintPath(ProofStep);
+	}
+	else
+	{
+		std::cout << "Proof via Reduce failed\n";
+	}
+
+	
+```
 //
 template<NumericDataType NumberBase = uint64_t>
 	NumberBase PowerUInt64(const NumberBase& ConstNumberRef, 
