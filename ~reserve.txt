@@ -1,5 +1,30 @@
 
 //
+		bool operator<(const __x86i64Int& other) const
+		{
+			bool resultFlag = true;
+			if (sign_ != other.sign_)
+			{
+				resultFlag = (sign_ < other.sign_);
+			}
+			else if (digits_.size() != other.digits_.size())
+			{
+				resultFlag = (digits_.size() * sign_ < other.digits_.size() * other.sign_);
+			}
+			else
+			{
+				for (uint64_t i = digits_.size() - 1; i >= 0; i--)
+				{
+					if (digits_[i] != other.digits_[i])
+					{
+						resultFlag = (digits_[i] * sign_ < other.digits_[i] * other.sign_);
+						break;
+					}
+				}
+			}
+			return resultFlag;
+		}
+//
 	template<typename Number>
 	concept NumericDataType = std::is_arithmetic_v<Number>;
 
