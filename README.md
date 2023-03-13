@@ -3,13 +3,15 @@ C++ Edition
 
 ## Description
 
-Euclid is a proof engine that operates symbolically and does not support library calls or built-in libraries. However, it can be utilized in game development to derive any achievable game state from the current state without pre-training, which is typically necessary for A.I. Additionally, it can be beneficial in debugging game logic.
+Euclid is a proof engine that operates symbolically and does not support library calls or built-in libraries. However, it can be utilized in game development to derive any achievable game-state, given the current state without pre-training, which is typically required for A.I. If successful, the prover will provide a path of proof-steps that prove the theorem, if it is provable, which can be used in your game.
+
+Additionally, Euclid can be beneficial in debugging game logic.
 
 ## Instructions
 
-To deploy the prover in your game logic, you provide it with axioms and lemmas related to the state of your game, and then request it to prove a theorem or desired outcome. Each proof-step can be used to derive a state-machine, update the game state, or in more advanced implementations, it can be utilized in helper A.I. engines that aim to achieve the proof-step as a desired outcome in your game. This feeding process is repeated until the game state reflects the desired outcome (i.e., the theorem is proven). If successful, the prover will return a path of proof-steps that proves the theorem, if it is provable. It is important to note that the prover can also produce a path of proof-steps that prove the theorem using the available Expand- and Reduce- solvers.
+To deploy the prover in your game logic, you provide it with axioms and lemmas related to the state of your game, and then request it to prove a theorem or desired outcome. Each proof-step can be used to perhaps update a state-machine, or update the game state; or in more advanced implementations, its proof-steps can be utilized by helper A.I. that aim to achieve the proof-step as a desired outcome in your game. This feeding process is repeated until the game state reflects the final proof, as a desired outcome (i.e., the theorem is proven). The prover can also produce a path of proof-steps using the available Expand- and Reduce- solvers.
 
-Examples
+Example expressed as C++ Code
 
 ```c++
 
@@ -18,6 +20,15 @@ Examples
 
  	// Instantiate Prover (module)
 	EuclidProver<BracketType::CurlyBraces> Euclid;
+
+	// Use chars, as opposed to std::strings, for efficiency and minor performance gains
+	/* char */ std::string PlayerCharacterSideKick = "1";
+	/* char */ std::string QuadUtilityVehicle = "1";
+	/* char */ std::string VehicleDriveDisabled = "1";
+	/* char */ std::string EuropaLAnd = "1";
+	/* char */ std::string StyxRiver = "2";
+	/* char */ std::string NotInEuropaLand = "2";
+	/* char */ std::string OutOfStyxBoat = "4";
 
 	// Add axioms
 	Euclid.Axiom({"{", "1", "}","+","{", "1", "}","=","{", "2", "}"}); // axiom_0
@@ -96,8 +107,8 @@ Example expressed as plain text:
 	{ PlayerCharacterSideKick } IsIn { Vehicle { QuadUtilityVehicle } } = { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle }
 	{ PlayerCharacterSideKick } IsNotIn { StyxBoat } = { StyxBoat } IsNotIn { StyxRiver }
 
-	// Theorem
-	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled } // Goal State
+	// Theorem to prove
+	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled } // Game State goal
 
 	// Proof-Step
 	{ PlayerCharacterSideKick } IsIn { StyxBoat } = { StyxBoat } IsIn { StyxRiver }
@@ -109,8 +120,30 @@ Example expressed as plain text:
 	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
 	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled } 
 
-	// Theorem expressed as C++ Code
-	const std::vector<std::string> Prove = { "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}","=","{", "QuadUtilityVehicle", "}","and","{", "VehicleDriveDisabled" }; 
+	// Theorem
+	Prove = { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled }
+```
+
+Example expressed as C++ Code:
+
+```c++
+	// Axiom
+	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}", "=", "{", "StyxBoat", "}", "IsIn", "{", "StyxRiver", "}" }); // Current Game State
+	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "=", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}", "and", "{", "Vehicle", "{", "QuadUtilityVehicle", "{", "VehicleDriveDisabled", "}", "}", "}" });
+	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "EuropaLand", "}", "=", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}" });
+	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}", "=", "{", "Vehicle", "{", "QuadUtilityVehicle", "{", "VehicleDriveDisabled", "}", "}" });
+	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsNotIn", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "=", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}" });
+	//.
+	//. Other available Game States, in the current environment, for the PlayerCharacterSideKick to choose from
+	//.
+	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}", "=", "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" });
+
+	// Lemma
+	Euclid.Lemma({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}", "=", "{", "StyxBoat", "}", "IsNotIn", "{", "StyxRiver", "}" }); // These are connectives, and axiom helpers
+
+	// Theorem
+	Euclid.Prove({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}", "=", "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" });
+	
 ```
 
 ## Format
