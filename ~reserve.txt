@@ -1,4 +1,16 @@
-
+//
+template<NumericDataType NumberBase = uint64_t>
+	NumberBase PowerUInt64(const NumberBase& ConstNumberRef, 
+		const NumberBase& ConstExponentRef)
+	{
+		NumberBase result = NumberBase{ ConstNumberRef };
+		NumberBase radix = NumberBase{ ConstExponentRef };
+		while (radix--)
+		{
+			result *= ConstNumberRef;
+		}
+		return result;
+	};
 //
 		static bool IsPrimeUInt64(const uint64_t& n)
 		{
