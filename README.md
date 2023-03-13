@@ -7,8 +7,7 @@ Euclid is a proof engine that operates symbolically and does not support library
 
 ## Instructions
 
-You feed the prover axioms and lemmas, pertaining to the state of your game, and then ask it to prove a theorem or desired outcome. Each proof-step can then be used to update the state of your game, 
-or in advanced implementations, can be fed into a helper engine A.I. which attempts to achieve the proof-step as a desried outcome in your game. The feeding process is repeated until the game state represents the desired outcome (ie. the theorem is proven). When successful, The prover will return a path of proof-steps that prove the theorem, if it can be proven. NOTE: The prover can also return a path of proof steps that prove the theorem, using the Expand and Reduce optional solvers.
+To deploy the prover in your game logic, you provide it with axioms and lemmas related to the state of your game, and then request it to prove a theorem or desired outcome. Each proof-step can be used to derive a state-machine, update the game state, or in more advanced implementations, it can be utilized in helper A.I. engines that aim to achieve the proof-step as a desired outcome in your game. This feeding process is repeated until the game state reflects the desired outcome (i.e., the theorem is proven). If successful, the prover will return a path of proof-steps that proves the theorem, if it is provable. It is important to note that the prover can also produce a path of proof-steps that prove the theorem using the available Expand- and Reduce- solvers.
 
 Examples
 
