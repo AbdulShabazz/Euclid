@@ -14,7 +14,8 @@ namespace std
 {
 
 	/*
-	AUTHOR: Seagat2011
+	AUTHOR: Seagat2011 https://github.com/Seagat2011
+	AUTHOR: AbdulShabazz https://github.com/AbdulShabazz
 	DATE: 2023-MAR-13 22:56:48 EDT
 	DESCRIPTION: This is a class that implements a 64-bit integer type for x86 processors.
 	USAGE: This class is designed to be used in the same way as the standard int64_t type, but with the ability to use the arithmetic operators with the __x86i64Int type of arbitrary size.
