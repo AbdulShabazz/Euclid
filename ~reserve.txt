@@ -1,4 +1,305 @@
+//
+		__x86i64Int(const std::string& str = "0")
+		{
+			std::vector<std::thread> threads;
+			auto processDigit = [&](const auto digit, vector<uint64_t>& OutVecRef, const int& i)
+			{
+				OutVecRef[i] = digit - '0';
+			};
+			digits_.resize(str.size(), 0);
+			uint64_t i = 0;
+			for (auto it = str.rbegin(); it != str.rend(); ++it)
+			{
+				if (*it >= '0' && *it <= '9')
+				{
+					threads.emplace_back([&] {
+						processDigit(*it, digits_, i++);
+						});
+				}
+				else if (*it == '-')
+				{
+					sign_ = -1;
+				}
+			}
+			for (auto& thread : threads)
+			{
+				thread.join();
+			}
+			if (digits_.empty())
+			{
+				digits_.push_back(0);
+			}
+			trimLeadingZeros();
+		}
+//
+	__x86i64Int(const std::string& str = "0")
+		{
+			std::for_each(std::execution::par, str.rbegin(), str.rend(), [&](char c) {
+				if (c >= '0' && c <= '9')
+				{
+					digits_.push_back(c - '0');
+				}
+				else if (c == '-')
+				{
+					sign_ = -1;
+				}
+				});
+			if (digits_.empty())
+			{
+				digits_.push_back(0);
+			}
+			trimLeadingZeros();
+		}
+//
+		__x86i64Int(const std::string& str = "0")
+		{
+			std::vector<std::thread> threads; 
+			auto processDigit = [&](char digit, int& val) {
+				int value = digit - '0';
+				for (size_t i = 0; i < digits_.size(); i++)
+				{
+					int result = digits_[i] * value;
+					digits_[i] = result % 10;
+					if (i + 1 == digits_.size())
+					{
+						digits_.push_back(result / 10);
+					}
+					else
+					{
+						digits_[i + 1] += result / 10;
+					}
+				}
+			};
+			digits_.resize(str.size(), 0);
+			uint64_t i = 0;
+			for (auto it = str.rbegin(); it != str.rend(); ++it)
+			{
+				if (*it >= '0' && *it <= '9')
+				{
+					digits_.push_back(*it - '0');
+					threads.emplace_back([=] {
+						processDigit(*it, digits_[i++]);
+						});
+				}
+				else if (*it == '-')
+				{
+					sign_ = -1;
+				}
+			}
+			if (digits_.empty())
+			{
+				digits_.push_back(0);
+			}
+			for (auto& thread : threads)
+			{
+				thread.join();
+			}
+			trimLeadingZeros();
+		}
+//
+		__x86i64Int(const std::string& str = "0")
+		{
+			std::vector<std::thread> threads; 
+			auto processDigit = [&](char digit) {
+				int value = digit - '0';
+				for (size_t i = 0; i < digits_.size(); i++)
+				{
+					int result = digits_[i] * value;
+					digits_[i] = result % 10;
+					if (i + 1 == digits_.size())
+					{
+						digits_.push_back(result / 10);
+					}
+					else
+					{
+						digits_[i + 1] += result / 10;
+					}
+				}
+			};
+			for (auto it = str.rbegin(); it != str.rend(); ++it)
+			{
+				if (*it >= '0' && *it <= '9')
+				{
+					digits_.push_back(*it - '0');
+					threads.emplace_back([=] {
+						processDigit(*it);
+						});
+				}
+				else if (*it == '-')
+				{
+					sign_ = -1;
+				}
+			}
+			if (digits_.empty())
+			{
+				digits_.push_back(0);
+			}
+			for (auto& thread : threads)
+			{
+				thread.join();
+			}
+			trimLeadingZeros();
+		}
+//
+		__x86i64Int(const std::string& str = "0")
+		{
+			for (auto it = str.rbegin(); it != str.rend(); ++it)
+			{
+				if (*it >= '0' && *it <= '9')
+				{
+					digits_.push_back(*it - '0');
+				}
+				else if (*it == '-')
+				{
+					sign_ = -1;
+				}
+			}
+			if (digits_.empty())
+			{
+				digits_.push_back(0);
+			}
+			trimLeadingZeros();
+		}
+//
+		__x86i64Int(const uint64_t val = 0) : __x86i64Int{ std::to_string(val) } {}
+//
+	auto parallelSum = [&](const std::vector<__x86i64Int>& input,
+				std::vector<__x86i64Int>& output,
+				const uint64_t& start,
+				const uint64_t& end) -> void
+			{
+				if (start == end)
+				{
+					output[start] = input[start];
+					return;
+				}
+				uint64_t mid = (start + end) / 2;
+				std::vector<__x86i64Int> left_output{ mid - start + 1 };
+				std::vector<__x86i64Int> right_output{ end - mid };
+				auto left_fn = [&]() { parallelSum(input, left_output, start, mid); };
+				auto right_fn = [&]() { parallelSum(input, right_output, mid + 1, end); };
+				std::thread left_thread(left_fn);
+				std::thread right_thread(right_fn, std::cref(input), std::ref(right_output), mid + 1, end);
+				left_thread.join();
+				right_thread.join();
+				std::merge(left_output.begin(), left_output.end(),
+					right_output.begin(), right_output.end(),
+					output.begin() + start);
+				const uint64_t& I = end + 1;
+				for (uint64_t& i = start; i < I; i++)
+				{
+					output[start] += output[i];
+				}
+			};
+//
+			auto parallelSum = [](const std::vector<__x86i64Int>& input,
+				std::vector<__x86i64Int>& output,
+				const uint64_t& start,
+				const uint64_t& end) -> void
+			{
+				if (start == end)
+				{
+					output[start] = input[start];
+					return;
+				}
+				uint64_t mid = (start + end) / 2;
+				std::vector<__x86i64Int> left_output{ mid - start + 1 };
+				std::vector<__x86i64Int> right_output{ end - mid };
+				std::thread left_thread(parallelSum, std::cref(input), std::ref(left_output), start, mid);
+				std::thread right_thread(parallelSum, std::cref(input), std::ref(right_output), mid + 1, end);
+				left_thread.join();
+				right_thread.join();
+				std::merge(left_output.begin(), left_output.end(),
+					right_output.begin(), right_output.end(),
+					output.begin() + start);
+				const uint64_t& I = end + 1;
+				for (uint64_t& i = start; i < I; i++)
+				{
+					output[start] += output[i];
+				}
+			};
+//
+		void parallelSum(const std::vector<__x86i64Int>& input,
+			std::vector<__x86i64Int>& output,
+			uint64_t start,
+			uint64_t end) const
+		{
+			if (start == end)
+			{
+				output[start] = input[start];
+				return;
+			}
 
+			uint64_t mid = (start + end) / 2;
+			std::vector<__x86i64Int> left_output{ mid - start + 1 };
+			std::vector<__x86i64Int> right_output{ end - mid };
+
+			std::thread left_thread(parallelSum, std::cref(input), std::ref(left_output), start, mid);
+			std::thread right_thread(parallelSum, std::cref(input), std::ref(right_output), mid + 1, end);
+
+			left_thread.join();
+			right_thread.join();
+
+			std::merge(left_output.begin(), left_output.end(),
+				right_output.begin(), right_output.end(),
+				output.begin() + start);
+
+			const uint64_t& I = end + 1;
+			for (uint64_t& i = start; i < I; i++)
+			{
+				output[start] += output[i];
+			}
+		}
+//
+		template<typename... Args>
+		requires (std::is_same_v<__x86i64Int, Args...>, "Second arguments... must be of type int")
+		bool _pushFront(__x86i64Int& x, Args&... args)
+		{
+			bool NoErrorsFlag = true;
+			for(const int& digit : args)
+			{
+				if (digit >= 0 && digit < BASE)
+				{
+					x.digits_.insert(x.digits_.begin(), digit...);
+				}
+				else
+				{
+					NoErrorsFlag = false;
+					continue;
+				}
+			}
+			return NoErrorsFlag;
+		}
+//
+		template<typename... Args>
+		requires (std::is_same_v<__x86i64Int, Args...>, "All arguments must be of type __x86i64Int") // or C++17 static_assert( std::is_same_v<__x86i64Int, Args...>, "All arguments must be of type __x86i64Int" )
+		__x86i64Int& _min(const __x86i64Int& arg, const Args&... args) const
+		{
+			__x86i64Int result{ arg };
+			for (const __x86i64Int& val : args)
+			{
+				if (val < result)
+				{
+					result = val;
+				}
+			}
+			return result;
+		}
+//
+	template<typename... Args>
+		requires (std::is_same_v<uint64_t, Args...>, "Arguments must be of type uint64_t")
+		uint64_t& _max(const uint64_t& arg, const Args&... args) const
+		{
+			uint64_t result = arg;
+			for (const uint64_t& val : args)
+			{
+				if (val > result)
+				{
+					result = val;
+				}
+			}
+			return result;
+		}
 //
 		bool operator<(const __x86i64Int& other) const
 		{
