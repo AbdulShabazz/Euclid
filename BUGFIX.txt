@@ -23,3 +23,6 @@ SOLU:
 SYMP:	Error no overloaded function of Axiom matches the parameter list
 SOLU:	const std::vector<char>& axiom_0 = { '{', '1', '}','+','{', '1', '}','=','{', '2', '}' }; >> 
 		const std::vector<std::string>& axiom_0 = { "{", "1", "}","+","{", "1", "}","=","{", "2", "}" };
+
+SYMP: Error Initial reference to a nonconst must be an lvalue
+SOLU: for (auto& it = str.rbegin(); it != str.rend(); ++it){...} >> for (auto it = str.rbegin(); it != str.rend(); ++it){...}
