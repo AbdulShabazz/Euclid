@@ -26,3 +26,8 @@ SOLU:	const std::vector<char>& axiom_0 = { '{', '1', '}','+','{', '1', '}','=','
 
 SYMP: Error Initial reference to a nonconst must be an lvalue
 SOLU: for (auto& it = str.rbegin(); it != str.rend(); ++it){...} >> for (auto it = str.rbegin(); it != str.rend(); ++it){...}
+
+SYMP: Error: no matching function for call to 'PushAtFront(__x86i64Int&, const __x86i64Int&)'
+SOLU:
+	bool PushAtFront(__x86i64Int& OutVecUInt64Ref, const __x86i64Int& InConstVecUInt64Ref) {...} >>
+	bool PushAtFront(__x86i64Int& OutVecUInt64Ref, const __x86i64Int& InConstVecUInt64Ref) const {...}
