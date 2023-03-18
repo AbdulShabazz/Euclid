@@ -63,6 +63,8 @@ To improve performance, Proof-search is conducted on arrays of primes.
 
 Todo: Add an optional constraint flag parameter to axioms and or lemmas to require or ignore their use
 Todo: Cache axioms-, lemmas-, intermedite results-, proof statements- and their proofsteps-, to disk, for ready retrieval when game play conditions re-present themselves (perhaps using a cocktail of thread-management and async co-routines)
+Todo: Implement the proof-search and caching algorithm using (async) co_routines and use threadpools for the nextprime computation.
+Todo: convert data types to auto to allow the theorem prover that is the compiler to perform optimizations on the data types.
 
 NOTES
-[+] Add a strict specifier, eg. st{ { 2 } - { 1 } } <=> { 1 }
+[+] Add a strict specifier, eg. st{ { 2 } - { 1 } } = { 1 }
