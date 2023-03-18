@@ -1,3 +1,94 @@
+
+//
+		__x86i64Int&& operator*(const __x86i64Int& other) const
+		{
+			auto rowProductVecUInt64 = [](const __x86i64Int& InDigitsVecUInt64Ref,
+				const int& InOtherUIntRef,
+				__x86i64Int& OutResultVecUInt64Ref)
+			{
+				int carry = 0;
+				const uint64_t& J = OutResultVecUInt64Ref.digits_.size();
+				for (uint64_t j = 0; ((j < J) || (carry > 0)); j++)
+				{
+					int prod = carry + 
+						OutResultVecUInt64Ref.digits_[j] + 
+						InOtherUIntRef * 
+						(j < InDigitsVecUInt64Ref.digits_.size() ? 
+							InDigitsVecUInt64Ref.digits_[j] : int{ 0 });
+					OutResultVecUInt64Ref.digits_[j] = prod % BASE;
+					carry = static_cast<int>(prod / BASE);
+				}
+			};
+			std::vector<__x86i64Int> IntermediateResultVecUInt64;
+			std::vector<thread> FusedMultiplyAddThread;
+			const uint64_t I = digits_.size();
+			const uint64_t II = digits_.size() + other.digits_.size();
+			for (uint64_t i = 0; i < I; i++)
+			{
+				__x86i64Int temp{ "0" };
+				temp.digits_.resize(II, 0);
+				IntermediateResultVecUInt64.push_back(temp);
+				FusedMultiplyAddThread.push_back(
+					std::thread(rowProductVecUInt64, 
+						std::cref(*this), 
+						std::cref(other.digits_[i]),
+						std::ref(IntermediateResultVecUInt64[i])));
+			}
+			for (thread& th : FusedMultiplyAddThread)
+			{
+				th.join();
+			}
+			SumArrayRefInParallel(IntermediateResultVecUInt64);
+			IntermediateResultVecUInt64[0].trimLeadingZeros();
+			IntermediateResultVecUInt64[0].sign_ = sign_ * other.sign_;
+			return std::move(IntermediateResultVecUInt64[0]);
+		}
+//
+		// Conversion operator to std::size_t
+		operator std::size_t&&() const
+		{
+			// Assuming you have a method or member variable that represents the value
+			// Return the value as std::size_t for the conversion
+			size_t i = 0;
+			size_t ret = 0;
+			std::vector<int> result = digits_;
+			std::reverse(result.begin(), result.end());
+			for (const int& val : result)
+			{
+				ret += val * PowerUInt64<size_t>(BASE, i++);
+			}
+			return std::move(ret);
+		}
+//
+		bool _assign(uint64_t& InStartIndexConstUInt64Ref, const __x86i64Int& InConstObjUInt64Ref)
+		{
+			bool AssignedFlag = false;
+			if (InStartIndexConstUInt64Ref)
+			{
+				throw std::runtime_error("Negative index");
+			}
+			if (InConstObjUInt64Ref.digits_.size() - InStartIndexConstUInt64Ref > digits_.size())
+			{
+				throw std::runtime_error("Startindex plus object length exceeds Endindex");
+			}
+			if (InStartIndexConstUInt64Ref >= digits_.size())
+			{
+				throw std::runtime_error("Start/End index exceeds vector length");
+			}
+			else if (InStartIndexConstUInt64Ref + InConstObjUInt64Ref.digits_.size >= digits_.size())
+			{
+
+			}
+			uint64_t& StartIndexInt64 = InStartIndexConstUInt64Ref;
+			const uint64_t& EndIndexInt64 = InParam2UInt64;
+			__x86i64Int ret{ "0" };
+			ret.digits_.resize(EndIndexInt64 - StartIndexInt64 + 1);
+			for (int& val : ret.digits_)
+			{
+				val = digits_[StartIndexInt64++];
+			}
+			return ret;
+		}
 //
 		EuclidProver() : _openBrace{ "{" },
 			_closeBrace{ "}" }
