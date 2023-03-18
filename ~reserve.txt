@@ -1,4 +1,10 @@
 //
+		EuclidProver() : _openBrace{ "{" },
+			_closeBrace{ "}" }
+		{
+
+		}
+//
 		__x86i64Int(const std::string& str = "0")
 		{
 			std::vector<std::thread> threads;
