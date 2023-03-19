@@ -94,7 +94,7 @@ But how to represent the proof-search space internally?
 
 	Solution: (in-process)
 
-		// Overall builtin support (unsigned double) with BigInt support (__x86i64Int ) as needed
+		// Overall builtin support (uint64_t) with BigInt support (__x86i64Int ) as needed
 		2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...
 
 		Limitations: (in-process)
