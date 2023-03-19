@@ -37,29 +37,67 @@ To improve performance, Proof-search is conducted on arrays of primes.
 		// Brackets '{} [] ()' and Equals '=' are builtin reserved types
 		tokens: '{', '}', '1', '2', '+', '='
 		primes:  2,   3,   7,  11,  13,   5
-	
-	Example:
 
+But how to represent the proof-search space internally?	
+
+	Solution: (abandoned)
+
+		// As simple strings or arrays of strings
 		prove: { 1 } + { 1 } = { 2 }
 
-	Limitations: platform resolution.
-
-	Example:
-
-		limited internal representation
-		2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11... 
+		Limitations: parsing an array of tokens as strings or integers within loop-constructs offers untenable quadratic runtime performance
 	
 	Solution: (abandoned)
 
-		scale-invariant internal string representation: 
+		// prime number internal representation with place-value exponents
+		2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11... 
+
+		Limitations: overflow
+	
+	Solution: (abandoned)
+
+		// scale-invariant internal string representation: 
 		'2_1 7_2 3_3 13_4 2_5 7_6 3_7 5_8 2_9 11_10 3_11'
 
-	Limitations: pattern searching long strings
+		Limitations: pattern searching over long strings
+
+	Solution: (abandoned)
+
+		// Overall BigInt support (__x86i64Int ) 
+		2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...
+
+		Limitations: Low multiplication performance
+
+	Solution: (abandoned)
+
+		// PrimeNumber only BigInt support (__x86i64Int ) 
+		2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...
+
+		// Internal log2 support (unsigned double precision) 
+		0.69314718055994530941723212145818 +
+		3.8918202981106266102107054868864 +
+		3.2958368660043290741857357107676 +
+		* 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...
+
+		std::pair<double, double> Number = std::log2(2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...)
+
+		Number.first; // Integer part
+		Number.second; // Fractional part
+
+		std::unordered_set NumberSet{}
+		NumberSet.insert(Number.first)
+		NumberSet.insert(Number.second) // Is there enough variance to rely only on Number.second?
+
+		// iff Number.second == 0.0, then rely on Number.first ?
+
+		Limitations: Set inclusion requires combinatorial expansion (ie. combinatorial explosion)
 
 	Solution: (in-process)
 
-		BigInt support (__x86i64Int ) 
-			2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...
+		// Overall builtin support (unsigned double) with BigInt support (__x86i64Int ) as needed
+		2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...
+
+		Limitations: (in-process)
 
 Todo: Add an optional constraint flag parameter to axioms and or lemmas to require or ignore their use
 Todo: Cache axioms-, lemmas-, intermedite results-, proof statements- and their proofsteps-, to disk, for ready retrieval when game play conditions re-present themselves (perhaps using a cocktail of thread-management and async co-routines)
