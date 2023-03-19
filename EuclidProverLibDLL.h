@@ -24,7 +24,9 @@
 #include <thread>
 #include <string>
 #include <limits>
+#include "PowerUInt64.h"
 #include "__x86i64Int.h"
+//#include <cassert>
 
 namespace EuclidProverLib
 {
@@ -154,7 +156,7 @@ namespace EuclidProverLib
 		829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947/*, 953*/ 
 	};
 
-	constexpr uint64_t PrimeComposite (const std::vector<uint64_t>& _primes)
+	constexpr uint64_t InitPrimeComposite (const std::vector<uint64_t>& _primes)
 	{
 		uint64_t result = 1;
 		for (const uint64_t& val : _primes)
@@ -164,29 +166,29 @@ namespace EuclidProverLib
 		return result;
 	};
 
-	uint64_t PrimeCompositeUInt64 = PrimeComposite(primes);
+	uint64_t PrimeCompositeUInt64 = InitPrimeComposite(primes);
 
 	class API_EXPORT PrimeNumberGen
 	{
 	public:
 		/** 
 		Example: 
-		const uint64_t output = PrimeNumberGen::NextPrimeUInt64(); // 3
+		const uint64_t output = PrimeNumberGen::NextPrimeUInt64(); // returns 3
 
 		Example: 
 		const uint64_t input = 162;
-		const uint64_t output = PrimeNumberGen::NextPrimeUInt64(input); // 953
+		const uint64_t output = PrimeNumberGen::NextPrimeUInt64(input); // returns 953
 		*/
 		static uint64_t NextPrimeUInt64(const uint64_t& index = ULLONG_MAX)
 		{
 			uint64_t result = 0;
 			uint64_t maxSize = primes.size();
-			// If index is less than the current size of the primes vector, return the prime at index.
+			// If index is in primes, return primes[index].
 			if (index < maxSize)
 			{
 				result = primes.at(index);
 			}
-			// Else, calculate the next prime and add it to the primes vector.
+			// Else, calculate the next prime and add it to primes[].
 			else
 			{
 				uint64_t nextPrimeUInt64 = currentPrimeUInt64 + 2;
@@ -198,10 +200,12 @@ namespace EuclidProverLib
 						nextPrimeUInt64 += 2;
 					}
 					primes.push_back(nextPrimeUInt64);
-					PrimeCompositeUInt64 *= nextPrimeUInt64;
 					maxSize++;
-					nextPrimeUInt64 += 2;
+					PrimeCompositeUInt64 *= nextPrimeUInt64; // Update PrimeCompositeUInt64.
+					nextPrimeUInt64 += 2; // Next odd integer.
+
 				} while (maxSize <= index && FindNextPrimeFlag);
+
 				result = currentPrimeUInt64 = primes.back();
 			}
 
@@ -215,7 +219,7 @@ namespace EuclidProverLib
 		*/
 		static bool IsPrimeUInt64(const uint64_t& n)
 		{
-			return ((PrimeCompositeUInt64 / n) % 1) == 0;
+			return (((PrimeCompositeUInt64 / n) % 1) != 0);
 		}
 	};
 
@@ -236,7 +240,7 @@ namespace EuclidProverLib
 		Euclid.Axiom({ "{", "2", "}","+","{", "2", "}","=","4" }); // axiom_1
 
 		// Add supporting lemmas
-		Euclid.Lemma({ "{", "1", "}","+","{", "0", "}","=","{", "1", "}" }); // lemma_0
+		Euclid.Lemma({ "{", "1", "}","+","{", "0", "}","<==>","{", "1", "}" }); // lemma_0
 
 		// Conduct proof
 		std::vector<std::string> proof = { "{", "4", "}", "=", "{", "1", "}","+","{", "1", "}","+","{", "1", "}", "+", "{", "1", "}" };
@@ -282,66 +286,16 @@ namespace EuclidProverLib
 	class API_EXPORT EuclidProver<BracketType::CurlyBraces>
 	{
 	public:
-		EuclidProver() : _openBrace{ "{" },
-			_openBraceST{ "st{" },
-			_closeBrace{ "}" }
-		{
-
-		}
-		EuclidProver(const std::string openBrace,
-			const std::string openBraceST,
-			const std::string closeBrace) : _openBrace{ openBrace },
-			_openBraceST{ openBraceST },
+		EuclidProver(const std::string openBrace = "{",
+			const std::string closeBrace = "}") : 
+			_openBrace{openBrace},
+			_openBraceST{ "st"+openBrace },
 			_closeBrace{ closeBrace }
 		{
 
 		}
 		bool Axiom(const std::vector<std::string>& InAxiomVecConstCharRef)
 		{
-			std::__x86i64Int _a_{}; // OK
-			std::__x86i64Int a{ 12n }; // OK
-			//std::__x86i64Int aa{ 12 }; // Error
-			std::__x86i64Int aaa{ 0 };
-			std::__x86i64Int aaaa{ "12" }; // OK
-			std::__x86i64Int b{ 0 };
-			std::__x86i64Int c = std::__x86i64Int{ 12n }; // OK
-			//std::__x86i64Int cc = std::__x86i64Int{ 12 }; // Error
-			std::__x86i64Int ccc = std::__x86i64Int{ "12" }; // OK
-			std::__x86i64Int d = std::__x86i64Int{ 12n };
-			std::__x86i64Int e = 12n;
-			std::__x86i64Int f(0);
-			e = a + b;
-			e = c * d;
-			e = a / b;
-			e = a - b;
-			a++;
-			++a;
-			a--;
-			--a;
-			e = a % b;
-			e = 12n;
-			e %= b;
-			e = 12n;
-			e += b;
-			e = 12n;
-			e -= b;
-			e = 12n;
-			e *= b;
-			bool g = a < b;
-			g;
-			g = a > b;
-			g;
-			g = a <= b;
-			g;
-			g = a >= b;
-			g;
-			g = a == b;
-			g;
-			g = a != b;
-			g;
-			std::__x86i64Int h = std::__x86i64Int{ a & b };
-			h = 12n;
-			h &= b;
 			bool AxiomAcceptedFlag = false;
 			uint64_t AxiomLHSPrimeCompositeUInt64 = 1;
 			uint64_t AxiomRHSPrimeCompositeUInt64 = 1;
@@ -416,8 +370,11 @@ namespace EuclidProverLib
 		}
 	protected:
 		std::string _openBrace;
-		std::string _openBraceST;
+		std::string _openBraceST; // strict comprehension enforcement
 		std::string _closeBrace;
+		const std::string LemmaImplies = "<==>";
+		const std::string LemmaImpliesRHS = "==>";
+		const std::string LemmaImpliesLHS = "<==";
 		std::vector<std::string> lhs;
 		std::vector<std::string> rhs;
 		std::vector<std::vector<std::string>> ProofStackLHS{};
@@ -428,35 +385,38 @@ namespace EuclidProverLib
 		std::vector<std::vector<std::string>> AxiomRHS{};
 		std::vector<std::vector<std::string>> ProofLHS{};
 		std::vector<std::vector<std::string>> ProofRHS{};
+
+		// Prime Composite Library. Cached to disk for performance
 		std::vector<uint64_t> AxiomLHSPrimeComposite{};
 		std::vector<uint64_t> AxiomRHSPrimeComposite{};
 		std::vector<uint64_t> LemmaLHSPrimeComposite{};
 		std::vector<uint64_t> LemmaRHSPrimeComposite{};
 		std::vector<uint64_t> ProofLHSPrimeComposite{};
 		std::vector<uint64_t> ProofRHSPrimeComposite{};
+		// Usage: primes[ TokenLibraryStdStringToUInt64tMap["{"] ]
 		std::unordered_map <std::string, uint64_t> TokenLibraryStdStringToUInt64tMap; 
 		bool isValid() const 
 		{
 			return (lhs.size() > 0 && rhs.size() > 0);
 		}
-		uint64_t GetPrimeToken(const std::string& str)
+		uint64_t&& GetPrimeToken(const std::string& InConstStdStr)
 		{
 			uint64_t ResultUInt64{};
-			auto iter = TokenLibraryStdStringToUInt64tMap.find(str);
+			auto iter = TokenLibraryStdStringToUInt64tMap.find(InConstStdStr);
 			if (iter == TokenLibraryStdStringToUInt64tMap.end())
 			{
 				uint64_t prime = PrimeNumberGen::NextPrimeUInt64();
-				TokenLibraryStdStringToUInt64tMap[str] = prime;
+				TokenLibraryStdStringToUInt64tMap[InConstStdStr] = prime;
 				ResultUInt64 = prime;
 			}
 			else
 			{
 				ResultUInt64 = iter->second;
 			}
-			return ResultUInt64;
+			return std::move(ResultUInt64);
 		}
-		bool FoundTentativeMatchFlag(const uint64_t& InAxiomRHSPrimeCompositeUInt64,
-			const uint64_t& InAxiomLHSPrimeCompositeUInt64)
+		bool FoundTentativeMatchFlag(const uint64_t& InAxiomLHSPrimeCompositeUInt64, 
+			const uint64_t& InAxiomRHSPrimeCompositeUInt64)
 		{
 			return ((InAxiomRHSPrimeCompositeUInt64 / InAxiomLHSPrimeCompositeUInt64) % 1 == 0);
 		}
@@ -469,9 +429,10 @@ namespace EuclidProverLib
 			bool FoundEqualsSignFlag = false;
 			bool NoOpenBracesFlag = true;
 			int openBraces = 0;
+			const std::unordered_map <std::string, bool> AssignmentOP = { { "=", true}, {"==>", true}, {"<==", true}, {"<==>", true} };
 			for (const std::string& str : inAxiomConstStdStrVecRef)
 			{
-				if (str == "=")
+				if (AssignmentOP.find(str) != AssignmentOP.end())
 				{
 					FoundEqualsSignFlag = true;
 					if (rhs.size())
@@ -521,24 +482,24 @@ namespace EuclidProverLib
 					}
 				}
 			};
+			/*
 			std::thread lhsThread(countOpenBraces, 
 				std::cref(lhs), 
 				std::ref(lhsOpenBraces),
 				std::cref(_openBrace),
-				std::cref(_openBraceST),
 				std::cref(_closeBrace));
 			std::thread rhsThread(countOpenBraces, 
 				std::cref(rhs), 
 				std::ref(rhsOpenBraces),
 				std::cref(_openBrace),
-				std::cref(_openBraceST),
 				std::cref(_closeBrace));
 			lhsThread.join();
 			rhsThread.join();
-			//bool NoOpenBracesFlag = true;
+			*/
+			// Implicit: NoOpenBracesFlag = true;
 			if (lhsOpenBraces || rhsOpenBraces)
 			{
-				std::cout << "Warning - Missing equals '=' in lhs axiom or lemma. Axioms and lemmas must have 'lhs... = rhs...'." << std::endl;
+				std::cout << "Warning - Axioms must have atleast one '=' operator and lemmas must have one or more '=' '==>' '<==' or '<==>'" << std::endl;
 				NoOpenBracesFlag = false;
 			}
 			return (NoOpenBracesFlag && FoundEqualsSignFlag);
@@ -549,7 +510,7 @@ namespace EuclidProverLib
 	class API_EXPORT EuclidProver<BracketType::Parentheses> : public EuclidProver<BracketType::CurlyBraces>
 	{
 	public:
-		EuclidProver() : EuclidProver<BracketType::CurlyBraces>("(", "st(", ")")
+		EuclidProver() : EuclidProver<BracketType::CurlyBraces>( "(", ")" )
 		{
 
 		}
@@ -559,7 +520,7 @@ namespace EuclidProverLib
 	class API_EXPORT EuclidProver<BracketType::SquareBrackets> : public EuclidProver<BracketType::CurlyBraces>
 	{
 	public:
-		EuclidProver() : EuclidProver<BracketType::CurlyBraces>("[", "st[", "]")
+		EuclidProver() : EuclidProver<BracketType::CurlyBraces>( "[", "]" )
 		{
 
 		}
