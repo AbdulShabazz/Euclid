@@ -1,5 +1,29 @@
 
 //
+	// Maintain a log2 of the prime composite.
+	uint64_t log2PrimeComposite = 0;
+
+	// Calculate the log2 of the first 160 primes.
+	std::vector<uint64_t> log2Primes{};
+
+	constexpr uint64_t InitPrimeComposite (const std::vector<uint64_t>& _primes)
+	{
+		uint64_t result = 1;
+		uint64_t log2val = 0;
+		for (const uint64_t& val : _primes)
+		{
+			result *= val;
+			log2val = log2(val);
+			log2Primes.push_back(log2val);
+			log2PrimeComposite += log2val;
+		}
+		return result;
+	};
+
+	uint64_t PrimeCompositeUInt64 = InitPrimeComposite(primes);
+//
+		// Usage: Ideally { lhs } is in expanded-form (eg. { 2 } + { 2 } ) and { rhs } is in reduced-form (eg. { 4 } )
+//
 		__x86i64Int&& operator*(const __x86i64Int& other) const
 		{
 			auto rowProductVecUInt64 = [](const __x86i64Int& InDigitsVecUInt64Ref,
