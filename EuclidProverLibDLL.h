@@ -57,36 +57,6 @@ namespace EuclidProverLib
 		static constexpr std::string Close = ")";
 	};
 
-	class API_EXPORT CurlyBraceScopeChecker
-	{
-	public:
-		/**
-		Example:
-		std::vector<std::string> stringvec_ = { "{", "}", "{", "{", "}", "}" };
-		CurlyBraceScopeChecker::AreProperlyScoped<BracketType::CurlyBraces>(stringvec_); // returns true 
-		*/
-		template <BracketType type>
-		static bool AreProperlyScoped(const std::vector<std::string>& chars)
-		{
-			static_assert(std::is_same_v<decltype(type), BracketType>, "Invalid bracket type");
-			const char openBrace = BracketTraits<type>::Open;
-			const char closeBrace = BracketTraits<type>::Close;
-			int count = 0;
-			for (char c : chars)
-			{
-				if (c == openBrace)
-				{
-					count++;
-				}
-				else if (c == closeBrace)
-				{
-					count--;
-				}
-			}
-			return count == 0;
-		}
-	};
-
 	class API_EXPORT CurlyBraceElide
 	{
 	public:
@@ -96,7 +66,7 @@ namespace EuclidProverLib
 		const auto& output = CurlyBraceElide::Elide<BracketType::CurlyBraces>(input); // { "{", "1", "}", "+", "{", "1", "}", "=", "{", "2", "}" }
 		*/
 		template <BracketType type>
-		static std::vector<std::string>/*&&*/ Elide(const std::vector<std::string>& input)
+		static std::vector<std::string> Elide(const std::vector<std::string>& input)
 		{
 			static_assert(std::is_same_v<decltype(type), BracketType>, "Invalid bracket type");
 			const char openBrace = BracketTraits<type>::Open;
@@ -125,18 +95,18 @@ namespace EuclidProverLib
 				}
 				output.push_back(c);
 			}
-			return output;// std::move(output);
+			return output;
 		}
 		/**
 		Example:
 		const auto& output = CurlyBraceElide::Elide<BracketType::CurlyBraces>({ "{", "{", "{", "1", "}", "}", "+", "{", "{", "1", "}", "}", "}", "=", "{", "{", "2", "}", "}" }); // { "{", "1", "}", "+", "{", "1", "}", "=", "{", "2", "}" }
 		*/
 		template <BracketType type>
-		static std::vector<std::string>/*&&*/ Elide(const std::initializer_list<std::string>& input)
+		static std::vector<std::string> Elide(const std::initializer_list<std::string>& input)
 		{
 			static_assert(std::is_same_v<decltype(type), BracketType>, "Invalid bracket type");
 			const std::vector<std::string>& input2(input);
-			return Elide<type>(input2);// std::move(Elide<type>(input2));
+			return Elide<type>(input2);
 		}
 	};
 
@@ -294,80 +264,109 @@ namespace EuclidProverLib
 		{
 
 		}
-		bool Axiom(const std::vector<std::string>& InAxiomVecConstCharRef)
+
+		bool Axiom(const std::vector<std::string>& InAxiomConstStdStrVecRef)
 		{
-			bool AxiomAcceptedFlag = false;
-			uint64_t AxiomLHSPrimeCompositeUInt64 = 1;
-			uint64_t AxiomRHSPrimeCompositeUInt64 = 1;
-			if (SplitEquation(InAxiomVecConstCharRef,
-				AxiomLHSPrimeCompositeUInt64,
-				AxiomRHSPrimeCompositeUInt64,
-				AxiomRHS,
+			// Check if the curly brace scope is valid
+			if (!CurlyBraceScopeChecker(InAxiomConstStdStrVecRef))
+			{
+				return false;
+			}
+
+			// Split the equation into left-hand side (LHS) and right-hand side (RHS)
+			if (!SplitEquation(InAxiomConstStdStrVecRef, AxiomLHS, AxiomRHS))
+			{
+				return false;
+			}
+
+			// Check if the axiom lengths are valid
+			if (!AxiomLengthsAreValid(AxiomLHS, AxiomRHS))
+			{
+				return false;
+			}
+
+			// Update LemmaLHSPrimeComposite and LemmaRHSPrimeComposite
+			if (!CalculatePrimeComposites(AxiomLHS, 
+				AxiomRHS, 
+				AxiomLHSPrimeComposite, 
 				AxiomRHSPrimeComposite))
 			{
-				AxiomAcceptedFlag = isValid();
-				if (AxiomAcceptedFlag)
-				{
-					LemmaLHS.push_back(lhs);
-					LemmaRHS.push_back(lhs);
-					LemmaLHSPrimeComposite.push_back(AxiomLHSPrimeCompositeUInt64);
-					LemmaRHSPrimeComposite.push_back(AxiomRHSPrimeCompositeUInt64);
-				}
+				return false;
 			}
-			return AxiomAcceptedFlag;
+
+			return true;
 		}
+
 		bool Axiom(const std::initializer_list<std::string>& InAxiomInitListConstStdStringRef)
 		{
 			const std::vector<std::string>& InAxiomVecConstStdStringRef{ InAxiomInitListConstStdStringRef };
 			return Axiom(InAxiomVecConstStdStringRef);
 		}
+
 		bool Lemma(const std::vector<std::string>& InLemmaConstStdStringVecRef)
 		{
-			bool LemmaAcceptedFlag = false;
-			uint64_t AxiomLHSPrimeCompositeUInt64 = 1;
-			uint64_t AxiomRHSPrimeCompositeUInt64 = 1;
-			if (SplitEquation(InLemmaConstStdStringVecRef,
-				AxiomLHSPrimeCompositeUInt64,
-				AxiomRHSPrimeCompositeUInt64, 
+			// Check if the curly brace scope is valid
+			if (!CurlyBraceScopeChecker(InLemmaConstStdStringVecRef))
+			{
+				return false;
+			}
+
+			// Split the equation into left-hand side (LHS) and right-hand side (RHS)
+			if (!SplitEquation(InLemmaConstStdStringVecRef, LemmaLHS, LemmaRHS))
+			{
+				return false;
+			}
+
+			// Check if the Lemma lengths are valid
+			if (!AxiomLengthsAreValid(LemmaLHS, LemmaRHS))
+			{
+				return false;
+			}
+
+			// Update LemmaLHSPrimeComposite and LemmaRHSPrimeComposite
+			if (!CalculatePrimeComposites(LemmaLHS, 
 				LemmaRHS,
+				LemmaLHSPrimeComposite, 
 				LemmaRHSPrimeComposite))
 			{
-				LemmaAcceptedFlag = isValid();
-				if(LemmaAcceptedFlag)
-				{
-					LemmaLHSPrimeComposite.push_back(AxiomLHSPrimeCompositeUInt64);
-					LemmaRHSPrimeComposite.push_back(AxiomRHSPrimeCompositeUInt64);
-				}
+				return false;
 			}
-			return LemmaAcceptedFlag;
+
+			return true;
 		}
+
 		bool Lemma(const std::initializer_list<std::string>& InLemmaInitListConstCharRef)
 		{
 			const std::vector<std::string>& InLemmaVecConstCharRef{ InLemmaInitListConstCharRef };
 			return Lemma(InLemmaVecConstCharRef);
 		}
+
 		bool Prove(const std::vector<std::string>& InProofVecConstCharRef,
 			std::vector<std::vector<std::string>>& OutPath2DVecCharRef)
 		{
 			bool ResultFoundFlag = false;
 			return ResultFoundFlag;
 		}
+
 		bool ProveViaReduce(const std::vector<std::string>& InProofVecChar,
 			std::vector<std::vector<std::string>>& OutReducePathVec2DCharRef)
 		{
 			bool ResultFoundFlag = false;
 			return ResultFoundFlag;
 		}
+
 		bool ProveViaExpand(const std::vector<std::string>& InProofVecConstChar,
 			std::vector<std::vector<std::string>>& OutExpandPathVec2DCharRef)
 		{
 			bool ResultFoundFlag = false;
 			return ResultFoundFlag;
 		}
+
 		void PrintPath(const std::vector<std::vector<std::string>>& InPathVec2DConstChar) const
 		{
 
 		}
+
 	protected:
 		std::string _openBrace;
 		std::string _openBraceST; // strict comprehension enforcement
@@ -375,8 +374,6 @@ namespace EuclidProverLib
 		const std::string LemmaImplies = "<==>";
 		const std::string LemmaImpliesRHS = "==>";
 		const std::string LemmaImpliesLHS = "<==";
-		std::vector<std::string> lhs;
-		std::vector<std::string> rhs;
 		std::vector<std::vector<std::string>> ProofStackLHS{};
 		std::vector<std::vector<std::string>> ProofStackRHS{};
 		std::vector<std::vector<std::string>> LemmaLHS{};
@@ -393,44 +390,127 @@ namespace EuclidProverLib
 		std::vector<uint64_t> LemmaRHSPrimeComposite{};
 		std::vector<uint64_t> ProofLHSPrimeComposite{};
 		std::vector<uint64_t> ProofRHSPrimeComposite{};
-		// Usage: primes[ TokenLibraryStdStringToUInt64tMap["{"] ]
-		std::unordered_map <std::string, uint64_t> TokenLibraryStdStringToUInt64tMap; 
-		bool isValid() const 
+		// Usage: primes[ TokenLibraryStdStringToUInt64PrimesIndexMap["{"] ]
+		std::unordered_map <std::string, uint64_t> TokenLibraryStdStringToUInt64PrimesIndexMap; 
+
+		bool CalculatePrimeComposites(const std::vector<std::vector<std::string>>& InLHS,
+			const std::vector<std::vector<std::string>>& InRHS, 
+			std::vector<uint64_t>& OutLHSPrimeComposite,
+			std::vector<uint64_t>& OutRHSPrimeComposite)
 		{
-			return (lhs.size() > 0 && rhs.size() > 0);
+			bool ResultFlag = false;
+
+			uint64_t LHSPrimeCompositeUInt64 = 1;
+
+			for (const auto& LHSAxiomRef : InLHS)
+			{
+				uint64_t ExponentUInt64 = 1;
+				for (const auto& AxiomTokenRef : LHSAxiomRef)
+				{
+					const uint64_t& NumberBaseUInt64 = GetPrimeUInt64(AxiomTokenRef);
+					LHSPrimeCompositeUInt64 *= std::PowerUInt64(NumberBaseUInt64, ExponentUInt64++);
+				}
+				OutLHSPrimeComposite.push_back(LHSPrimeCompositeUInt64);
+				LHSPrimeCompositeUInt64 = 1;
+			}
+
+			uint64_t RHSPrimeCompositeUInt64 = 1;
+
+			for (const auto& RHSAxiomRef : InRHS)
+			{
+				uint64_t ExponentUInt64 = 1;
+				for (const auto& AxiomTokenRef : RHSAxiomRef)
+				{
+					const uint64_t& NumberBaseUInt64 = GetPrimeUInt64(AxiomTokenRef);
+					RHSPrimeCompositeUInt64 *= std::PowerUInt64(NumberBaseUInt64, ExponentUInt64++);
+				}
+				OutRHSPrimeComposite.push_back(RHSPrimeCompositeUInt64);
+				RHSPrimeCompositeUInt64 = 1;
+			}
+
+			ResultFlag = true;
+			return ResultFlag;
 		}
-		uint64_t&& GetPrimeToken(const std::string& InConstStdStr)
+
+		bool AxiomLengthsAreValid(const  std::vector <std::vector<std::string>> InLhs,
+			const  std::vector <std::vector<std::string>> InRhs) const
+		{
+			return (InLhs.size() > 0 && InRhs.size() > 0);
+		}
+
+		uint64_t GetPrimeUInt64(const std::string& InConstStdStr)
 		{
 			uint64_t ResultUInt64{};
-			auto iter = TokenLibraryStdStringToUInt64tMap.find(InConstStdStr);
-			if (iter == TokenLibraryStdStringToUInt64tMap.end())
+			const auto iter = TokenLibraryStdStringToUInt64PrimesIndexMap.find(InConstStdStr);
+			if (iter == TokenLibraryStdStringToUInt64PrimesIndexMap.end())
 			{
-				uint64_t prime = PrimeNumberGen::NextPrimeUInt64();
-				TokenLibraryStdStringToUInt64tMap[InConstStdStr] = prime;
-				ResultUInt64 = prime;
+				PrimeNumberGen::NextPrimeUInt64();
+				const uint64_t i =
+					TokenLibraryStdStringToUInt64PrimesIndexMap[InConstStdStr] =
+					primes.size() - 1;
+				ResultUInt64 = primes[i];
+			}
+			else
+			{
+				ResultUInt64 = primes[iter->second];
+			}
+			return ResultUInt64;
+		}
+
+		uint64_t GetPrimeUInt64Index(const std::string& InConstStdString)
+		{
+			uint64_t ResultUInt64{};
+			const auto iter = TokenLibraryStdStringToUInt64PrimesIndexMap.find(InConstStdString);
+			if (iter == TokenLibraryStdStringToUInt64PrimesIndexMap.end())
+			{
+				PrimeNumberGen::NextPrimeUInt64();
+				ResultUInt64 = 
+					TokenLibraryStdStringToUInt64PrimesIndexMap[InConstStdString] =
+						primes.size() - 1;
 			}
 			else
 			{
 				ResultUInt64 = iter->second;
 			}
-			return std::move(ResultUInt64);
+			return ResultUInt64;
 		}
+
 		bool FoundTentativeMatchFlag(const uint64_t& InAxiomLHSPrimeCompositeUInt64, 
 			const uint64_t& InAxiomRHSPrimeCompositeUInt64)
 		{
 			return ((InAxiomRHSPrimeCompositeUInt64 / InAxiomLHSPrimeCompositeUInt64) % 1 == 0);
 		}
-		bool SplitEquation(const std::vector<std::string>& inAxiomConstStdStrVecRef,
-			uint64_t& OutAxiomLHSPrimeCompositeUInt64,
-			uint64_t& OutAxiomRHSPrimeCompositeUInt64,
-			std::vector<std::vector<std::string>>& OutAxiomRHS,
-			std::vector<uint64_t>& OutAxiomRHSPrimeComposite)
+
+		bool CurlyBraceScopeChecker(const std::vector<std::string>& InAxiomConstStdStrVecRef)
 		{
-			bool FoundEqualsSignFlag = false;
 			bool NoOpenBracesFlag = true;
 			int openBraces = 0;
+			for (const auto& token : InAxiomConstStdStrVecRef)
+			{
+				if (token == _openBrace || 
+					token == _openBraceST)
+				{
+					openBraces++;
+				}
+				else if (token == _closeBrace)
+				{
+					openBraces--;
+				}
+			}
+			NoOpenBracesFlag = (openBraces == 0);
+			return NoOpenBracesFlag;
+		}
+
+		bool SplitEquation(const std::vector<std::string>& InAxiomConstStdStrVecRef,
+			std::vector<std::vector<std::string>>& OutAxiomLHS,
+			std::vector<std::vector<std::string>>& OutAxiomRHS)
+		{
+			bool result = false;
+			bool FoundEqualsSignFlag = false;
+			std::vector<std::string> lhs;
+			std::vector<std::string> rhs;
 			const std::unordered_map <std::string, bool> AssignmentOP = { { "=", true}, {"==>", true}, {"<==", true}, {"<==>", true} };
-			for (const std::string& str : inAxiomConstStdStrVecRef)
+			for (const std::string& str : InAxiomConstStdStrVecRef)
 			{
 				if (AssignmentOP.find(str) != AssignmentOP.end())
 				{
@@ -438,8 +518,6 @@ namespace EuclidProverLib
 					if (rhs.size())
 					{
 						OutAxiomRHS.push_back(rhs);
-						OutAxiomRHSPrimeComposite.push_back(OutAxiomRHSPrimeCompositeUInt64);
-						OutAxiomRHSPrimeCompositeUInt64 = 1;
 						rhs = {};
 					}
 					continue;
@@ -447,62 +525,15 @@ namespace EuclidProverLib
 				if (!FoundEqualsSignFlag) 
 				{
 					lhs.push_back(str); 
-					const uint64_t prime = GetPrimeToken(str);
-					const uint64_t ExponentUInt64 = static_cast<uint64_t>(lhs.size());
-					const uint64_t PowerUInt64 = std::PowerUInt64<>(prime, ExponentUInt64);
-					OutAxiomLHSPrimeCompositeUInt64 *= PowerUInt64;
 				}
 				else
 				{
 					rhs.push_back(str);
-					const uint64_t prime = GetPrimeToken(str);
-					const uint64_t ExponentUInt64 = static_cast<uint64_t>(rhs.size());
-					const uint64_t PowerUInt64 = std::PowerUInt64<>(prime, ExponentUInt64);
-					OutAxiomRHSPrimeCompositeUInt64 *= PowerUInt64;
 				}
 			}
-			int lhsOpenBraces = 0;
-			int rhsOpenBraces = 0;
-			auto countOpenBraces = [](const std::vector<std::string>& ConstStdStringVecRef,
-				int& openBraces,
-				const std::string& OpenBrace,
-				const std::string& OpenBraceST,
-				const std::string& CloseBrace)
-			{
-				std::unordered_set<std::string> braceSet{ OpenBrace, OpenBraceST };				
-				for (const std::string& str : ConstStdStringVecRef)
-				{
-					if (braceSet.contains(str))
-					{
-						openBraces++;
-					}
-					else if (str == CloseBrace)
-					{
-						openBraces--;
-					}
-				}
-			};
-			/*
-			std::thread lhsThread(countOpenBraces, 
-				std::cref(lhs), 
-				std::ref(lhsOpenBraces),
-				std::cref(_openBrace),
-				std::cref(_closeBrace));
-			std::thread rhsThread(countOpenBraces, 
-				std::cref(rhs), 
-				std::ref(rhsOpenBraces),
-				std::cref(_openBrace),
-				std::cref(_closeBrace));
-			lhsThread.join();
-			rhsThread.join();
-			*/
-			// Implicit: NoOpenBracesFlag = true;
-			if (lhsOpenBraces || rhsOpenBraces)
-			{
-				std::cout << "Warning - Axioms must have atleast one '=' operator and lemmas must have one or more '=' '==>' '<==' or '<==>'" << std::endl;
-				NoOpenBracesFlag = false;
-			}
-			return (NoOpenBracesFlag && FoundEqualsSignFlag);
+			OutAxiomLHS.push_back(lhs);
+			result = FoundEqualsSignFlag;
+			return result;
 		}
 	};
 
