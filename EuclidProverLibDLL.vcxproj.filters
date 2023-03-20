@@ -24,9 +24,6 @@
     <ClInclude Include="pch.h">
       <Filter>Public</Filter>
     </ClInclude>
-    <ClInclude Include="PowerUInt64.h">
-      <Filter>Public</Filter>
-    </ClInclude>
     <ClInclude Include="EuclidProverLibDLL.h">
       <Filter>Public</Filter>
     </ClInclude>
