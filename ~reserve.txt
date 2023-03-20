@@ -1,5 +1,16 @@
 
 //
+
+
+			// Update LemmaLHSPrimeComposite and LemmaRHSPrimeComposite
+			if (!BuildRegisterUInt64(LemmaLHS, 
+				LemmaRHS,
+				LemmaLHSPrimeComposite, 
+				LemmaRHSPrimeComposite))
+			{
+				return false;
+			}
+
 	// Initialize static members.
 	uint64_t currentPrimeUInt64 = 947;
 
