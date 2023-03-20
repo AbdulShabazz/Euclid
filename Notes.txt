@@ -92,12 +92,28 @@ But how to represent the proof-search space internally?
 
 		Limitations: Set inclusion requires combinatorial expansion (ie. combinatorial explosion)
 
-	Solution: (in-process)
+	Solution: (abandoned)
 
 		// Overall builtin support (uint64_t) with BigInt support (__x86i64Int ) as needed
 		2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...
 
-		Limitations: (in-process)
+		Limitations: non-exceptional multiplication performance		
+
+	Solution: (abandoned)
+
+		// Managing (uint64_t) single- byte words 
+		 2 3 5 7 11 13...
+		[1 1 1 1 1  1]
+
+		Limitations: token order not preserved
+
+	Solution: (in-process)
+
+		// Managing (uint64_t) multi-byte words % num_tokens
+		 2 3 5 7 11 13  2 3 5 7 11 13  2 3 5 7 11 13...
+		[1 0 0 0 0  0] [0 0 0 1 0  0] [0 1 0 0 0  0]
+
+		Limitations: token order not preserved
 
 Todo: Add an optional constraint flag parameter to axioms and or lemmas to require or ignore their use
 Todo: Cache axioms-, lemmas-, intermedite results-, proof statements- and their proofsteps-, to disk, for ready retrieval when game play conditions re-present themselves (perhaps using a cocktail of thread-management and async co-routines)
