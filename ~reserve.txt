@@ -1,5 +1,126 @@
 
 //
+	// Initialize static members.
+	uint64_t currentPrimeUInt64 = 947;
+
+	// Calculate the first 160 primes.
+	std::vector<uint64_t> primes = 
+	{
+		2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
+		73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173,
+		179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281,
+		283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419,
+		421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541, 547, 557,
+		563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661, 673, 677,
+		683, 691, 701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827,
+		829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947/*, 953*/ 
+	};
+
+	constexpr uint64_t InitPrimeComposite (const std::vector<uint64_t>& _primes)
+	{
+		uint64_t result = 1;
+		for (const uint64_t& val : _primes)
+		{
+			result *= val;
+		}
+		return result;
+	};
+
+	uint64_t PrimeCompositeUInt64 = InitPrimeComposite(primes);
+
+	class API_EXPORT PrimeNumberGen
+	{
+	public:
+		/** 
+		Example: 
+		const uint64_t output = PrimeNumberGen::NextPrimeUInt64(); // returns 3
+
+		Example: 
+		const uint64_t input = 162;
+		const uint64_t output = PrimeNumberGen::NextPrimeUInt64(input); // returns 953
+		*/
+		static uint64_t NextPrimeUInt64(const uint64_t& index = ULLONG_MAX)
+		{
+			uint64_t result = 0;
+			uint64_t maxSize = primes.size();
+			// If index is in primes, return primes[index].
+			if (index < maxSize)
+			{
+				result = primes.at(index);
+			}
+			// Else, calculate the next prime and add it to primes[].
+			else
+			{
+				uint64_t nextPrimeUInt64 = currentPrimeUInt64 + 2;
+				bool FindNextPrimeFlag = (index != ULLONG_MAX);
+				do
+				{
+					while (!IsPrimeUInt64(nextPrimeUInt64))
+					{
+						nextPrimeUInt64 += 2;
+					}
+					primes.push_back(nextPrimeUInt64);
+					maxSize++;
+					PrimeCompositeUInt64 *= nextPrimeUInt64; // Update PrimeCompositeUInt64.
+					nextPrimeUInt64 += 2; // Next odd integer.
+
+				} while (maxSize <= index && FindNextPrimeFlag);
+
+				result = currentPrimeUInt64 = primes.back();
+			}
+
+			// Return prime at this index.
+			return result;
+		}
+		/**
+		Example:
+		const uint64_t input = 162;
+		const bool IsPrimeFlag = PrimeNumberGen::IsPrimeUInt64(input); // returns false
+		*/
+		static bool IsPrimeUInt64(const uint64_t& n)
+		{
+			return (((PrimeCompositeUInt64 / n) % 1) != 0);
+		}
+	};
+
+	
+		uint64_t GetPrimeUInt64(const std::string& InConstStdStr)
+		{
+			uint64_t ResultUInt64{};
+			const auto iter = TokenLibraryStdStringToUInt64PrimesIndexMap.find(InConstStdStr);
+			if (iter == TokenLibraryStdStringToUInt64PrimesIndexMap.end())
+			{
+				PrimeNumberGen::NextPrimeUInt64();
+				const uint64_t i =
+					TokenLibraryStdStringToUInt64PrimesIndexMap[InConstStdStr] =
+					primes.size() - 1;
+				ResultUInt64 = primes[i];
+			}
+			else
+			{
+				ResultUInt64 = primes[iter->second];
+			}
+			return ResultUInt64;
+		}
+
+		uint64_t GetPrimeUInt64Index(const std::string& InConstStdString)
+		{
+			uint64_t ResultUInt64{};
+			const auto iter = TokenLibraryStdStringToUInt64PrimesIndexMap.find(InConstStdString);
+			if (iter == TokenLibraryStdStringToUInt64PrimesIndexMap.end())
+			{
+				PrimeNumberGen::NextPrimeUInt64();
+				ResultUInt64 = 
+					TokenLibraryStdStringToUInt64PrimesIndexMap[InConstStdString] =
+						primes.size() - 1;
+			}
+			else
+			{
+				ResultUInt64 = iter->second;
+			}
+			return ResultUInt64;
+		}
+//
 		bool CalculatePrimeComposites(const std::vector<std::vector<std::string>>& InLHS,
 			std::vector<uint64_t>& OutLHSPrimeComposite,
 			const std::vector<std::vector<std::string>>& InRHS,
