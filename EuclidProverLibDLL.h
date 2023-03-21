@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 #include <cmath>
-#include <unordered_map>
+#include <unordered_map>>
 #include <unordered_set>
 #include <thread>
 #include <string>
@@ -66,11 +66,11 @@ namespace EuclidProverLib
 		static std::vector<std::string> Elide(const std::vector<std::string>& input)
 		{
 			static_assert(std::is_same_v<decltype(type), BracketType>, "Invalid bracket type");
-			const char openBrace = BracketTraits<type>::Open;
-			const char closeBrace = BracketTraits<type>::Close;
+			const std::string openBrace = BracketTraits<type>::Open;
+			const std::string closeBrace = BracketTraits<type>::Close;
 			std::vector<std::string> output;
 			bool OpenScopeFlag = false;
-			for (char c : input)
+			for (std::string c : input)
 			{
 				if (c == openBrace)
 				{
@@ -199,15 +199,6 @@ namespace EuclidProverLib
 				return false;
 			}
 
-			// Update LemmaLHSPrimeComposite and LemmaRHSPrimeComposite
-			if (!CalculatePrimeComposites(AxiomLHS, 
-				AxiomRHS, 
-				AxiomLHSPrimeComposite, 
-				AxiomRHSPrimeComposite))
-			{
-				return false;
-			}
-
 			return true;
 		}
 
@@ -237,51 +228,55 @@ namespace EuclidProverLib
 				return false;
 			}
 
-			// Update LemmaLHSPrimeComposite and LemmaRHSPrimeComposite
-			if (!CalculatePrimeComposites(LemmaLHS, 
-				LemmaRHS,
-				LemmaLHSPrimeComposite, 
-				LemmaRHSPrimeComposite))
-			{
-				return false;
-			}
-
 			return true;
 		}
 
-		bool Lemma(const std::initializer_list<std::string>& InLemmaInitListConstCharRef)
+		bool Lemma(const std::initializer_list<std::string>& InLemmaInitListConstStringRef)
 		{
-			const std::vector<std::string>& InLemmaVecConstCharRef{ InLemmaInitListConstCharRef };
-			return Lemma(InLemmaVecConstCharRef);
+			const std::vector<std::string>& InLemmaVecConstStringRef{ InLemmaInitListConstStringRef };
+			return Lemma(InLemmaVecConstStringRef);
 		}
 
-		bool Prove(const std::vector<std::string>& InProofVecConstCharRef,
-			std::vector<std::vector<std::string>>& OutPath2DVecCharRef)
+		bool Prove(const std::vector<std::string>& InProofVecConstStringRef,
+			std::vector<std::vector<std::string>>& OutPath2DVecStringRef)
 		{
+			if (RecompileFlag && Compile())
+			{
+				RecompileFlag = false;
+			}
 			bool ResultFoundFlag = false;
 			return ResultFoundFlag;
 		}
 
-		bool ProveViaReduce(const std::vector<std::string>& InProofVecChar,
-			std::vector<std::vector<std::string>>& OutReducePathVec2DCharRef)
+		bool ProveViaReduce(const std::vector<std::string>& InProofVecString,
+			std::vector<std::vector<std::string>>& OutReducePathVec2DStringRef)
 		{
+			if (RecompileFlag && Compile())
+			{
+				RecompileFlag = false;
+			}
 			bool ResultFoundFlag = false;
 			return ResultFoundFlag;
 		}
 
-		bool ProveViaExpand(const std::vector<std::string>& InProofVecConstChar,
-			std::vector<std::vector<std::string>>& OutExpandPathVec2DCharRef)
+		bool ProveViaExpand(const std::vector<std::string>& InProofVecConstString,
+			std::vector<std::vector<std::string>>& OutExpandPathVec2DStringRef)
 		{
+			if (RecompileFlag && Compile())
+			{
+				RecompileFlag = false;
+			}
 			bool ResultFoundFlag = false;
 			return ResultFoundFlag;
 		}
 
-		void PrintPath(const std::vector<std::vector<std::string>>& InPathVec2DConstChar) const
+		void PrintPath(const std::vector<std::vector<std::string>>& InPathVec2DConstString) const
 		{
 
 		}
 
 	protected:
+		bool RecompileFlag = true;
 		std::string _openBrace;
 		std::string _openBraceST; // strict comprehension enforcement
 		std::string _closeBrace;
@@ -298,52 +293,65 @@ namespace EuclidProverLib
 		std::vector<std::vector<std::string>> ProofRHS{};
 
 		// Prime Composite Library. Cached to disk for performance
-		std::vector<uint64_t> AxiomLHSPrimeComposite{};
-		std::vector<uint64_t> AxiomRHSPrimeComposite{};
-		std::vector<uint64_t> LemmaLHSPrimeComposite{};
-		std::vector<uint64_t> LemmaRHSPrimeComposite{};
-		std::vector<uint64_t> ProofLHSPrimeComposite{};
-		std::vector<uint64_t> ProofRHSPrimeComposite{};
-		// Usage: primes[ TokenLibraryStdStringToUInt64PrimesIndexMap["{"] ]
-		std::unordered_map <std::string, uint64_t> TokenLibraryStdStringToUInt64PrimesIndexMap; 
+		std::vector<uint64_t> AxiomLHSRegister{};
+		std::vector<uint64_t> AxiomRHSRegister{};
+		std::vector<uint64_t> LemmaLHSRegister{};
+		std::vector<uint64_t> LemmaRHSRegister{};
+		std::vector<uint64_t> ProofLHSRegister{};
+		std::vector<uint64_t> ProofRHSRegister{};
+		using TokenLibrary = std::unordered_map <std::string, uint64_t>;
+		TokenLibrary& TokenLibraryStdStringToUInt64PrimesIndexMap;
+		uint64_t GuidUINT64 = 0;
 
-		bool CalculatePrimeComposites(const std::vector<std::vector<std::string>>& InLHS,
+		bool Compile(const std::vector<std::vector<std::string>>& InLHS,
 			const std::vector<std::vector<std::string>>& InRHS, 
-			std::vector<uint64_t>& OutLHSPrimeComposite,
-			std::vector<uint64_t>& OutRHSPrimeComposite)
+			std::vector<std::vector<uint64_t>>& OutLHSRegister,
+			std::vector<std::vector<uint64_t>>& OutRHSRegister)
 		{
 			bool ResultFlag = false;
 
-			uint64_t LHSPrimeCompositeUInt64 = 1;
+			std::vector<uint64_t> LHSRegisterUInt64{};
 
 			for (const auto& LHSAxiomRef : InLHS)
 			{
-				uint64_t ExponentUInt64 = 1;
 				for (const auto& AxiomTokenRef : LHSAxiomRef)
 				{
-					const uint64_t& NumberBaseUInt64 = GetPrimeUInt64(AxiomTokenRef);
-					LHSPrimeCompositeUInt64 *= std::PowerUInt64(NumberBaseUInt64, ExponentUInt64++);
+					const uint64_t& NumberBaseUInt64 = GetTokenIndexUInt64(AxiomTokenRef);
+					const uint64_t nIndex = NumberBaseUInt64 / 64;
+					const uint64_t nBit = NumberBaseUInt64 % 64;
+					ExpandResolutionIfNeeded(nIndex, LHSRegisterUInt64);
+					LHSRegisterUInt64[nIndex] |= 1ull << NumberBaseUInt64;
 				}
-				OutLHSPrimeComposite.push_back(LHSPrimeCompositeUInt64);
-				LHSPrimeCompositeUInt64 = 1;
+				OutLHSRegister.push_back(LHSRegisterUInt64);
 			}
 
-			uint64_t RHSPrimeCompositeUInt64 = 1;
+			std::vector<uint64_t> RHSRegisterUInt64{};
 
 			for (const auto& RHSAxiomRef : InRHS)
 			{
-				uint64_t ExponentUInt64 = 1;
 				for (const auto& AxiomTokenRef : RHSAxiomRef)
 				{
-					const uint64_t& NumberBaseUInt64 = GetPrimeUInt64(AxiomTokenRef);
-					RHSPrimeCompositeUInt64 *= std::PowerUInt64(NumberBaseUInt64, ExponentUInt64++);
+					const uint64_t& NumberBaseUInt64 = GetTokenIndexUInt64(AxiomTokenRef);
+					const uint64_t nIndex = NumberBaseUInt64 / 64;
+					const uint64_t nBit = NumberBaseUInt64 % 64;
+					ExpandResolutionIfNeeded(nIndex, RHSRegisterUInt64);
+					RHSRegisterUInt64[nIndex] |= 1ull << NumberBaseUInt64;
 				}
-				OutRHSPrimeComposite.push_back(RHSPrimeCompositeUInt64);
-				RHSPrimeCompositeUInt64 = 1;
+				OutRHSRegister.push_back(RHSRegisterUInt64);
 			}
 
 			ResultFlag = true;
 			return ResultFlag;
+		}
+
+		void ExpandResolutionIfNeeded(const uint64_t& nIndex, std::vector<uint64_t>& RegisterUInt64Ref)
+		{
+			uint64_t i = 1;
+			while (nIndex >= RegisterUInt64Ref.size())
+			{
+				RegisterUInt64Ref.insert(RegisterUInt64Ref.begin() + i,0);
+				i += 2;
+			}
 		}
 
 		bool AxiomLengthsAreValid(const  std::vector <std::vector<std::string>> InLhs,
@@ -352,15 +360,26 @@ namespace EuclidProverLib
 			return (InLhs.size() > 0 && InRhs.size() > 0);
 		}
 		
-		uint64_t GetTokenIndexUInt64(const std::string& str) const
+		uint64_t GetTokenIndexUInt64(const std::string& InConstStdStr) const
 		{
-			return TokenLibraryStdStringToUInt64PrimesIndexMap.at(str);
+			uint64_t ResultUInt64{};
+			const auto iter = TokenLibraryStdStringToUInt64PrimesIndexMap.find(InConstStdStr);
+			if (iter == TokenLibraryStdStringToUInt64PrimesIndexMap.end())
+			{
+				const uint64_t& i = ResultUInt64 = TokenLibraryStdStringToUInt64PrimesIndexMap.size();
+				TokenLibraryStdStringToUInt64PrimesIndexMap.insert({ InConstStdStr, i });
+			}
+			else
+			{
+				ResultUInt64 = iter->second;
+			}
+			return ResultUInt64;
 		}
 
-		bool FoundTentativeMatchFlag(const uint64_t& InAxiomLHSPrimeCompositeUInt64, 
-			const uint64_t& InAxiomRHSPrimeCompositeUInt64)
+		bool FoundTentativeMatchFlag(const uint64_t& InAxiomLHSRegisterUInt64, 
+			const uint64_t& InAxiomRHSRegisterUInt64)
 		{
-			return ((InAxiomRHSPrimeCompositeUInt64 / InAxiomLHSPrimeCompositeUInt64) % 1 == 0);
+			return ((InAxiomRHSRegisterUInt64 / InAxiomLHSRegisterUInt64) % 1 == 0);
 		}
 
 		bool CurlyBraceScopeChecker(const std::vector<std::string>& InAxiomConstStdStrVecRef)
@@ -417,6 +436,17 @@ namespace EuclidProverLib
 			result = FoundEqualsSignFlag;
 			return result;
 		}
+
+		struct ProofStackObject
+		{
+			explicit ProofStackObject(bool IsAxiomFlag_, uint64_t nIndex_) :
+				IsAxiomFlag(IsAxiomFlag_), nIndex(nIndex_)
+			{
+
+			};
+			bool IsAxiomFlag;
+			uint64_t nIndex;
+		};
 	};
 
 	template<>
