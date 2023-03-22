@@ -26,7 +26,6 @@
 #include <limits>
 #include "PowerUInt64.h"
 #include "__x86i64Int.h"
-//#include <cassert>
 
 namespace EuclidProverLib
 {
