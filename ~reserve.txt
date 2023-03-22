@@ -1,5 +1,276 @@
 
 //
+
+
+		__x86i64Int operator%= (const __x86i64Int& rhs)
+		{
+			if (rhs == __x86i64Int{ "0" })
+			{
+				throw std::invalid_argument("Division by zero");
+			}
+			// Compute the remainder using long division algorithm
+			__x86i64Int dividend = *this;
+			__x86i64Int divisor = rhs.abs();
+			__x86i64Int quotient{ "0" };
+			__x86i64Int remainder{ "0" };
+			const size_t I = static_cast<size_t>(dividend.digits_.size() - 1);
+			for (size_t i = I; i > 0; i--)
+			{
+				remainder *= __x86i64Int{ std::to_string(BASE) };
+				remainder += __x86i64Int{ std::to_string(dividend.digits_[i - 1]) };
+				const __x86i64Int& result = remainder / divisor;
+				PushAtFront(quotient, result.quotient());
+				remainder %= divisor;
+			}
+			std::reverse(quotient.digits_.begin(), quotient.digits_.end());
+			std::reverse(remainder.digits_.begin(), remainder.digits_.end());
+			__x86i64Int result = *this = remainder;
+			return result;
+		}
+//
+		__x86i64Int operator/ (const __x86i64Int& rhs) const
+		{
+			if (rhs == __x86i64Int{ "0" })
+			{
+				throw std::invalid_argument("divide by zero");
+			}
+			__x86i64Int result{ "0" };
+			__x86i64Int remainder{ "0" };
+			result.digits_.resize(digits_.size());
+			for (int64_t i = digits_.size() - 1; i >= 0; i--)
+			{
+				remainder = remainder * __x86i64Int{ std::to_string(BASE) } + __x86i64Int{ std::to_string(digits_[i]) };
+				int x = 0, y = BASE - 1;
+				while (x < y)
+				{
+					int m = (x + y + 1) / 2;
+					if (rhs * __x86i64Int{ std::to_string(m) } <= remainder)
+					{
+						x = m;
+					}
+					else
+					{
+						y = m - 1;
+					}
+				}
+				result.digits_[i] = x;
+				remainder -= rhs * __x86i64Int{ std::to_string(x) };
+			}
+			result.trimLeadingZeros();
+			result.sign_ = sign_ * rhs.sign_;
+			return result;
+		}
+//
+		/** Knuth implementation...
+		Example:
+		__x86i64Int dividend{ 12n }, divisor{ 12n };
+		std::pair<__x86i64Int, __x86i64Int> result = dividend / divisor;
+		__x86i64Int quotient = result.first;
+		__x86i64Int remainder = result.second;
+		*/
+		std::pair<__x86i64Int, __x86i64Int> operator/ (const __x86i64Int& divisor)
+		{ 
+
+			__x86i64Int dividend{ *this };
+			__x86i64Int quotient{};
+			__x86i64Int remainder{};
+
+			// Step 1. Handle base cases
+
+			// Base case 1: Division by zero
+			if (divisor.digits_.empty())
+			{
+				throw std::runtime_error("Divide by zero");
+			}
+
+			// Base case 2: Dividend is smaller than the divisor
+			if (dividend < divisor)
+			{
+				return std::make_pair(quotient, remainder); // Return zero as the quotient
+			}
+
+			// Base case 6: Dividend is a multiple of the divisor
+			if (dividend == divisor)
+			{
+				quotient.digits_.push_back(1);
+				return std::make_pair(quotient, remainder);
+			}
+
+			// Base case 3: Divisor is a single-digit number
+			if (divisor.digits_.size() == 1)
+			{
+				int single_digit = divisor.digits_[0];
+				return dividend.DivideByDigit(single_digit);
+			}
+
+			// Base case 4: Dividend is a single-digit number
+			if (dividend.digits_.size() == 1)
+			{
+				int single_digit = dividend.digits_[0];
+				quotient.digits_.push_back(single_digit / divisor.digits_[0]);
+				remainder = __x86i64Int{ std::to_string(single_digit % divisor.digits_[0]) };
+				return std::make_pair(quotient, remainder);
+			}
+
+			// Base case 5: Dividend is a power of 10
+			if (dividend.digits_.size() > divisor.digits_.size() &&
+				dividend.digits_.back() == 0)
+			{
+				quotient.digits_.resize(dividend.digits_.size() - divisor.digits_.size(), 0);
+				dividend.digits_.resize(divisor.digits_.size());
+			}
+
+			// Base case 7: Dividend is a power of 10 and a multiple of the divisor
+			if (dividend.digits_.size() == divisor.digits_.size() &&
+				dividend.digits_.back() == 0)
+			{
+				quotient.digits_.resize(dividend.digits_.size() - divisor.digits_.size(), 0);
+				dividend.digits_.resize(divisor.digits_.size());
+			}
+
+			// Step 2: Normalize dividend and divisor
+			/*
+			This implementation multiplies both the dividend and divisor by a normalization factor 
+			to ensure the divisor's most significant digit is greaterThan or equalTo 5 
+			so that the divisor's most significant digit is greater than or equal to half the base 
+			(in our case, base 10). Normalization helps improve the efficiency and accuracy 
+			of the quotient estimation in the algorithm... 
+			The normalization factor is calculated as 10 / (1 + divisor.digits_.back()).
+			*/
+			int normalization_factor = 10 / (1 + divisor.digits_.back());
+			__x86i64Int normalized_dividend = dividend * __x86i64Int{ std::to_string(normalization_factor) };
+			__x86i64Int normalized_divisor = divisor * __x86i64Int{ std::to_string(normalization_factor) };
+
+			// Step 3: Determine the number of chunks and create a loop to iterate through them
+			uint64_t n = uint64_t{ normalized_dividend.digits_.size() };
+			uint64_t m = uint64_t{ normalized_divisor.digits_.size() };
+			uint64_t chunk_count = n - m;
+
+			quotient.digits_.resize(chunk_count + 1, 0);
+
+			// Loop through chunks in reverse (from most significant to least significant)
+			for (int64_t i = chunk_count; i >= 0; i--)
+			{
+				// Step 4: Estimate the quotient using the most significant digits
+				int q_clamp = int{ normalized_dividend.digits_[i + m] * 10 +
+					normalized_dividend.digits_[i + m - 1] } /
+					int{ normalized_divisor.digits_[m - 1] };
+
+				// Clamp the estimate to the maximum value of a single digit (9)
+				if (q_clamp > 9)
+				{
+					q_clamp = 9;
+				}
+
+				// Step 5: Refine the estimated quotient and compute the remainder
+				__x86i64Int r_clamp = normalized_dividend.GetNumberSubrange(i, m + 1) - __x86i64Int{ std::to_string(q_clamp) } * normalized_divisor;
+
+				// Adjust the estimate if necessary
+				while (r_clamp.sign_ < 1)
+				{
+					q_clamp--;
+					r_clamp += normalized_divisor;
+				}
+
+				// Update the dividend with the remainder
+				normalized_dividend.SetNumberSubrange(i, r_clamp);
+
+				// Save the quotient for this chunk
+				quotient.digits_[i] = q_clamp;
+			}
+
+			// Step 6: Finalize the quotient
+			quotient.trimLeadingZeros();
+
+			return std::make_pair(quotient, remainder);
+		}
+//
+		// Constructor
+		template <typename T = std::string,
+		typename std::enable_if<!std::is_arithmetic<T>::value, int>::type = 0>
+		__x86i64Int(const T& str = "0")
+		{
+			for (T it = str.rbegin(); it != str.rend(); ++it)
+			{
+				if (std::isdigit(*it))
+				{
+					digits_.push_back(*it - '0');
+				}
+				else if (*it == '-')
+				{
+					sign_ = -1;
+				}
+			}
+			if (digits_.empty())
+			{
+				digits_.push_back(0);
+			}
+			trimLeadingZeros();
+		}
+//
+		__x86i64Int operator* (const __x86i64Int& other) const
+		{
+			auto rowProductVecUInt64 = [](const __x86i64Int& InDigitsVecUInt64Ref,
+				const int& InOtherUIntRef,
+				__x86i64Int& OutResultVecUInt64Ref)
+			{
+				int carry = 0;
+				const uint64_t& J = OutResultVecUInt64Ref.digits_.size();
+				for (uint64_t j = 0; ((j < J) || (carry > 0)); j++)
+				{
+					int prod = carry +
+						OutResultVecUInt64Ref.digits_[j] +
+						InOtherUIntRef *
+						(j < InDigitsVecUInt64Ref.digits_.size() ?
+							InDigitsVecUInt64Ref.digits_[j] : int{ 0 });
+					OutResultVecUInt64Ref.digits_[j] = prod % BASE;
+					carry = static_cast<int>(prod / BASE);
+				}
+			};
+
+			std::vector<__x86i64Int> IntermediateResultVecUInt64;
+			const uint64_t I = digits_.size();
+			const uint64_t II = digits_.size() + other.digits_.size();
+
+			// Initialize thread pool with a fixed number of threads
+			const size_t MaxConcurrentThreads = std::thread::hardware_concurrency();
+			bool useThreadPoolFlag = (MaxConcurrentThreads > 2U);
+			const size_t numThreads = (useThreadPoolFlag ? MaxConcurrentThreads : 2U) - 1;
+			std::vector<std::future<void>> futures;
+
+			for (uint64_t i = 0; i < I; i++)
+			{
+				__x86i64Int temp{ "0" };
+				temp.digits_.resize(II, 0);
+				IntermediateResultVecUInt64.push_back(temp);
+			}
+
+			auto processChunk = [&](uint64_t start, uint64_t end)
+			{
+				for (uint64_t i = start; i < end; i++)
+				{
+					rowProductVecUInt64(*this, other.digits_[i], IntermediateResultVecUInt64[i]);
+				}
+			};
+
+			for (size_t i = 0; i < numThreads; ++i)
+			{
+				uint64_t startIndex = (I * i) / numThreads;
+				uint64_t endIndex = (I * (i + 1)) / numThreads;
+				futures.push_back(std::async(std::launch::async, processChunk, startIndex, endIndex));
+			}
+
+			for (auto& future : futures)
+			{
+				future.wait();
+			}
+
+			SumArrayRefInParallel(IntermediateResultVecUInt64);
+			IntermediateResultVecUInt64[0].trimLeadingZeros();
+			IntermediateResultVecUInt64[0].sign_ = sign_ * other.sign_;
+			return IntermediateResultVecUInt64[0];
+		}
+//
 		bool CalculatePrimeComposites(const std::vector<std::vector<std::string>>& InLHS,
 			std::vector<uint64_t>& OutLHSPrimeComposite,
 			const std::vector<std::vector<std::string>>& InRHS,
