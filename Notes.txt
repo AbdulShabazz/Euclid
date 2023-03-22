@@ -88,20 +88,20 @@ But how to represent the proof-search space internally?
 		NumberSet.insert(Number.first)
 		NumberSet.insert(Number.second) // Is there enough variance to rely only on Number.second?
 
-		// iff Number.second == 0.0, then rely on Number.first ?
+		// iff ever Number.second == 0.0, then rely on Number.first ?
 
 		Limitations: Set inclusion requires combinatorial expansion (ie. combinatorial explosion)
 
 	Solution: (in-process)
 
-		// Overall builtin support (unsigned double) with BigInt support (__x86i64Int ) as needed
+		// Default builtin support (unsigned double) with added BigInt support (__x86i64Int ) as needed
 		2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...
 
 		Limitations: (in-process)
 
 Todo: Add an optional constraint flag parameter to axioms and or lemmas to require or ignore their use
 Todo: Cache axioms-, lemmas-, intermedite results-, proof statements- and their proofsteps-, to disk, for ready retrieval when game play conditions re-present themselves (perhaps using a cocktail of thread-management and async co-routines)
-Todo: Implement the proof-search and caching algorithm using (async) co_routines and use threadpools for the nextprime computation.
+Todo: Implement the proof-search and caching algorithm (async) w/ co_routines and use threadpools for the nextprime computation.
 Todo: convert data types to auto to allow the theorem prover that is the compiler to perform optimizations on the data types.
 
 NOTES
