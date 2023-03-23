@@ -177,10 +177,16 @@ namespace EuclidProverLib
 
 				result = currentPrimeUInt64 = primes.back();
 			}
-
+			// Todo: Add a check to see if the next prime is greater than 1/2 the max value of uint64_t.
+			// Todo: Compute intermediate sums between this and previous primes, for later use.
+			// Todo: Compute intermediate products between this and previous primes, for later use.
+			// Todo: Compute intermediate quotients between this and previous primes, for later use.
+			// Todo: Compute intermediate remainders between this and previous primes, for later use.
+			// Todo: Cache prime number constituents for this integer, for later use.
 			// Return prime at this index.
 			return result;
 		}
+
 		/**
 		Example:
 		const uint64_t input = 162;
