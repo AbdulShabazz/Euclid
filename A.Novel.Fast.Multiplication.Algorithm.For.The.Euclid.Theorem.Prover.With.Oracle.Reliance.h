@@ -160,7 +160,7 @@ int main() {
 	// B = 7 * 11 * 13 + 6
 
     uint64_t result = novel_multiplication(X_prime_factors, M, Y_prime_factors, N); // Compute A * B
-    std::cout << "Result: " << result << std::endl;
+    std::cout << "Result: " << result << std::endl; // 476
 
     return 0;
 }
