@@ -94,15 +94,16 @@ But how to represent the proof-search space internally?
 
 	Solution: (in-process)
 
-		// Default builtin support (unsigned double) with added BigInt support (__x86i64Int ) as needed
+		// Default builtin support (for unsigned double) with added BigInt support (__x86i64Int ) as needed
 		2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...
 
 		Limitations: (in-process)
 
 Todo: Add an optional constraint flag parameter to axioms and or lemmas to require or ignore their use
 Todo: Cache axioms-, lemmas-, intermedite results-, proof statements- and their proofsteps-, to disk, for ready retrieval when game play conditions re-present themselves (perhaps using a cocktail of thread-management and async co-routines)
-Todo: Implement the proof-search and caching algorithm (async) w/ co_routines and use threadpools for the nextprime computation.
-Todo: convert data types to auto to allow the theorem prover that is the compiler to perform optimizations on the data types.
+Todo: Implement a proof-search caching algorithm (asynchronous) w/ co_routines; and use threadpools for the nextprime calculation.
+Todo: convert data types to auto to allow the theorem prover in the c++ compiler to perform optimizations on the data types.
+Todo: Iff a value N % M == 0, then M is a composite factor of N; iff a value (N / M) % 2 == 0, then M is a scalar multiple of N.
 
 NOTES
 [+] Add a strict specifier, eg. st{ { 2 } - { 1 } } = { 1 }
