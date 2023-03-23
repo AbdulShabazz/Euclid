@@ -150,7 +150,7 @@ uint64_t novel_multiplication(const std::vector<uint64_t>& X_prime_factors, uint
 }
 
 int main() {
-    // Example input (prime factors and scalar residues for A and B)
+    // Example input (prime factors and scalar residues for A and B, for the computation of A * B)
     std::vector<uint64_t> X_prime_factors = {2, 3, 5}; // Prime factors of A
     uint64_t M = 4; // Scalar residue for A
     std::vector<uint64_t> Y_prime_factors = {7, 11, 13}; // Prime factors of B
