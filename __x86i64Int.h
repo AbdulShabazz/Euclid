@@ -129,7 +129,7 @@ namespace std
 			return result;
 		}
 
-		__x86i64Int operator+ (const __x86i64Int& rhs) const
+		virtual __x86i64Int operator+ (const __x86i64Int& rhs) const
 		{
 			__x86i64Int result{};
 			if (sign_ == rhs.sign_)
@@ -154,7 +154,7 @@ namespace std
 			return result;
 		}
 
-		__x86i64Int operator- (const __x86i64Int& rhs) const
+		virtual __x86i64Int operator- (const __x86i64Int& rhs) const
 		{
 			__x86i64Int result{ "0" };
 			if (sign_ == rhs.sign_)
@@ -399,7 +399,7 @@ namespace std
 			return result;
 		}
 
-		__x86i64Int operator* (const __x86i64Int& rhs) const
+		virtual __x86i64Int operator* (const __x86i64Int& rhs) const
 		{
 			__x86i64Int result;
 			// Resize the result vector to fit the result
@@ -423,7 +423,7 @@ namespace std
 			return result;
 		}
 
-		__x86i64Int operator/ (const __x86i64Int& rhs) const
+		virtual __x86i64Int operator/ (const __x86i64Int& rhs) const
 		{
 			if (rhs == __x86i64Int{ "0" })
 			{
