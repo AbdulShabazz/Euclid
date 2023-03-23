@@ -156,11 +156,11 @@ int main() {
     std::vector<uint64_t> Y_prime_factors = {7, 11, 13}; // Prime factors of B
     uint64_t N = 6; // Scalar residue for B
 
-	// A = 2 * 3 * 5 + 4
-	// B = 7 * 11 * 13 + 6
+	// A = 2 * 3 * 5 + 4 = 34
+	// B = 7 * 11 * 13 + 6 = 1'001
 
     uint64_t result = novel_multiplication(X_prime_factors, M, Y_prime_factors, N); // Compute A * B
-    std::cout << "Result: " << result << std::endl; // 476
+    std::cout << "Result: " << result << std::endl; // 34'034
 
     return 0;
 }
