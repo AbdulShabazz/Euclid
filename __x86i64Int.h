@@ -22,7 +22,8 @@ namespace std
 
 	/*
 	DATE: 2023-MAR-13 22:56:48 EDT
-	DESCRIPTION: This class implements 64-bit integer types of arbitrary length for x86 64-bit processors.
+	DESCRIPTION: This class implements 64-bit integer types of arbitrary length for x86 64-bit processors. There is SUBSTANTIAL overhead involved to instantiate these, therefore
+	it is recommended they be used for computation only.
 	USAGE: This class is designed to be used in the same way as a standard uint64_t type, but with the added ability to use the arithmetic operators on __x86i64Int data types having arbitrary size.
 	STYLEGUIDE: https://docs.unrealengine.com/4.27/en-US/ProductionPipelines/DevelopmentSetup/CodingStandard/
 	VERSION: 0.0.1 (Major.Minor.Patch)
@@ -36,32 +37,32 @@ namespace std
 		{
 			uint64_t tmp = 0;
 			uint64_t digit_count = 0;
-			for (auto it = str.rbegin(); it != str.rend(); ++it)
+			for (const auto& it : str)
 			{
-				if (std::isdigit(*it))
+				//std::cout << "it = " << it << std::endl;
+				//std::cout << "it - '0' = " << (it - '0') << std::endl;
+				if (std::isdigit(it))
 				{
-					tmp = tmp * 10 + (*it - '0');
+					tmp = tmp * 10 +  (it - '0');
 					digit_count++;
 
 					if (digit_count == 9)
 					{
+						//std::cout << "tmp = " << tmp << std::endl;
 						digits_.push_back(tmp);
 						tmp = 0;
 						digit_count = 0;
 					}
 				}
-				else if (*it == '-')
+				else if (it == '-')
 				{
 					sign_ = -1;
 				}
 			}
-			//std::cout << "tmp: " << tmp << std::endl;
-			if (tmp != 0 || digits_.empty())
-			{
-				digits_.push_back(tmp);
-			}
+			//std::cout << "tmp = " << tmp << std::endl;
+			//std::cout << "digits_ = " << (*this).to_string() << std::endl;
+			digits_.push_back(tmp);
 			trimLeadingZeros();
-			//std::cout << "digits_[0]: " << digits_[0] << std::endl;
 		}
 
 		// Get the number
@@ -83,7 +84,7 @@ namespace std
 			for (const auto& num : digits_)
 			{
 				std::string temp = std::to_string(num);
-				std::reverse(temp.begin(), temp.end());
+				//std::reverse(temp.begin(), temp.end());
 				value += temp;
 			}
 			return value + "n";
