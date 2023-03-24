@@ -1,4 +1,12 @@
+//
+		/*
 
+		friend std::ostream& operator<< (std::ostream& os, const __x86i64Int& value)
+		{
+			const std::string str = value.to_string();
+			os << str;
+			return os;
+		}*/
 //
 		virtual __x86i64Int operator- (const __x86i64Int& rhs) const
 		{
