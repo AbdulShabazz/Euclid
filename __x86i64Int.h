@@ -347,17 +347,12 @@ namespace std
 			return result;
 		}
 
-		__x86i64Int operator+= (const __x86i64Int& rhs)
+		__x86i64Int& operator+=(const __x86i64Int& rhs)
 		{
 			// Perform addition digit by digit
 			uint64_t carry = 0;
-			const uint64_t& I = rhs.digits_.size();
-			for (
-				uint64_t i = uint64_t{ 0 }; 
-				__x86i64Int{ std::to_string( i ) } < 
-					_max(__x86i64Int{ std::to_string(digits_.size()) }, 
-						__x86i64Int{ std::to_string(I) }); 
-							++i)
+			uint64_t maxLength = std::max(digits_.size(), rhs.digits_.size());
+			for (uint64_t i = 0; i < maxLength; ++i)
 			{
 				if (i < digits_.size())
 				{
@@ -381,8 +376,8 @@ namespace std
 			{
 				digits_.push_back(carry);
 			}
-			__x86i64Int result = *this;
-			return result;
+			trimLeadingZeros();
+			return *this;
 		}
 
 		__x86i64Int operator++ (int) // prefix inc
