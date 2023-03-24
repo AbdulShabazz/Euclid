@@ -19,8 +19,7 @@
 			std::__x86i64Int d = a * b;
 			std::cout << "d = a * b: " << d << std::endl;
 			std::__x86i64Int e = a / b;
-			std::cout << "e = a / b, e.quotient(): " << e.quotient() << std::endl;
-			std::cout << "e = a / b, e.remainder(): " << e.remainder() << std::endl;
+			std::cout << "e = a / b, \ne.quotient(): " << e.quotient() << ", \ne.remainder() : " << e.remainder() << std::endl;
 			std::__x86i64Int _a_{};
 			a = 12n;
 			std::cout << "a = 12n: " << b << std::endl;
