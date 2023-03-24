@@ -1,5 +1,144 @@
 
 //
+		virtual __x86i64Int operator- (const __x86i64Int& rhs) const
+		{
+			__x86i64Int result{ "0" };
+			if (sign_ == rhs.sign_)
+			{
+				if (abs() >= rhs.abs())
+				{
+					result.digits_.resize(digits_.size());
+					uint64_t borrow = 0;
+					for (uint64_t i = uint64_t{ 0 }; i < result.digits_.size(); i++)
+					{
+						uint64_t diff = borrow + digits_[i];
+						if (i < rhs.digits_.size())
+						{
+							diff -= rhs.digits_[i];
+						}
+						if (diff < 0)
+						{
+							diff += BASE;
+							borrow = -1;
+						}
+						else
+						{
+							borrow = 0;
+						}
+						result.digits_[i] = diff;
+					}
+					result.trimLeadingZeros();
+					result.sign_ = sign_;
+				}
+				else
+				{
+					result = -(rhs - *this);
+				}
+			}
+			else
+			{
+				result = *this + (-rhs);
+			}
+			return result;
+		}
+//
+		template <typename BoolOrTruthyType = bool>
+		std::string is_bool_type(const T& value)
+		{
+			std::string result{ value };
+			if constexpr (std::is_same_v<T, bool>)
+			{
+				result = value ? "true" : "false";
+			}
+			return result;
+		}
+//
+		std::string to_string() const
+		{
+			std::string str{};
+			for (auto it = digits_.rbegin(); it != digits_.rend(); ++it)
+			{
+				str += char(*it + '0');
+			}
+			return str;
+		}
+//
+		std::string to_string(const std::vector<uint64_t>& digits) const
+		{
+			std::string str{};
+			for (auto it = digits.rbegin(); it != digits.rend(); ++it)
+			{
+				str += char(*it + '0');
+			}
+			return str;
+		}
+//
+		virtual __x86i64Int operator* (const __x86i64Int& rhs) const
+		{
+			__x86i64Int result;
+			// Resize the result vector to fit the result
+			result.digits_.resize(digits_.size() + rhs.digits_.size());
+			// Perform multiplication digit by digit
+			for (uint64_t i = 0; i < digits_.size(); ++i)
+			{
+				uint64_t carry = 0;
+				for (uint64_t j = 0; j < rhs.digits_.size() || carry; ++j)
+				{
+					uint64_t product = result.digits_[i + j] + carry +
+					(j < rhs.digits_.size()) ? digits_[i] * rhs.digits_[j] : 0ull;
+					result.digits_[i + j] = product % BASE;
+					carry = product / BASE;
+				}
+			}
+			// Preserve the sign of the result
+			result.sign_ = sign_ * rhs.sign_;
+			// Remove leading zeros
+			result.trimLeadingZeros();
+			return result;
+		}
+//
+		// Constructor
+		__x86i64Int(const std::string& str = "0")
+		{
+			for (auto it = str.rbegin(); it != str.rend(); ++it)
+			{
+				if (std::isdigit(*it))
+				{
+					digits_.push_back(*it - '0');
+				}
+				else if (*it == '-')
+				{
+					sign_ = -1;
+				}
+			}
+			if (digits_.empty())
+			{
+				digits_.push_back(0);
+			}
+			trimLeadingZeros();
+		}
+//
+		__x86i64Int GetNumberSubrange(size_t start_index, const size_t& length) const
+		{
+			__x86i64Int SubrangeSliceUInt64{ "0" };
+			if (start_index >= digits_.size()) 
+			{
+				// NOP //
+			}
+			else
+			{
+				const __x86i64Int I = _min(
+					__x86i64Int{ std::to_string(start_index + length) }, 
+					__x86i64Int{ std::to_string(digits_.size()) });
+				__x86i64Int StartIndex{ std::to_string(start_index) };
+				for (__x86i64Int i = StartIndex; i < I; i++)
+				{
+					SubrangeSliceUInt64.digits_.push_back(digits_[i]);
+				}
+			}
+			return SubrangeSliceUInt64;
+		}
+//
 
 
 		__x86i64Int operator%= (const __x86i64Int& rhs)
