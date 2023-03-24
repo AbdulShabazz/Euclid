@@ -70,37 +70,23 @@ namespace std
 			return digits_;
 		}
 
-		friend std::ostream& operator<< (std::ostream& os, const bool& value)
-		{
-			const std::string str = value ? "true" : "false";
-			os << str;
-			return os;
-		}
-
 		friend std::ostream& operator<< (std::ostream& os, const __x86i64Int& value)
 		{
 			const std::string str = value.to_string();
-			os << str + "n";
+			os << str;
 			return os;
 		}
-
-		std::string to_string(const std::vector<uint64_t>& digits) const
-		{
-			std::ostringstream oss;
-			for (const auto& num : digits)
-			{
-				oss << num;
-			}
-			return oss.str();
-		}
-
+		
 		std::string to_string() const
 		{
-			std::ostringstream oss;
-			for (const auto& num : digits_) {
-				oss << num;
+			std::string value{};
+			for (const auto& num : digits_)
+			{
+				std::string temp = std::to_string(num);
+				std::reverse(temp.begin(), temp.end());
+				value += temp;
 			}
-			return oss.str();
+			return value + "n";
 		}
 
 		__x86i64Int _max(const __x86i64Int& lhs, const __x86i64Int& rhs) const
@@ -465,7 +451,7 @@ namespace std
 				++quotient;
 			}
 			quotient.sign_ = sign_ * rhs.sign_;
-			__x86i64Int result{ "0" };
+			__x86i64Int result = quotient;
 			result.sign_ = remainder.sign_ * rhs.sign_;
 			result.quotient_ = quotient.digits_;
 			result.remainder_ = remainder.digits_;
@@ -667,7 +653,6 @@ namespace std
 				sign_ = 1;
 			}
 		}
-
 
 		int sign_ = 1;
 
