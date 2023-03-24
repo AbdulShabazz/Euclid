@@ -1,4 +1,41 @@
 //
+		std::string to_string(const std::vector<uint64_t>& digits) const
+		{
+			//std::ostringstream oss;
+			std::string value{};
+			for (const auto& num : digits)
+			{
+				std::string temp = std::to_string(num);
+				std::reverse(temp.begin(), temp.end());
+				value += temp;
+				//oss << num;
+			}
+			//std::string temp = oss.str();
+			return value + "n";
+		}
+//
+		std::string to_string(const std::vector<uint64_t>& digits) const
+		{
+			//std::ostringstream oss;
+			std::string value{};
+			for (const auto& num : digits)
+			{
+				std::string temp = std::to_string(num);
+				std::reverse(temp.begin(), temp.end());
+				value += temp;
+				//oss << num;
+			}
+			//std::string temp = oss.str();
+			return value + "n";
+		}
+//
+		friend std::ostream& operator<< (std::ostream& os, const bool& value)
+		{
+			const std::string str = value ? "true" : "false";
+			os << str;
+			return os;
+		}
+//
 		/*
 
 		friend std::ostream& operator<< (std::ostream& os, const __x86i64Int& value)
