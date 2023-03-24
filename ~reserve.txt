@@ -1,5 +1,82 @@
 
 //
+		// Constructor
+		__x86i64Int(const std::string& str = "0")
+		{
+			uint64_t tmp = 0;
+			uint64_t digit_count = 0;
+			for (auto it = str.rbegin(); it != str.rend(); ++it)
+			{
+				if (std::isdigit(*it))
+				{
+					tmp = tmp * 10 + (*it - '0');
+					digit_count++;
+
+					if (digit_count == 9)
+					{
+						digits_.push_back(tmp);
+						tmp = 0;
+						digit_count = 0;
+					}
+				}
+				else if (*it == '-')
+				{
+					sign_ = -1;
+				}
+			}
+			//std::cout << "tmp: " << tmp << std::endl;
+			if (tmp != 0 || digits_.empty())
+			{
+				digits_.push_back(tmp);
+			}
+			trimLeadingZeros();
+			//std::cout << "digits_[0]: " << digits_[0] << std::endl;
+		}
+//
+class __x86i64Int {
+    // Assuming existing class members and methods
+    std::vector<uint64_t> digits_;
+    int sign_;
+
+    // Assumed helper methods
+    size_t num_bits() const;
+    void shift_left(size_t n);
+    bool is_zero() const;
+
+public:
+    __x86i64Int operator/ (const __x86i64Int& rhs) const
+    {
+        if (rhs.is_zero())
+        {
+            throw std::invalid_argument("divide by zero");
+        }
+
+        __x86i64Int quotient{ "0" };
+        __x86i64Int remainder{ *this };
+        remainder.sign_ = 1; // Make remainder positive for comparison purposes
+
+        size_t n = rhs.num_bits() - 1;
+        __x86i64Int divisor = rhs;
+        divisor.sign_ = 1; // Make divisor positive for comparison purposes
+        divisor.shift_left(n);
+
+        while (n-- > 0)
+        {
+            quotient.shift_left(1);
+            if (remainder >= divisor)
+            {
+                remainder -= divisor;
+                quotient.digits_[0] |= 1; // Set the least significant bit of quotient
+            }
+            divisor.shift_right(1);
+        }
+
+        quotient.sign_ = sign_ * rhs.sign_;
+        return quotient;
+    }
+};
+
+//
 	__x86i64Int operator+= (const __x86i64Int& rhs)
 		{
 			// Perform addition digit by digit
