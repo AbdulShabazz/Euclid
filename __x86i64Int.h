@@ -688,7 +688,7 @@ namespace std
 		std::vector<ui64> remainder_;
 
 		// Set to 1/2 the full uin64_t resolution to prevent multiplication overflow
-		static constexpr ui64 BASE = std::numeric_limits<ui64>::max() / 2;
+		static constexpr ui64 BASE = (std::numeric_limits<ui64>::max() / 2) - 1;
 	};
 }
 
