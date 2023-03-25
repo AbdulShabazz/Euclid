@@ -14,6 +14,7 @@
 #include <functional>
 #include <utility>
 #include <exception>
+#include <concepts>
 #include <sstream>
 #include "PowerUInt64.h"
 
@@ -28,6 +29,9 @@ namespace std
 	STYLEGUIDE: https://docs.unrealengine.com/4.27/en-US/ProductionPipelines/DevelopmentSetup/CodingStandard/
 	VERSION: 0.0.1 (Major.Minor.Patch)
 	*/
+	template<typename ui64>
+	concept UnsignedInteger = std::is_unsigned_v<ui64>;
+	template <UnsignedInteger ui64 = uint64_t>
 	class __x86i64Int
 	{
 	public:
@@ -35,8 +39,8 @@ namespace std
 		// Constructor
 		__x86i64Int(const std::string& str = "0")
 		{
-			uint64_t tmp = 0;
-			uint64_t digit_count = 0;
+			ui64 tmp = 0;
+			ui64 digit_count = 0;
 			for (const auto& it : str)
 			{
 				//std::cout << "it = " << it << std::endl;
@@ -66,7 +70,7 @@ namespace std
 		}
 
 		// Get the number
-		std::vector<uint64_t> GetDigits() const
+		std::vector<ui64> GetDigits() const
 		{
 			return digits_;
 		}
@@ -141,11 +145,11 @@ namespace std
 			if (sign_ == rhs.sign_)
 			{
 				result.sign_ = sign_;
-				uint64_t carry = 0;
-				uint64_t maxSize = (((digits_.size()) > (rhs.digits_.size())) ? (digits_.size()) : (rhs.digits_.size()));
-				for (uint64_t i = 0; i < maxSize || carry; ++i)
+				ui64 carry = 0;
+				ui64 maxSize = (((digits_.size()) > (rhs.digits_.size())) ? (digits_.size()) : (rhs.digits_.size()));
+				for (ui64 i = 0; i < maxSize || carry; ++i)
 				{
-					uint64_t sum = carry +
+					ui64 sum = carry +
 						(i < digits_.size() ? digits_[i] : 0) +
 						(i < rhs.digits_.size() ? rhs.digits_[i] : 0);
 					result.digits_.push_back(sum % BASE);
@@ -188,7 +192,7 @@ namespace std
 				result.sign_ = sign_;
 			}
 			int borrow = 0;
-			for (uint64_t i = uint64_t{ 0 }; i < result.digits_.size(); i++)
+			for (ui64 i = ui64{ 0 }; i < result.digits_.size(); i++)
 			{
 				int64_t diff = borrow + minuend.digits_[i];
 				if (i < subtrahend.digits_.size())
@@ -218,13 +222,13 @@ namespace std
 				throw std::invalid_argument("__x86i64Int: -= operation  -- Negative result");
 			}
 			// Perform subtraction digit by digit
-			uint64_t borrow = 0;
-			for (uint64_t i = uint64_t{ 0 }; i < rhs.digits_.size(); ++i)
+			ui64 borrow = 0;
+			for (ui64 i = ui64{ 0 }; i < rhs.digits_.size(); ++i)
 			{
 				borrow = (digits_[i] < rhs.digits_[i] + borrow) ? 1 : 0;
 				digits_[i] = BASE + digits_[i] - rhs.digits_[i] - borrow;
 			}
-			for (uint64_t i = rhs.digits_.size(); i < digits_.size(); ++i)
+			for (ui64 i = rhs.digits_.size(); i < digits_.size(); ++i)
 			{
 				borrow = (digits_[i] < borrow) ? 1 : 0;
 				digits_[i] = BASE + digits_[i] - borrow;
@@ -275,9 +279,9 @@ namespace std
 			// Perform bitwise AND operation between digits_ and rhs.digits_
 			// and store the result in digits_
 			const __x86i64Int& tmp = _max(__x86i64Int{ std::to_string(digits_.size()) }, __x86i64Int{ std::to_string(rhs.digits_.size()) });
-			const uint64_t& I = tmp.digits_.size();
+			const ui64& I = tmp.digits_.size();
 			digits_.resize(I, 0);
-			for (uint64_t i = 0; i < I; ++i)
+			for (ui64 i = 0; i < I; ++i)
 			{
 				digits_[i] &= (i < rhs.digits_.size() ? rhs.digits_[i] : 0);
 			}
@@ -351,9 +355,9 @@ namespace std
 		__x86i64Int& operator+=(const __x86i64Int& rhs)
 		{
 			// Perform addition digit by digit
-			uint64_t carry = 0;
-			uint64_t maxLength = std::max(digits_.size(), rhs.digits_.size());
-			for (uint64_t i = 0; i < maxLength; ++i)
+			ui64 carry = 0;
+			ui64 maxLength = std::max(digits_.size(), rhs.digits_.size());
+			for (ui64 i = 0; i < maxLength; ++i)
 			{
 				if (i < digits_.size())
 				{
@@ -415,12 +419,12 @@ namespace std
 			// Resize the result vector to fit the result
 			result.digits_.resize(digits_.size() + rhs.digits_.size());
 			// Perform multiplication digit by digit
-			for (uint64_t i = 0; i < digits_.size(); ++i)
+			for (ui64 i = 0; i < digits_.size(); ++i)
 			{
-				uint64_t carry = 0;
-				for (uint64_t j = 0; j < rhs.digits_.size() || carry; ++j)
+				ui64 carry = 0;
+				for (ui64 j = 0; j < rhs.digits_.size() || carry; ++j)
 				{
-					uint64_t product = result.digits_[i + j] + carry +
+					ui64 product = result.digits_[i + j] + carry +
 					(j < rhs.digits_.size()) ? digits_[i] * rhs.digits_[j] : 0ull;
 					result.digits_[i + j] = product % BASE;
 					carry = product / BASE;
@@ -435,22 +439,47 @@ namespace std
 
 		virtual __x86i64Int operator/ (const __x86i64Int& rhs) const
 		{
+			if ((*this) == __x86i64Int{ "0" } ||
+				((*this) == __x86i64Int{ "0" } &&
+				rhs == __x86i64Int{ "0" }))
+			{
+				__x86i64Int remainder{ "0" };
+				remainder.sign_ = sign_ * rhs.sign_;
+				remainder.remainder_ = rhs.digits_;
+				return remainder;
+			}
+
 			if (rhs == __x86i64Int{ "0" })
 			{
 				throw std::invalid_argument("divide by zero");
 			}
+
 			__x86i64Int quotient{ "0" };
 			__x86i64Int remainder{ *this };
+
+			__x86i64Int dividend{ *this };
+			__x86i64Int divisor{ rhs };
+			__x86i64Int result{ "0" };
+			result.digits_.resize(std::max(digits_.size(), rhs.digits_.size()) + 1);
+			/*
+			for (ui64 it = digits_.rbegin(); it != digits_.rend(); ++it)
+			{
+
+			}
+
 			while (remainder >= rhs)
 			{
 				remainder -= rhs;
 				++quotient;
 			}
+
 			quotient.sign_ = sign_ * rhs.sign_;
+
 			__x86i64Int result = quotient;
 			result.sign_ = remainder.sign_ * rhs.sign_;
 			result.quotient_ = quotient.digits_;
 			result.remainder_ = remainder.digits_;
+			*/
 			return result;
 		}
 
@@ -460,7 +489,7 @@ namespace std
 			return *this;
 		}
 
-		__x86i64Int _clone(uint64_t& InParamUInt64, const uint64_t& InParam2UInt64) const
+		__x86i64Int _clone(ui64& InParamUInt64, const ui64& InParam2UInt64) const
 		{
 			if (InParamUInt64 < 0 || InParam2UInt64 < 0)
 			{
@@ -478,18 +507,18 @@ namespace std
 			{
 				 throw std::runtime_error("Endindex exceeds length of number");
 			}
-			uint64_t& StartIndexInt64 = InParamUInt64;
-			const uint64_t& EndIndexInt64 = InParam2UInt64;
+			ui64& StartIndexInt64 = InParamUInt64;
+			const ui64& EndIndexInt64 = InParam2UInt64;
 			__x86i64Int ret{ "0" };
 			ret.digits_.resize(EndIndexInt64 - StartIndexInt64 + 1);
-			for (uint64_t& val : ret.digits_)
+			for (ui64& val : ret.digits_)
 			{
 				val = digits_[StartIndexInt64++];
 			}
 			return ret;
 		}
 
-		__x86i64Int GetNumberSubrange(uint64_t start_index, const uint64_t& length) const
+		__x86i64Int GetNumberSubrange(ui64 start_index, const ui64& length) const
 		{
 			__x86i64Int SubrangeSliceUInt64{ "0" };
 			if (start_index >= digits_.size()) 
@@ -498,8 +527,8 @@ namespace std
 			}
 			else
 			{
-				const uint64_t I = (start_index + length) < digits_.size() ? start_index + length : digits_.size();
-				for (uint64_t i = start_index; i < I; i++)
+				const ui64 I = (start_index + length) < digits_.size() ? start_index + length : digits_.size();
+				for (ui64 i = start_index; i < I; i++)
 				{
 					SubrangeSliceUInt64.digits_.push_back(digits_[i]);
 				}
@@ -507,7 +536,7 @@ namespace std
 			return SubrangeSliceUInt64;
 		}
 
-		bool SetNumberSubrange(uint64_t start_index, const __x86i64Int& InConstUInt64ObjRef)
+		bool SetNumberSubrange(ui64 start_index, const __x86i64Int& InConstUInt64ObjRef)
 		{
 			bool RangeSetFlag = false;
 			if (start_index >= digits_.size())
@@ -518,7 +547,7 @@ namespace std
 			{
 				throw std::runtime_error("Start index, plus length of number to replace in subrange, exceeds length of number");
 			}
-			for (const uint64_t& val : InConstUInt64ObjRef.digits_)
+			for (const ui64& val : InConstUInt64ObjRef.digits_)
 			{
 				digits_[start_index++] = val;
 			}
@@ -528,13 +557,13 @@ namespace std
 
 		// Conversion operator to std::uint64_t for
 		// use as a literal index in array elements
-		operator uint64_t () const
+		operator ui64 () const
 		{
-			uint64_t i = 0;
-			uint64_t ret = 0;
+			ui64 i = 0;
+			ui64 ret = 0;
 			for (auto val = digits_.rbegin(); val != digits_.rend(); ++val)
 			{
-				ret += *val * PowerUInt64<uint64_t>(BASE, i++);
+				ret += *val * PowerUInt64<ui64>(BASE, i++);
 			}
 			return ret;
 		}
@@ -554,17 +583,17 @@ namespace std
 		}
 
 	private:
-		__x86i64Int DivideByDigit(const uint64_t& divisor) const
+		__x86i64Int DivideByDigit(const ui64& divisor) const
 		{
 			if (divisor > 9 || divisor < 1)
 			{
 				throw std::runtime_error("Invalid single-digit divisor for single-digit division.");
 			}
-			uint64_t remainder = 0;
+			ui64 remainder = 0;
 			__x86i64Int quotient{ "0" };
 			for (const int& val : digits_)
 			{
-				uint64_t temp = remainder * 10 + val;
+				ui64 temp = remainder * 10 + val;
 				__x86i64Int iDividend = __x86i64Int{ std::to_string(temp) };
 				__x86i64Int iDivisor = __x86i64Int{ std::to_string(divisor) };
 				const __x86i64Int& result = iDividend / iDivisor;
@@ -583,10 +612,10 @@ namespace std
 		{
 			auto parallelSum = [&](const std::vector<__x86i64Int>& input,
 				std::vector<__x86i64Int>& output,
-				const uint64_t& start,
-				const uint64_t& end)
+				const ui64& start,
+				const ui64& end)
 			{
-				std::stack<std::tuple<uint64_t, uint64_t>> tasks;
+				std::stack<std::tuple<ui64, ui64>> tasks;
 				tasks.emplace(start, end);
 				while (!tasks.empty()) {
 					auto [start_i, end_i] = tasks.top();
@@ -596,13 +625,13 @@ namespace std
 						output[start_i] = input[start_i];
 						continue;
 					}
-					uint64_t mid = (start_i + end_i) / 2;
+					ui64 mid = (start_i + end_i) / 2;
 					std::vector<__x86i64Int> left_output(mid - start_i + 1);
 					std::vector<__x86i64Int> right_output(end_i - mid);
 					tasks.emplace(mid + 1, end_i);
 					tasks.emplace(start_i, mid);
 					std::thread left_thread([&]() {
-							for (uint64_t i = start_i; i <= mid; ++i)
+							for (ui64 i = start_i; i <= mid; ++i)
 							{
 								left_output[i - start_i] = input[i];
 							}
@@ -610,7 +639,7 @@ namespace std
 						});
 
 					std::thread right_thread([&]() {
-							for (uint64_t i = mid + 1; i <= end_i; ++i)
+							for (ui64 i = mid + 1; i <= end_i; ++i)
 							{
 								right_output[i - mid - 1] = input[i];
 							}
@@ -629,12 +658,12 @@ namespace std
 			};
 			std::vector<__x86i64Int> output{ 0 };
 			output.resize(input.size());
-			const uint64_t& I = output.size();
-			for (uint64_t i = 0; i < I; ++i)
+			const ui64& I = output.size();
+			for (ui64 i = 0; i < I; ++i)
 			{
 				output[i] = __x86i64Int{ "0" };
 			}
-			parallelSum(input, output, uint64_t{ 0 }, input.size() - 1);
+			parallelSum(input, output, ui64{ 0 }, input.size() - 1);
 			return true;
 		}
 
@@ -652,18 +681,18 @@ namespace std
 
 		int sign_ = 1;
 
-		uint64_t decimalPointAt_ = uint64_t{ 0 };
+		ui64 decimalPointAt_ = ui64{ 0 };
 
-		std::vector<uint64_t> digits_;
-		std::vector<uint64_t> quotient_;
-		std::vector<uint64_t> remainder_;
+		std::vector<ui64> digits_;
+		std::vector<ui64> quotient_;
+		std::vector<ui64> remainder_;
 
 		// Set to 1/2 the full uin64_t resolution to prevent multiplication overflow
-		static const uint64_t BASE = 1e9;/*10*/;
+		static constexpr ui64 BASE = std::numeric_limits<ui64>::max() / 2;
 	};
 }
 
-std::__x86i64Int operator"" n(const char* i64Str)
+std::__x86i64Int<> operator"" n(const char* i64Str)
 {
-	return std::__x86i64Int{ i64Str };
+	return std::__x86i64Int<>{ i64Str };
 }
