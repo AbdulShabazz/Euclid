@@ -26,6 +26,7 @@
 #include <limits>
 #include "PowerUInt64.h"
 #include "__x86i64Int.h"
+#include "../boost/multiprecision/cpp_int.hpp"
 
 namespace EuclidProverLib
 {
