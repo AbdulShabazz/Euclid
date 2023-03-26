@@ -37,7 +37,7 @@ namespace std
 	public:
 
 		// Constructor
-		__x86i64Int(const std::string& str = "0")
+		[[noexcept]] __x86i64Int(const std::string& str = "0")
 		{
 			ui64 tmp = 0;
 			ui64 digit_count = 0;
@@ -150,8 +150,8 @@ namespace std
 				for (ui64 i = 0; i < maxSize || carry; ++i)
 				{
 					ui64 sum = carry +
-						(i < digits_.size() ? digits_[i] : 0) +
-						(i < rhs.digits_.size() ? rhs.digits_[i] : 0);
+						(i < digits_.size() ? digits_.at(i) : 0) +
+						(i < rhs.digits_.size() ? rhs.digits_.at(i) : 0);
 					result.digits_.push_back(sum % BASE);
 					carry = sum / BASE;
 					//std::cout << "Digit: " << sum % BASE << std::endl;
@@ -171,12 +171,12 @@ namespace std
 			__x86i64Int result{ "0" };
 			__x86i64Int minuend = *this;
 			__x86i64Int subtrahend = rhs;
-			bool RHShasLargerMagnitudeFlag = (abs() >= rhs.abs());
-			bool RHShasLargerMatchingMagnitudeFlag = ((abs() >= rhs.abs()) && (sign_ == rhs.sign_));
+			const bool RHShasLargerMagnitudeFlag = (abs() >= rhs.abs());
+			const bool RHShasLargerMatchingMagnitudeFlag = ((abs() >= rhs.abs()) && (sign_ == rhs.sign_));
 			if (RHShasLargerMagnitudeFlag)
 			{
-				__x86i64Int minuend = rhs;
-				__x86i64Int subtrahend = *this;
+				minuend = rhs;
+				subtrahend = *this;
 				result.digits_.resize(rhs.digits_.size());
 			}
 			else
@@ -194,21 +194,21 @@ namespace std
 			int borrow = 0;
 			for (ui64 i = ui64{ 0 }; i < result.digits_.size(); i++)
 			{
-				int64_t diff = borrow + minuend.digits_[i];
+				ui64 diff = borrow + minuend.digits_.at(i);
 				if (i < subtrahend.digits_.size())
 				{
-					diff -= subtrahend.digits_[i];
+					if (diff < subtrahend)
+					{
+						diff += BASE;
+						borrow = -1;
+					}
+					else
+					{
+						borrow = 0;
+					}
+					diff -= subtrahend.digits_.at(1);
 				}
-				if (diff < 0)
-				{
-					diff += BASE;
-					borrow = -1;
-				}
-				else
-				{
-					borrow = 0;
-				}
-				result.digits_[i] = diff;
+				result.digits_.at(i) = diff;
 			}
 			result.trimLeadingZeros();
 			return result;
@@ -225,13 +225,13 @@ namespace std
 			ui64 borrow = 0;
 			for (ui64 i = ui64{ 0 }; i < rhs.digits_.size(); ++i)
 			{
-				borrow = (digits_[i] < rhs.digits_[i] + borrow) ? 1 : 0;
-				digits_[i] = BASE + digits_[i] - rhs.digits_[i] - borrow;
+				borrow = (digits_.at(i) < rhs.digits_.at(i) + borrow) ? 1 : 0;
+				digits_.at(i) = BASE + digits_.at(i) - rhs.digits_.at(i) - borrow;
 			}
 			for (ui64 i = rhs.digits_.size(); i < digits_.size(); ++i)
 			{
-				borrow = (digits_[i] < borrow) ? 1 : 0;
-				digits_[i] = BASE + digits_[i] - borrow;
+				borrow = (digits_.at(i) < borrow) ? 1 : 0;
+				digits_.at(i) = BASE + digits_.at(i) - borrow;
 			}
 			trimLeadingZeros();
 
@@ -264,9 +264,9 @@ namespace std
 			{
 				for (int64_t i = digits_.size() - 1; i >= 0; i--)
 				{
-					if (digits_[i] != rhs.digits_[i])
+					if (digits_.at(i) != rhs.digits_.at(i))
 					{
-						resultFlag = (digits_[i] * sign_ < rhs.digits_[i] * rhs.sign_);
+						resultFlag = (digits_.at(i) * sign_ < rhs.digits_.at(i) * rhs.sign_);
 						break;
 					}
 				}
@@ -283,7 +283,7 @@ namespace std
 			digits_.resize(I, 0);
 			for (ui64 i = 0; i < I; ++i)
 			{
-				digits_[i] &= (i < rhs.digits_.size() ? rhs.digits_[i] : 0);
+				digits_.at(i) &= (i < rhs.digits_.size() ? rhs.digits_.at(i) : 0);
 			}
 			trimLeadingZeros();
 			__x86i64Int result = *this;
@@ -361,15 +361,15 @@ namespace std
 			{
 				if (i < digits_.size())
 				{
-					carry += digits_[i];
+					carry += digits_.at(i);
 				}
 				if (i < rhs.digits_.size())
 				{
-					carry += rhs.digits_[i];
+					carry += rhs.digits_.at(i);
 				}
 				if (i < digits_.size())
 				{
-					digits_[i] = carry % BASE;
+					digits_.at(i) = carry % BASE;
 				}
 				else
 				{
@@ -424,9 +424,9 @@ namespace std
 				ui64 carry = 0;
 				for (ui64 j = 0; j < rhs.digits_.size() || carry; ++j)
 				{
-					ui64 product = result.digits_[i + j] + carry +
-					(j < rhs.digits_.size()) ? digits_[i] * rhs.digits_[j] : 0ull;
-					result.digits_[i + j] = product % BASE;
+					ui64 product = result.digits_.at(i + j) + carry +
+					(j < rhs.digits_.size()) ? digits_.at(i) * rhs.digits_.at(j) : 0ull;
+					result.digits_.at(i + j) = product % BASE;
 					carry = product / BASE;
 				}
 			}
@@ -513,7 +513,7 @@ namespace std
 			ret.digits_.resize(EndIndexInt64 - StartIndexInt64 + 1);
 			for (ui64& val : ret.digits_)
 			{
-				val = digits_[StartIndexInt64++];
+				val = digits_.at(StartIndexInt64++);
 			}
 			return ret;
 		}
@@ -530,7 +530,7 @@ namespace std
 				const ui64 I = (start_index + length) < digits_.size() ? start_index + length : digits_.size();
 				for (ui64 i = start_index; i < I; i++)
 				{
-					SubrangeSliceUInt64.digits_.push_back(digits_[i]);
+					SubrangeSliceUInt64.digits_.push_back(digits_.at(i));
 				}
 			}
 			return SubrangeSliceUInt64;
@@ -549,7 +549,7 @@ namespace std
 			}
 			for (const ui64& val : InConstUInt64ObjRef.digits_)
 			{
-				digits_[start_index++] = val;
+				digits_.at(start_index++) = val;
 			}
 			RangeSetFlag = true;
 			return RangeSetFlag;
@@ -622,7 +622,7 @@ namespace std
 					tasks.pop();
 					if (start_i == end_i)
 					{
-						output[start_i] = input[start_i];
+						output.at(start_i) = input.at(start_i);
 						continue;
 					}
 					ui64 mid = (start_i + end_i) / 2;
@@ -633,7 +633,7 @@ namespace std
 					std::thread left_thread([&]() {
 							for (ui64 i = start_i; i <= mid; ++i)
 							{
-								left_output[i - start_i] = input[i];
+								left_output.at(i - start_i) = input.at(i);
 							}
 							std::partial_sum(left_output.begin(), left_output.end(), left_output.begin());
 						});
@@ -641,7 +641,7 @@ namespace std
 					std::thread right_thread([&]() {
 							for (ui64 i = mid + 1; i <= end_i; ++i)
 							{
-								right_output[i - mid - 1] = input[i];
+								right_output.at(i - mid - 1) = input.at(i);
 							}
 							std::partial_sum(right_output.begin(), right_output.end(), right_output.begin());
 						});
@@ -652,7 +652,7 @@ namespace std
 						output.begin() + start_i);
 					if (start_i != 0)
 					{
-						output[start_i - 1] += output[end_i];
+						output.at(start_i - 1) += output.at(end_i);
 					}
 				}
 			};
@@ -661,19 +661,19 @@ namespace std
 			const ui64& I = output.size();
 			for (ui64 i = 0; i < I; ++i)
 			{
-				output[i] = __x86i64Int{ "0" };
+				output.at(i) = __x86i64Int{ "0" };
 			}
 			parallelSum(input, output, ui64{ 0 }, input.size() - 1);
 			return true;
 		}
 
-		void trimLeadingZeros()
+		[[noexcept]] void trimLeadingZeros()
 		{
 			for (auto val = digits_.rbegin(); val != digits_.rend() && *val == 0; val++)
 			{
 				digits_.pop_back();
 			}
-			if (digits_.size() == 1 && digits_[0] == 0)
+			if (digits_.size() == 1 && digits_.at(0) == 0)
 			{
 				sign_ = 1;
 			}
