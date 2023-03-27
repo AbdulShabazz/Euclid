@@ -37,7 +37,7 @@ namespace std
 	public:
 
 		// Constructor
-		[[noexcept]] __x86i64Int(const std::string& str = "0")
+		__x86i64Int(const std::string& str = "0") noexcept
 		{
 			ui64 tmp = 0;
 			ui64 digit_count = 0;
@@ -667,7 +667,7 @@ namespace std
 			return true;
 		}
 
-		[[noexcept]] void trimLeadingZeros()
+		void trimLeadingZeros() noexcept
 		{
 			for (auto val = digits_.rbegin(); val != digits_.rend() && *val == 0; val++)
 			{
