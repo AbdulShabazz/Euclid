@@ -16,7 +16,11 @@
 #include <vector>
 #include <type_traits>
 #include <initializer_list>
-
+#include <cstdint>
+#include <mutex>
+#include <functional>
+#include <condition_variable>
+#include <stack>
 #include <stdint.h>
 #include <cmath>
 #include <unordered_map>
@@ -541,6 +545,147 @@ namespace EuclidProverLib
 			result = FoundEqualsSignFlag;
 			return result;
 		}
+
+		enum class Indirection
+		{
+			reduce_,
+			expand_,
+			auto_
+		};
+
+		class AxiomAtom
+		{
+		public:
+			uint64_t PrimaryKeyLHS;
+			uint64_t PrimaryKeyRHS;
+			Indirection Indir;
+			std::vector<std::string> Subnet;
+			uint64_t guid;
+		};
+
+		class Theorem
+		{
+		public:
+			uint64_t PrimaryKey;
+			std::vector<std::string> Subnet;
+		};
+
+		class Auto
+		{
+		public:
+			Auto(const AxiomAtom& Proof, const std::vector<AxiomAtom>& Axioms) :
+				LHS.PrimaryKey(Proof.PrimaryKeyLHS),
+				RHS.PrimaryKey(Proof.PrimaryKeyRHS)
+			{
+				ThreadPool.reserve(ThreadPoolSize);
+				// Spawn the initial threads for Expand and Reduce
+				{
+					std::unique_lock<std::mutex> lock(Mutex);
+					CV.wait(lock, [this]() { return AvailableThreads >= 2; });
+					AvailableThreads -= 2;
+				}
+
+				ThreadPool.emplace_back([&]()
+					{
+						Expand(LHS, Proof, ProofHistoryMap, Proof.Indir);
+						{
+							std::unique_lock<std::mutex> lock(Mutex);
+							++AvailableThreads;
+							CV.notify_one();
+						}
+					});
+
+				ThreadPool.emplace_back([&]()
+					{
+						Reduce(RHS, Proof, ProofHistoryMap, Proof.Indir);
+						{
+							std::unique_lock<std::mutex> lock(Mutex);
+							++AvailableThreads;
+							CV.notify_one();
+						}
+					});
+
+				// Wait for threads to complete
+				for (auto& thread : ThreadPool)
+				{
+					thread.join();
+				}
+			}
+
+		private:
+			Theorem LHS{}, RHS{};
+			bool bProofFoundFlag = false;
+			std::unordered_map<uint64_t, bool> ProofHistoryMap;
+			std::stack<AxiomAtom> ProofStack;
+			enum class Indirection indir = Indirection::auto_;
+
+			void Expand(Theorem& theorem, AxiomAtom Axiom, std::unordered_map<uint64_t, bool>& proofHistoryMap, Indirection indir)
+			{
+				ThreadPool.emplace_back([&]()
+					{
+						Expand(LHS, Proof, ProofHistoryMap, Proof.Indir);
+						{
+							std::unique_lock<std::mutex> lock(Mutex);
+							++AvailableThreads;
+							CV.notify_one();
+						}
+					});
+
+				if (indir == Indirection::auto_)
+				{
+					ThreadPool.emplace_back([&]()
+						{
+							Reduce(RHS, Proof, ProofHistoryMap, Proof.Indir);
+							{
+								std::unique_lock<std::mutex> lock(Mutex);
+								++AvailableThreads;
+								CV.notify_one();
+							}
+						});
+				}
+				// Wait for threads to complete
+				for (auto& thread : ThreadPool)
+				{
+					thread.join();
+				}
+			};
+			void Reduce(Theorem& theorem, AxiomAtom axiom, std::unordered_map<uint64_t, bool>& proofHistoryMap, Indirection indir)
+			{
+				if (indir == Indirection::auto_)
+				{
+					ThreadPool.emplace_back([&]()
+					{
+						Expand(LHS, Proof, ProofHistoryMap, Proof.Indir);
+						{
+							std::unique_lock<std::mutex> lock(Mutex);
+							++AvailableThreads;
+							CV.notify_one();
+						}
+					});
+				}
+				ThreadPool.emplace_back([&]()
+					{
+						Reduce(RHS, Proof, ProofHistoryMap, Proof.Indir);
+						{
+							std::unique_lock<std::mutex> lock(Mutex);
+							++AvailableThreads;
+							CV.notify_one();
+						}
+					});
+
+				// Wait for threads to complete
+				for (auto& thread : ThreadPool)
+				{
+					thread.join();
+				}
+			};
+
+			static constexpr size_t ThreadPoolSize = 128;
+			std::vector<std::thread> ThreadPool;
+			std::mutex Mutex;
+			std::condition_variable CV;
+			size_t AvailableThreads = ThreadPoolSize;
+		};
 	};
 
 	template<>
