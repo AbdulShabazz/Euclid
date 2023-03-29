@@ -1,5 +1,29 @@
 
 //
+				ThreadPool.reserve(ThreadPoolSize);
+
+				{
+					// Spawn the initial threads for Expand and Reduce
+					std::unique_lock<std::mutex> lock(Mutex);
+					CV.wait(lock, [this]() { return AvailableThreads >= 2; });
+					AvailableThreads -= 2;
+				}
+
+				ProofLHS = InProofLHS;
+				ProofRHS = InProofRHS;
+
+				ThreadPool.emplace_back([&]()
+					{
+						Expand(ProofLHS, 
+						ProofStack, 
+						ProofHistoryMap);
+						{
+							std::unique_lock<std::mutex> lock(Mutex);
+							++AvailableThreads;
+							CV.notify_one();
+						}
+					});
+//
 		// Constructor
 		__x86i64Int(const std::string& str = "0")
 		{
