@@ -1,4 +1,12 @@
 //
+		[[nodiscard]] std::vector<std::vector<std::string>> Auto(const Theorem& InProof_Theorem,
+			const std::vector<AxiomAtom>& InAxioms_AxiomAtomVec,
+			std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec,
+			const Indirection Indir_IndirectionEnum = Indirection::auto_)
+		{
+
+		}
+//
 			switch (Indir_IndirectionEnum)
 			{
 				case Indirection::auto_:
