@@ -585,7 +585,7 @@ namespace EuclidProverLib
 			result = FoundEqualsSignFlag;
 			return result;
 		}
-	
+
 	private:
 		enum class Indirection; // Forward declaration
 		std::unordered_map<uint64_t, bool> ProofHistoryMap{};
@@ -627,9 +627,9 @@ namespace EuclidProverLib
 		class AxiomAtom : public AxiomProto_
 		{
 		public:
-			explicit AxiomAtom (const std::vector<std::string>& InSubnetLHS_VecStdStrRef,
+			explicit AxiomAtom(const std::vector<std::string>& InSubnetLHS_VecStdStrRef,
 				const std::vector<std::string>& InSubnetRHS_VecStdStrRef,
-				const uint64_t InGUID_UInt64) : 
+				const uint64_t InGUID_UInt64) :
 				AxiomProto_(InSubnetLHS_VecStdStrRef,
 					InSubnetRHS_VecStdStrRef,
 					InGUID_UInt64)
@@ -669,7 +669,70 @@ namespace EuclidProverLib
 					std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec,
 					const Indirection Indir_IndirectionEnum = Indirection::auto_) -> void
 			{
-				Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+				// Check if all proofs have already been found
+				bool bInternalProofFound_Flag = bProofFoundFlag.load(std::memory_order_relaxed);
+				if (bInternalProofFound_Flag)
+				{
+					return;
+				}
+
+				// Check if a proof has yet to be found
+				uint64_t InternalProofsFound_UInt64 = ProofsFound_UInt64.load(std::memory_order_relaxed);
+				if (InternalProofsFound_UInt64 < InProof_Theorem.MaxAllowedProofs_UInt64)
+				{
+					//Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+					uint64_t InternalPrimaryKeyLHS_UInt64 = InProof_Theorem.PrimaryKeyLHS_AtomicUInt64;
+					for (const AxiomAtom InternalAxiom : InAxioms_AxiomAtomVec)
+					{
+						// Todo: Check if the proof process is suspended
+
+						if (!InternalAxiom.bIsOnlineFlag)
+						{
+							break;
+						}
+						if ((InternalPrimaryKeyLHS_UInt64 / InternalAxiom.PrimaryKeyLHS_AtomicUInt64) % 1 != 0)
+						{
+							break;
+						}
+						InternalPrimaryKeyLHS_UInt64 = 
+							InternalPrimaryKeyLHS_UInt64 / InternalAxiom.PrimaryKeyLHS_AtomicUInt64 * 
+							InternalAxiom.PrimaryKeyRHS_AtomicUInt64;
+					}
+
+					bInternalProofFound_Flag = (InternalPrimaryKeyLHS_UInt64 == InProof_Theorem.PrimaryKeyRHS_AtomicUInt64);
+					if (bInternalProofFound_Flag)
+					{
+						for (const AxiomAtom InternalAxiom : InAxioms_AxiomAtomVec)
+						{
+							// Parse and verify the proof at the InternalAxiom.SubnetLHS_VecStdStrRef level
+							for (const std::string InternalSubnetLHS_StdStr : InternalAxiom.SubnetLHS_VecStdStrRef)
+							{
+
+							}
+						}						
+
+						// Todo: Add the proof string to the proof stack
+						
+						//OutProofStack_StdStr2DVec.push_back(InAxioms_AxiomAtomVec);
+						//ProofStack_StdStr2DVec.push_back(OutProofStack_StdStr2DVec);
+						
+						// Proof found
+						ProofsFound_UInt64.fetch_add(1, std::memory_order_relaxed);
+					}
+
+					else
+					{
+						// Proof not found
+						return;
+					}
+				}
+
+				// All proofs have been found. Set the flag to true.
+				else
+				{
+					bProofFoundFlag.store(true,std::memory_order_relaxed);
+					return;
+				}
 			};
 
 			std::function<void(const Theorem&,
@@ -681,30 +744,41 @@ namespace EuclidProverLib
 						std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec,
 						const Indirection Indir_IndirectionEnum = Indirection::auto_) -> void
 			{
+				if (bProofFoundFlag)
+				{
+					return;
+				}
 				Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
 			};
 
-			if (Indir_IndirectionEnum == Indirection::auto_)
+			// Reshuffle axioms to produce an optimal invokation order
+			do
 			{
-				Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
-				Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
-			}
+				if (Indir_IndirectionEnum == Indirection::auto_)
+				{
+					Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+					Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+				}
 
-			else if (Indir_IndirectionEnum == Indirection::reduce_) 
-			{
-				Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
-			}
+				else if (Indir_IndirectionEnum == Indirection::reduce_)
+				{
+					Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+				}
 
-			else if (Indir_IndirectionEnum == Indirection::expand_)
-			{
-				Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
-			}
+				else if (Indir_IndirectionEnum == Indirection::expand_)
+				{
+					Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+				}
 
-			else // default: // Auto
-			{
-				Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
-				Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
-			}
+				else // default: // Auto
+				{
+					Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+					Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+				}
+			} 
+			while (std::next_permutation(InAxioms_AxiomAtomVec.begin(), 
+					InAxioms_AxiomAtomVec.end()) && 
+				!bProofFoundFlag.load(std::memory_order_relaxed));
 		};
 
 	};
