@@ -272,7 +272,6 @@ namespace EuclidProverLib
 			_openBraceST{ "st"+openBrace },
 			_closeBrace{ closeBrace }
 		{
-
 		}
 
 		bool Axiom(const std::vector<std::string>& InAxiomConstStdStrVecRef)
@@ -354,6 +353,11 @@ namespace EuclidProverLib
 		bool Prove(const std::vector<std::string>& InProofVecConstCharRef,
 			std::vector<std::vector<std::string>>& OutPath2DVecCharRef)
 		{
+			Reset();
+			Auto(InProof_Theorem,
+				InAxioms_AxiomAtomVec,
+				OutProofStack_StdStr2DVec,
+				Indir_IndirectionEnum);
 			bool ResultFoundFlag = false;
 			return ResultFoundFlag;
 		}
@@ -361,6 +365,11 @@ namespace EuclidProverLib
 		bool ProveViaReduce(const std::vector<std::string>& InProofVecChar,
 			std::vector<std::vector<std::string>>& OutReducePathVec2DCharRef)
 		{
+			Reset();
+			Auto(InProof_Theorem,
+				InAxioms_AxiomAtomVec,
+				OutProofStack_StdStr2DVec,
+				Indir_IndirectionEnum);
 			bool ResultFoundFlag = false;
 			return ResultFoundFlag;
 		}
@@ -368,6 +377,11 @@ namespace EuclidProverLib
 		bool ProveViaExpand(const std::vector<std::string>& InProofVecConstChar,
 			std::vector<std::vector<std::string>>& OutExpandPathVec2DCharRef)
 		{
+			Reset();
+			Auto(InProof_Theorem,
+				InAxioms_AxiomAtomVec,
+				OutProofStack_StdStr2DVec,
+				Indir_IndirectionEnum);
 			bool ResultFoundFlag = false;
 			return ResultFoundFlag;
 		}
@@ -377,29 +391,55 @@ namespace EuclidProverLib
 
 		}
 
+		bool Reset()
+		{
+			bool result = true;
+			ProofsFound_UInt64 = 0;
+			bProofFoundFlag = false;
+			ThreadPool.reserve(ThreadPoolSize_SizeT);
+			return result;
+		}
+
+		uint64_t Suspend()
+		{
+			// Todo: Verify the process is unsuspended
+			// Todo: Serialize the Proof state
+			// Todo: Set the new process state to suspended
+			// Todo: return a resume handle
+		}
+
+		uint64_t Resume(const uint64_t guid)
+		{
+			// Todo: Verify the resume handle
+			// Todo: Verify the process is suspended
+			// Todo: DeSerialize the Proof state
+			// Todo: Set the new process state to unsuspended
+		}
+
 	protected:
+		uint64_t GUID_UInt64 = 0;
 		std::string _openBrace;
 		std::string _openBraceST; // strict comprehension enforcement
 		std::string _closeBrace;
 		const std::string LemmaImplies = "<==>";
 		const std::string LemmaImpliesRHS = "==>";
 		const std::string LemmaImpliesLHS = "<==";
-		std::vector<std::vector<std::string>> ProofStackLHS{};
-		std::vector<std::vector<std::string>> ProofStackRHS{};
-		std::vector<std::vector<std::string>> LemmaLHS{};
-		std::vector<std::vector<std::string>> LemmaRHS{};
-		std::vector<std::vector<std::string>> AxiomLHS{};
-		std::vector<std::vector<std::string>> AxiomRHS{};
-		std::vector<std::vector<std::string>> ProofLHS{};
-		std::vector<std::vector<std::string>> ProofRHS{};
+		std::vector<std::vector<std::string>> ProofStackLHS_StdStr2DVec{};
+		std::vector<std::vector<std::string>> ProofStackRHS_StdStr2DVec{};
+		std::vector<std::vector<std::string>> LemmaLHS_StdStr2DVec{};
+		std::vector<std::vector<std::string>> LemmaRHS_StdStr2DVec{};
+		std::vector<std::vector<std::string>> AxiomLHS_StdStr2DVec{};
+		std::vector<std::vector<std::string>> AxiomRHS_StdStr2DVec{};
+		std::vector<std::vector<std::string>> ProofLHS_StdStr2DVec{};
+		std::vector<std::vector<std::string>> ProofRHS_StdStr2DVec{};
 
 		// Prime Composite Library. Cached to disk for performance
-		std::vector<uint64_t> AxiomLHSPrimeComposite{};
-		std::vector<uint64_t> AxiomRHSPrimeComposite{};
-		std::vector<uint64_t> LemmaLHSPrimeComposite{};
-		std::vector<uint64_t> LemmaRHSPrimeComposite{};
-		std::vector<uint64_t> ProofLHSPrimeComposite{};
-		std::vector<uint64_t> ProofRHSPrimeComposite{};
+		std::vector<uint64_t> AxiomLHSPrimeComposite_UInt64Vec{};
+		std::vector<uint64_t> AxiomRHSPrimeComposite_UInt64Vec{};
+		std::vector<uint64_t> LemmaLHSPrimeComposite_UInt64Vec{};
+		std::vector<uint64_t> LemmaRHSPrimeComposite_UInt64Vec{};
+		std::vector<uint64_t> ProofLHSPrimeComposite_UInt64Vec{};
+		std::vector<uint64_t> ProofRHSPrimeComposite_UInt64Vec{};
 		// Usage: primes[ TokenLibraryStdStringToUInt64PrimesIndexMap["{"] ]
 		std::unordered_map <std::string, uint64_t> TokenLibraryStdStringToUInt64PrimesIndexMap; 
 
@@ -545,6 +585,21 @@ namespace EuclidProverLib
 			result = FoundEqualsSignFlag;
 			return result;
 		}
+	
+	private:
+		enum class Indirection; // Forward declaration
+		std::unordered_map<uint64_t, bool> ProofHistoryMap{};
+		std::vector<std::string> ProofStack_StdStrVec{};
+		enum class Indirection Indir_IndirectionEnum = Indirection::auto_;
+		//const uint64_t maxThreadsUInt64 = std::thread::hardware_concurrency();
+		static constexpr size_t ThreadPoolSize_SizeT = 128;
+		std::vector<std::jthread> ThreadPool{};
+		std::mutex Mutex; // A reserved register and scope to perform serial operations
+		std::condition_variable CV; // Used to facilitate communication between threads
+
+		std::atomic<uint64_t> ProofsFound_UInt64 = 0;
+		std::atomic<bool> bProofFoundFlag = false;
+		std::atomic<size_t> AvailableThreads_SizeT = ThreadPoolSize_SizeT;
 
 		enum class Indirection
 		{
@@ -553,146 +608,112 @@ namespace EuclidProverLib
 			auto_
 		};
 
-		class AxiomAtom
+		struct AxiomProto_
 		{
-		public:
-			uint64_t PrimaryKeyLHS;
-			uint64_t PrimaryKeyRHS;
-			Indirection Indir;
-			std::vector<std::string> Subnet;
-			uint64_t guid;
+			AxiomProto_(const std::vector<std::string>& InSubnetLHS_VecStdStrRef,
+				const std::vector<std::string>& InSubnetRHS_VecStdStrRef,
+				const uint64_t InGUID_UInt64) :
+				SubnetLHS_VecStdStrRef(InSubnetLHS_VecStdStrRef),
+				SubnetRHS_VecStdStrRef(InSubnetRHS_VecStdStrRef),
+				GUID_UInt64(InGUID_UInt64)
+			{}
+			std::atomic<uint64_t> PrimaryKeyLHS_AtomicUInt64 = 1;
+			std::atomic<uint64_t> PrimaryKeyRHS_AtomicUInt64 = 1;
+			std::vector<std::string> SubnetLHS_VecStdStrRef{};
+			std::vector<std::string> SubnetRHS_VecStdStrRef{};
+			const uint64_t GUID_UInt64;
 		};
 
-		class Theorem
+		class AxiomAtom : public AxiomProto_
 		{
 		public:
-			uint64_t PrimaryKey;
-			std::vector<std::string> Subnet;
-		};
-
-		class Auto
-		{
-		public:
-			Auto(const AxiomAtom& Proof, const std::vector<AxiomAtom>& Axioms) :
-				LHS.PrimaryKey(Proof.PrimaryKeyLHS),
-				RHS.PrimaryKey(Proof.PrimaryKeyRHS)
+			explicit AxiomAtom (const std::vector<std::string>& InSubnetLHS_VecStdStrRef,
+				const std::vector<std::string>& InSubnetRHS_VecStdStrRef,
+				const uint64_t InGUID_UInt64) : 
+				AxiomProto_(InSubnetLHS_VecStdStrRef,
+					InSubnetRHS_VecStdStrRef,
+					InGUID_UInt64)
 			{
-				ThreadPool.reserve(ThreadPoolSize);
-				// Spawn the initial threads for Expand and Reduce
-				{
-					std::unique_lock<std::mutex> lock(Mutex);
-					CV.wait(lock, [this]() { return AvailableThreads >= 2; });
-					AvailableThreads -= 2;
-				}
+			}
+			bool bIsOnlineFlag = true;
+		};
 
-				ThreadPool.emplace_back([&]()
-					{
-						Expand(LHS, Proof, ProofHistoryMap, Proof.Indir);
-						{
-							std::unique_lock<std::mutex> lock(Mutex);
-							++AvailableThreads;
-							CV.notify_one();
-						}
-					});
+		class Theorem : public AxiomProto_
+		{
+		public:
+			explicit Theorem(const std::vector<std::string>& InSubnetLHS_VecStdStrRef,
+				const std::vector<std::string>& InSubnetRHS_VecStdStrRef,
+				const uint64_t InGUID_UInt64,
+				Indirection InIndirection_Enum = Indirection::auto_,
+				const uint64_t InMaxAllowedProofs_UInt64 = 1) :
+				AxiomProto_(InSubnetLHS_VecStdStrRef,
+					InSubnetRHS_VecStdStrRef,
+					InGUID_UInt64)
+			{
+			}
+			Indirection Indirection_Enum = Indirection::auto_;
+			uint64_t MaxAllowedProofs_UInt64 = 1;
+		};
 
-				ThreadPool.emplace_back([&]()
-					{
-						Reduce(RHS, Proof, ProofHistoryMap, Proof.Indir);
-						{
-							std::unique_lock<std::mutex> lock(Mutex);
-							++AvailableThreads;
-							CV.notify_one();
-						}
-					});
+		[[nodiscard]] std::vector<std::vector<std::string>> Auto(const Theorem& InProof_Theorem,
+			const std::vector<AxiomAtom>& InAxioms_AxiomAtomVec,
+			std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec,
+			const Indirection Indir_IndirectionEnum = Indirection::auto_)
+		{
+			std::function<void(const Theorem&,
+				const std::vector<AxiomAtom>&,
+				std::vector<const std::vector<std::string>>,
+				const Indirection Indir_IndirectionEnum)>
+				Reduce = [&](const Theorem& InProof_Theorem,
+					const std::vector<AxiomAtom>& InAxioms_AxiomAtomVec,
+					std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec,
+					const Indirection Indir_IndirectionEnum = Indirection::auto_) -> void
+			{
+				Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+			};
 
-				// Wait for threads to complete
-				for (auto& thread : ThreadPool)
-				{
-					thread.join();
-				}
+			std::function<void(const Theorem&,
+				const std::vector<AxiomAtom>&,
+				std::vector<const std::vector<std::string>>,
+				const Indirection Indir_IndirectionEnum)> 
+					Expand = [&](const Theorem& InProof_Theorem,
+						const std::vector<AxiomAtom>& InAxioms_AxiomAtomVec,
+						std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec,
+						const Indirection Indir_IndirectionEnum = Indirection::auto_) -> void
+			{
+				Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+			};
+
+			if (Indir_IndirectionEnum == Indirection::auto_)
+			{
+				Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+				Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
 			}
 
-		private:
-			Theorem LHS{}, RHS{};
-			bool bProofFoundFlag = false;
-			std::unordered_map<uint64_t, bool> ProofHistoryMap;
-			std::stack<AxiomAtom> ProofStack;
-			enum class Indirection indir = Indirection::auto_;
-
-			void Expand(Theorem& theorem, AxiomAtom Axiom, std::unordered_map<uint64_t, bool>& proofHistoryMap, Indirection indir)
+			else if (Indir_IndirectionEnum == Indirection::reduce_) 
 			{
-				ThreadPool.emplace_back([&]()
-					{
-						Expand(LHS, Proof, ProofHistoryMap, Proof.Indir);
-						{
-							std::unique_lock<std::mutex> lock(Mutex);
-							++AvailableThreads;
-							CV.notify_one();
-						}
-					});
+				Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+			}
 
-				if (indir == Indirection::auto_)
-				{
-					ThreadPool.emplace_back([&]()
-						{
-							Reduce(RHS, Proof, ProofHistoryMap, Proof.Indir);
-							{
-								std::unique_lock<std::mutex> lock(Mutex);
-								++AvailableThreads;
-								CV.notify_one();
-							}
-						});
-				}
-				// Wait for threads to complete
-				for (auto& thread : ThreadPool)
-				{
-					thread.join();
-				}
-			};
-			void Reduce(Theorem& theorem, AxiomAtom axiom, std::unordered_map<uint64_t, bool>& proofHistoryMap, Indirection indir)
+			else if (Indir_IndirectionEnum == Indirection::expand_)
 			{
-				if (indir == Indirection::auto_)
-				{
-					ThreadPool.emplace_back([&]()
-					{
-						Expand(LHS, Proof, ProofHistoryMap, Proof.Indir);
-						{
-							std::unique_lock<std::mutex> lock(Mutex);
-							++AvailableThreads;
-							CV.notify_one();
-						}
-					});
-				}
-				ThreadPool.emplace_back([&]()
-					{
-						Reduce(RHS, Proof, ProofHistoryMap, Proof.Indir);
-						{
-							std::unique_lock<std::mutex> lock(Mutex);
-							++AvailableThreads;
-							CV.notify_one();
-						}
-					});
+				Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+			}
 
-				// Wait for threads to complete
-				for (auto& thread : ThreadPool)
-				{
-					thread.join();
-				}
-			};
-
-			static constexpr size_t ThreadPoolSize = 128;
-			std::vector<std::thread> ThreadPool;
-			std::mutex Mutex;
-			std::condition_variable CV;
-			size_t AvailableThreads = ThreadPoolSize;
+			else // default: // Auto
+			{
+				Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+				Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+			}
 		};
+
 	};
 
 	template<>
 	class API_EXPORT EuclidProver<BracketType::Parentheses> : public EuclidProver<BracketType::CurlyBraces>
 	{
 	public:
-		EuclidProver() : EuclidProver<BracketType::CurlyBraces>( "(", ")" )
+		EuclidProver() noexcept : EuclidProver<BracketType::CurlyBraces>( "(", ")" )
 		{
 
 		}
@@ -702,7 +723,7 @@ namespace EuclidProverLib
 	class API_EXPORT EuclidProver<BracketType::SquareBrackets> : public EuclidProver<BracketType::CurlyBraces>
 	{
 	public:
-		EuclidProver() : EuclidProver<BracketType::CurlyBraces>( "[", "]" )
+		EuclidProver() noexcept : EuclidProver<BracketType::CurlyBraces>( "[", "]" )
 		{
 
 		}
