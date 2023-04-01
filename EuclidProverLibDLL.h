@@ -657,16 +657,16 @@ namespace EuclidProverLib
 
 		[[nodiscard]] std::vector<std::vector<std::string>> Auto(const Theorem& InProof_Theorem,
 			const std::vector<AxiomAtom>& InAxioms_AxiomAtomVec,
-			std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec,
+			std::vector<const std::vector<std::string>>& OutProofStack_StdStr2DVec,
 			const Indirection Indir_IndirectionEnum = Indirection::auto_)
 		{
 			std::function<void(const Theorem&,
 				const std::vector<AxiomAtom>&,
-				std::vector<const std::vector<std::string>>,
+				std::vector<const std::vector<std::string>>&,
 				const Indirection Indir_IndirectionEnum)>
 				Reduce = [&](const Theorem& InProof_Theorem,
 					const std::vector<AxiomAtom>& InAxioms_AxiomAtomVec,
-					std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec,
+					std::vector<const std::vector<std::string>>& OutProofStack_StdStr2DVec,
 					const Indirection Indir_IndirectionEnum = Indirection::auto_) -> void
 			{
 				// Check if all proofs have already been found
@@ -711,11 +711,15 @@ namespace EuclidProverLib
 							}
 						}						
 
-						// Todo: Add the proof string to the proof stack
+						// Todo: Add the proof to the proof stack
 						
-						//OutProofStack_StdStr2DVec.push_back(InAxioms_AxiomAtomVec);
-						//ProofStack_StdStr2DVec.push_back(OutProofStack_StdStr2DVec);
-						
+						/*
+						{ // local thread scope 
+							std::unique_lock<std::mutex> lock(Mutex);
+							OutProofStack_StdStr2DVec.push_back(...);
+						}
+						*/
+
 						// Proof found
 						ProofsFound_UInt64.fetch_add(1, std::memory_order_relaxed);
 					}
@@ -737,11 +741,11 @@ namespace EuclidProverLib
 
 			std::function<void(const Theorem&,
 				const std::vector<AxiomAtom>&,
-				std::vector<const std::vector<std::string>>,
+				std::vector<const std::vector<std::string>>&,
 				const Indirection Indir_IndirectionEnum)> 
 					Expand = [&](const Theorem& InProof_Theorem,
 						const std::vector<AxiomAtom>& InAxioms_AxiomAtomVec,
-						std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec,
+						std::vector<const std::vector<std::string>>& OutProofStack_StdStr2DVec,
 						const Indirection Indir_IndirectionEnum = Indirection::auto_) -> void
 			{
 				if (bProofFoundFlag)
