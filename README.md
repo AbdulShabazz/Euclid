@@ -21,7 +21,7 @@ To deploy the prover in your game logic, you provide it with axioms and lemmas r
 
 { variable } = Variable
 
-Example expressed as plain text: 
+Example psuedo code: 
 
 ```c++
 	// Axiom
@@ -58,7 +58,7 @@ Example expressed as plain text:
 	Prove = { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled }
 ```
 
-Example expressed as C++ Code:
+Example C++ Code:
 
 ```c++
 	// Create empty ProofStep[lineNumber][proofStep] vector to store proof
@@ -113,7 +113,17 @@ Example expressed as C++ Code:
 	else
 	{
 		std::cout << "Proof via Reduce failed\n";
-	}
+	}	
+
+	// Suspend a Solver for proof(GUID)
+	const uint64_t guid = Euclid.Suspend(); 
+	std::cout << "Proof Solver suspended for: guid_" << guid << std::endl;
+
+	// Resume a Solver for proof(GUID)
+	if(Euclid.Resume(guid))
+	{
+		std::cout << "Proof Solver resumed for: guid_" << guid << std::endl;
+	} 
 
 ```
 
@@ -121,7 +131,7 @@ Example expressed as C++ Code:
 
 The required format for the expressions is as follows:
 
-{ LHS }... = { RHS }..., where LHS and RHS are properly-formed expressions.
+{ LHS }... = { RHS }..., where LHS and RHS are properly-formed sets of expressions.
 
 The "=" is the equality operator, is required, and should be interpreted as a connective, used to delimit and or separate the LHS and RHS. 
 The equality operator is the only builtin operator that is reserved. All other symbols may be used in your expressions.
@@ -130,13 +140,13 @@ The equality operator can also be used to separate multiple expressions, as show
 
 { LHS }... = { RHS_0000 }... = { RHS_0001 }... = { RHS_N }..., where LHS and RHS_N are properly-formed expressions.
 
-If you have any questions, please contact me at: https://github.com/Seagat2011NOTES
+If you have any questions, please contact me at: https://github.com/Seagat2011/UnrealEngine-Seagat2011-2023
 
-Compatibility C++20 (Windows)
+Compatibility C++20 (Windows x86 i64)
 
 STYLEGUIDE
 
-    POOR FORMATTING EXAMPLE
+    POOR FORMATTING
 
         TEST CASE: RENDER [PASS], PROOF [FAIL]
         {{a}raised{2}}plus{2ab}plus{b raised{2}}<==({a}plus{b})raised{2}
@@ -181,18 +191,18 @@ PROOFGUIDE
 
     AXIOM FORMAT
 
-        { LHS... } = { RHS... } [ = { RHS_N... } ]+
+        { LHS... }... = { RHS... }... [ = { RHS_N... }... ]*
         .
         .
 
     LEMMA SUBSTITUTION FORMAT
 
-        { LHS... } <== or <==> or ==> { RHS... }
+        { LHS... }... <== or <==> or ==> { RHS... }... [ <== or <==> or ==> { RHS_N... }... ]*
         .
         .
 
     PROOF FORMAT
-        Prove { LHS... } = { RHS... } [ = { RHS_N... } ]+
+        Prove { LHS... }... = { RHS... }... [ = { RHS_N... }... ]*
 
     QUICK FORMAT
 
