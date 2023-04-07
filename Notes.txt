@@ -30,6 +30,8 @@ Algorithm
 
 NOTES
 
+unordered_map gripes about const key values.
+
 To improve performance, Proof-search is conducted on arrays of primes. 
 
 	Example:
@@ -92,9 +94,16 @@ But how to represent the proof-search space internally?
 
 		Limitations: Set inclusion requires combinatorial expansion (ie. combinatorial explosion)
 
+	Solution: (abandoned)
+
+		// Default builtin support (for unsigned long long) on strict token types, with added BigInt support (__x86i64Int ) where needed
+		2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...
+
+		Limitations: (complex library implementation)
+
 	Solution: (in-process)
 
-		// Default builtin support (for unsigned double) with added BigInt support (__x86i64Int ) as needed
+		// Default builtin support (for unsigned long long) on strict token types, with added BigInt support (cpp_int ) where needed
 		2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...
 
 		Limitations: (in-process)
@@ -102,8 +111,8 @@ But how to represent the proof-search space internally?
 Todo: Add an optional constraint flag parameter to axioms and or lemmas to require or ignore their use
 Todo: Cache axioms-, lemmas-, intermedite results-, proof statements- and their proofsteps-, to disk, for ready retrieval when game play conditions re-present themselves (perhaps using a cocktail of thread-management and async co-routines)
 Todo: Implement a proof-search caching algorithm (asynchronous) w/ co_routines; and use threadpools for the nextprime calculation.
-Todo: convert data types to auto to allow the theorem prover in the c++ compiler to perform optimizations on the data types.
-Todo: Iff a value N % M == 0, then M is a composite factor of N; iff a value (N / M) % 2 == 0, then M is a scalar multiple of N.
+Todo: convert data types to auto to allow the theorem prover in the c++ compiler to perform optimizations on data types.
+Todo: Iff N % M == 0, then M is a multiple of N; iff (N / M) % 2 == 0, then M is a scalar multiple of N; if (N / M) % 1 == 0 then M is a composite of N.
 
 NOTES
 [+] Add a strict specifier, eg. st{ { 2 } - { 1 } } = { 1 }
