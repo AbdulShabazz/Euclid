@@ -116,3 +116,11 @@ Todo: Iff N % M == 0, then M is a multiple of N; iff (N / M) % 2 == 0, then M is
 
 NOTES
 [+] Add a strict specifier, eg. st{ { 2 } - { 1 } } = { 1 }
+
+Benchmarks: for_each(std::execution::unseq: (nanoseconds) 1062400
+Benchmarks: for-loop: (nanoseconds) 64900
+Benchmarks: for_each(std::execution::par: (nanoseconds) 596800
+Benchmarks: std::async(std::launch::async, [](){ for_each(std::execution::par_unseq: (nanoseconds) 1343400
+Benchmarks: for_each(std::execution::par_unseq: (nanoseconds) 1436700
+Benchmarks: for(threads.emplace_back: (nanoseconds) DNF
+Benchmarks: for_each(std::execution::unseq, threads.emplace_back: (nanoseconds) DNF
