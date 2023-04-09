@@ -1,4 +1,173 @@
 //
+	std::vector <uint64_t> v{};
+	v.resize(300'000);
+
+	std::mutex mtx;
+	constexpr std::size_t num_threads = 1; // std::thread::hardware_concurrency();
+	const std::size_t chunk_size = v.size() / num_threads;
+	std::vector<std::jthread> threads;
+
+	// Create one jthread per chunk of elements in the vector
+	for (std::size_t i = 0; i < v.size(); i += chunk_size) { // v.resize(300'000); Benchmarks (nanoseconds): 3848300
+		std::size_t chunk_end = i + chunk_size;
+		if (chunk_end > v.size()) {
+			chunk_end = v.size();
+		}
+		threads.emplace_back([i, chunk_end, &v, &mtx](std::stop_token st) noexcept -> void {
+			// Execute the for-each loop on the chunk of elements
+			if (st.stop_requested()) {
+				return;
+			}
+			//std::unique_lock<std::mutex> lock(mtx);
+			std::for_each(std::execution::unseq, v.begin() + i, v.begin() + chunk_end, [](uint64_t& n) {
+				n = 2;
+				//std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+			});
+		});
+	}
+	for (std::jthread& th : threads)
+	{
+		th.join();
+	}
+	std::cout << v[0] << std::endl;
+// Note: more threads reduce performance. Most likely due to malware multiplexing our workload onto a single thread.
+	std::vector <uint64_t> v{};
+	v.resize(300'000);
+
+		const std::size_t num_threads = 1e3; // std::thread::hardware_concurrency();
+		const std::size_t chunk_size = v.size() / num_threads;
+		std::vector<std::jthread> threads;
+
+		// Create one jthread per chunk of elements in the vector
+		for (std::size_t i = 0; i < v.size(); i += chunk_size) { // v.resize(300'000); Benchmarks (nanoseconds): 2583489400
+			std::size_t chunk_end = i + chunk_size;
+			if (chunk_end > v.size()) {
+				chunk_end = v.size();
+			}
+			threads.emplace_back([i, chunk_end, &v](std::stop_token st) noexcept -> void {
+				// Execute the for-each loop on the chunk of elements
+				if (st.stop_requested()) {
+					return;
+				}
+				std::for_each(std::execution::unseq, v.begin() + i, v.begin() + chunk_end, [](uint64_t& n) {
+					n = 2;
+					std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+				});
+			});
+		}
+		for (std::jthread& th : threads)
+		{
+			th.join();
+		}
+//
+	std::vector <uint64_t> v{};
+	v.resize(300'000);
+
+		const std::size_t num_threads = 1; // std::thread::hardware_concurrency();
+		const std::size_t chunk_size = v.size() / num_threads;
+		std::vector<std::jthread> threads;
+
+		// Create one jthread per chunk of elements in the vector
+		for (std::size_t i = 0; i < v.size(); i += chunk_size) { // v.resize(300'000); Benchmarks (nanoseconds): 2989900
+			std::size_t chunk_end = i + chunk_size;
+			if (chunk_end > v.size()) {
+				chunk_end = v.size();
+			}
+			threads.emplace_back([i, chunk_end, &v](std::stop_token st) noexcept -> void {
+				// Execute the for-each loop on the chunk of elements
+				if (st.stop_requested()) {
+					return;
+				}
+				std::for_each(std::execution::unseq, v.begin() + i, v.begin() + chunk_end, [](uint64_t& n) {
+					n = 2;
+				});
+			});
+		}
+		for (std::jthread& th : threads)
+		{
+			th.join();
+		}
+		std::cout << v[0] << std::endl;
+//
+	std::vector <uint64_t> v{};
+	v.resize(300'000);
+
+		const std::size_t num_threads = std::thread::hardware_concurrency();
+		const std::size_t chunk_size = v.size() / num_threads;
+		std::vector<std::jthread> threads;
+
+		// Create one jthread per chunk of elements in the vector
+		for (std::size_t i = 0; i < v.size(); i += chunk_size) { // v.resize(300'000); Benchmarks (nanoseconds): 1677483000
+			std::size_t chunk_end = i + chunk_size;
+			if (chunk_end > v.size()) {
+				chunk_end = v.size();
+			}
+			threads.emplace_back([i, chunk_end, &v](std::stop_token st) noexcept -> void {
+				// Execute the for-each loop on the chunk of elements
+				if (st.stop_requested()) {
+					return;
+				}
+				std::for_each(std::execution::par_unseq, v.begin() + i, v.begin() + chunk_end, [](uint64_t& n) {
+					n = 2;
+					std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+				});
+			});
+		}
+		for (std::jthread& th : threads)
+		{
+			th.join();
+		}
+		std::cout << v[0] << std::endl;
+//
+		auto fute = std::async(std::launch::async, [&v] { // v.resize(300'000); Benchmarks (nanoseconds): 1383600
+			std::for_each(std::execution::unseq, v.begin(), v.end(), [](uint64_t& n) noexcept -> void {
+				std::atomic<uint64_t> u{ 2 };
+				n = u;
+				});
+			});
+		fute.wait();
+//
+		// Create one jthread per element in the vector
+		std::for_each(std::execution::unseq, v.begin(), v.end(), [&threads](uint64_t& elem) noexcept -> void {
+			elem = 2;
+		});
+// Create one jthread per element in the vector
+		std::for_each(std::execution::par_unseq, v.begin(), v.end(), [&threads](uint64_t& elem) noexcept -> void {
+			std::atomic<uint64_t> _elem{elem};
+			threads.emplace_back([&_elem](std::stop_token st) noexcept -> void {
+				if (st.stop_requested()) {
+					return;
+				}
+				_elem.store(2, std::memory_order_relaxed);
+			});
+		});
+
+		// Wait for all jthreads to finish
+		for (auto& thread : threads) {
+			thread.join();
+		}
+//
+	std::atomic<uint64_t> u{};
+	std::vector <std::atomic<uint64_t>> v{};
+	v.resize(300'000);
+
+		std::vector<std::jthread> threads;
+
+		// Create one jthread per element in the vector
+		std::for_each(std::execution::unseq, v.begin(), v.end(), [&threads](std::atomic<uint64_t>& elem) noexcept -> void {
+			threads.emplace_back([&elem](std::stop_token st) noexcept -> void {
+				if (st.stop_requested()) {
+					return;
+				}
+				elem.store(2, std::memory_order_relaxed);
+			});
+		});
+
+		// Wait for all jthreads to finish
+		for (auto& thread : threads) {
+			thread.join();
+		}
+//
 		[[nodiscard]] std::vector<std::vector<std::string>> Auto(const Theorem& InProof_Theorem,
 			const std::vector<AxiomAtom>& InAxioms_AxiomAtomVec,
 			std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec,
