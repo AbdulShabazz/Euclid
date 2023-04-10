@@ -1,3 +1,252 @@
+
+// Benchmarks (nanoseconds): 40'034
+	std::unordered_map<uint64_t, std::vector<uint64_t>> LHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::vector<uint64_t>> RHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallHistory_Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallHistory_Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallGraph_UInt64Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallGraph_UInt64Map;
+    std::atomic<uint64_t> i(0);
+    std::for_each(std::execution::unseq, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
+        [&](std::vector<uint64_t>& Axiom_i) {
+            {
+                const uint64_t _lhs = Axiom_i.at(0);
+                const uint64_t _rhs = Axiom_i.at(1);
+                if (_lhs < _rhs)
+                {
+                    const uint64_t lhs = _rhs;
+                    const uint64_t rhs = _lhs;
+                    Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 0, uint64_t{ lhs });
+                    Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 1, uint64_t{ rhs });
+                }
+            }
+    
+            std::unordered_map<uint64_t, bool> _cgl; // Build lhs call graph
+            std::unordered_map<uint64_t, bool> _cgr; // Build rhs call graph
+            std::unordered_map<uint64_t, bool> _cg2l; // Build lhs call history map
+            std::unordered_map<uint64_t, bool> _cg2r; // Build rhs call history map
+            LHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgl));
+            RHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgr));
+            LHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2l));
+            RHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2r));
+    
+            std::atomic<uint64_t> j(0);
+            std::for_each(std::execution::par, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
+                [&](const std::vector<uint64_t>& Axiom_j) {
+                    bool ijDoesNotCreateACallLoop_Flag = (i.load() != j.load()); // Avoid Call loops
+                    if (ijDoesNotCreateACallLoop_Flag)
+                    {
+                        const uint64_t Subnet_UInt64_lhs = Axiom_i.at(0) / Axiom_j.at(1);
+                        const uint64_t Subnet_UInt64_rhs = Axiom_i.at(1) / Axiom_j.at(0);
+                        const bool bSubnetFound_Flag_lhs = (Subnet_UInt64_lhs % 1 == 0); // 2 == 1 + 1 ?
+                        const bool bSubnetFound_Flag_rhs = (Subnet_UInt64_rhs % 1 == 0); // 1 + 1 == 2 ?
+    
+                        if (bSubnetFound_Flag_lhs)
+                        {
+                            auto it = LHSCallGraph_UInt64Map.find(i.load());
+                            if (it != LHSCallGraph_UInt64Map.end())
+                            {
+                                it->second.insert(std::make_pair(j.load(), true));
+                            }
+                        }
+    
+                        if (bSubnetFound_Flag_rhs)
+                        {
+                            auto it = RHSCallGraph_UInt64Map.find(j.load());
+                            if (it != RHSCallGraph_UInt64Map.end())
+                            {
+                                it->second.insert(std::make_pair(i.load(), true));
+                        }
+                    }
+                }
+                j.fetch_add(1);
+            });
+        i.fetch_add(1);
+    });
+// Benchmarks (nanoseconds): 1'570'893
+	std::unordered_map<uint64_t, std::vector<uint64_t>> LHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::vector<uint64_t>> RHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallHistory_Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallHistory_Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallGraph_UInt64Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallGraph_UInt64Map;
+    uint64_t i = 0;
+    for (std::vector<uint64_t>& Axiom_i : Axioms_UInt64Vec)
+    {   
+        {// lhs < rhs ? swap!
+            const uint64_t _lhs = Axiom_i.at(0);
+            const uint64_t _rhs = Axiom_i.at(1);
+            if (_lhs < _rhs)
+            {
+                const uint64_t lhs = _rhs;
+                const uint64_t rhs = _lhs;
+                Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 0, uint64_t{ lhs });
+                Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 1, uint64_t{ rhs });
+            }
+        }
+        uint64_t j = 0;
+        std::unordered_map<uint64_t, bool> _cgl; // Build lhs call graph
+        std::unordered_map<uint64_t, bool> _cgr; // Build rhs call graph
+        std::unordered_map<uint64_t, bool> _cg2l; // Build lhs call history map
+        std::unordered_map<uint64_t, bool> _cg2r; // Build rhs call history map
+        LHSCallGraph_UInt64Map.insert(std::make_pair(i, _cgl));
+        RHSCallGraph_UInt64Map.insert(std::make_pair(i, _cgr));
+        LHSCallHistory_Map.insert(std::make_pair(i, _cg2l));
+        RHSCallHistory_Map.insert(std::make_pair(i, _cg2r));
+        for (const std::vector<uint64_t>& Axiom_j : Axioms_UInt64Vec)
+        {
+            bool ijDoesNotCreateACallLoop_Flag = (i != j); // Avoid Call loops
+            if (ijDoesNotCreateACallLoop_Flag) 
+            {
+                const uint64_t Subnet_UInt64_lhs = Axiom_i.at(0) / Axiom_j.at(1);
+                const uint64_t Subnet_UInt64_rhs = Axiom_i.at(1) / Axiom_j.at(0);
+                const bool bSubnetFound_Flag_lhs = (Subnet_UInt64_lhs % 1 == 0); // 2 == 1 + 1 ?
+                const bool bSubnetFound_Flag_rhs = (Subnet_UInt64_rhs % 1 == 0); // 1 + 1 == 2 ?
+                
+                if (bSubnetFound_Flag_lhs)
+                {
+                    auto it = LHSCallGraph_UInt64Map.find(i);
+                    if (it != LHSCallGraph_UInt64Map.end())
+                    {
+                        it->second.insert(std::make_pair(j, true));
+                    }
+                }
+
+                if (bSubnetFound_Flag_rhs)
+                {
+                    auto it = RHSCallGraph_UInt64Map.find(j);
+                    if (it != RHSCallGraph_UInt64Map.end())
+                    {
+                        it->second.insert(std::make_pair(i, true));
+                    }
+                }
+                
+            }
+            j++;
+        }
+        i++;
+    }
+//
+/*
+	std::vector <uint64_t> v{};
+	v.resize(300'000);
+	std::mutex mtx;
+	std::vector<std::jthread> threads;
+	constexpr std::size_t num_threads = 1; // std::thread::hardware_concurrency();
+	const std::size_t chunk_size = v.size() / num_threads;
+	// Create one jthread per chunk of elements in the vector
+	for (std::size_t i = 0; i < v.size(); i += chunk_size) { // v.resize(300'000); Benchmarks (nanoseconds): 3848300
+		std::size_t chunk_end = i + chunk_size;
+		if (chunk_end > v.size()) {
+			chunk_end = v.size();
+		}
+		threads.emplace_back([i, chunk_end, &v, &mtx](std::stop_token st) noexcept -> void {
+			// Execute the for-each loop on the chunk of elements
+			if (st.stop_requested()) {
+				return;
+			}
+			//std::unique_lock<std::mutex> lock(mtx);
+			std::for_each(std::execution::unseq, v.begin() + i, v.begin() + chunk_end, [](uint64_t& n) {
+				n = 2;
+				//std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+			});
+		});
+	}
+	for (std::jthread& th : threads)
+	{
+		th.join();
+	}
+	std::cout << v[0] << std::endl;
+*/	
+// Benchmark (nanosecond): 1'729'652 
+	std::unordered_map<uint64_t, std::vector<uint64_t>> LHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::vector<uint64_t>> RHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallHistory_Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallHistory_Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallGraph_UInt64Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallGraph_UInt64Map;
+    std::atomic<uint64_t> i(0);
+    std::for_each(std::execution::par_unseq, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
+        [&](std::vector<uint64_t>& Axiom_i) {
+            {
+                const uint64_t _lhs = Axiom_i.at(0);
+                const uint64_t _rhs = Axiom_i.at(1);
+                if (_lhs < _rhs)
+                {
+                    const uint64_t lhs = _rhs;
+                    const uint64_t rhs = _lhs;
+                    Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 0, uint64_t{ lhs });
+                    Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 1, uint64_t{ rhs });
+                }
+            }
+    
+            std::unordered_map<uint64_t, bool> _cgl; // Build lhs call graph
+            std::unordered_map<uint64_t, bool> _cgr; // Build rhs call graph
+            std::unordered_map<uint64_t, bool> _cg2l; // Build lhs call history map
+            std::unordered_map<uint64_t, bool> _cg2r; // Build rhs call history map
+            LHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgl));
+            RHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgr));
+            LHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2l));
+            RHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2r));
+    
+            std::atomic<uint64_t> j(0);
+            std::for_each(std::execution::par, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
+                [&](const std::vector<uint64_t>& Axiom_j) {
+                    bool ijDoesNotCreateACallLoop_Flag = (i.load() != j.load()); // Avoid Call loops
+                    if (ijDoesNotCreateACallLoop_Flag)
+                    {
+                        const uint64_t Subnet_UInt64_lhs = Axiom_i.at(0) / Axiom_j.at(1);
+                        const uint64_t Subnet_UInt64_rhs = Axiom_i.at(1) / Axiom_j.at(0);
+                        const bool bSubnetFound_Flag_lhs = (Subnet_UInt64_lhs % 1 == 0); // 2 == 1 + 1 ?
+                        const bool bSubnetFound_Flag_rhs = (Subnet_UInt64_rhs % 1 == 0); // 1 + 1 == 2 ?
+    
+                        if (bSubnetFound_Flag_lhs)
+                        {
+                            auto it = LHSCallGraph_UInt64Map.find(i.load());
+                            if (it != LHSCallGraph_UInt64Map.end())
+                            {
+                                it->second.insert(std::make_pair(j.load(), true));
+                            }
+                        }
+    
+                        if (bSubnetFound_Flag_rhs)
+                        {
+                            auto it = RHSCallGraph_UInt64Map.find(j.load());
+                            if (it != RHSCallGraph_UInt64Map.end())
+                            {
+                                it->second.insert(std::make_pair(i.load(), true));
+                        }
+                    }
+                }
+                j.fetch_add(1);
+            });
+        i.fetch_add(1);
+    });
+//
+                    // Todo: move clause to rhs
+					else if (ijCreatesAnExpandCall_Flag) // Expand
+					{
+						const uint64_t Subnet_UInt64 = Axiom_i.at(0) / Axiom_j.at(1);
+						const bool bSubgnetFound_Flag = (Subnet_UInt64 % 1 == 0); // 1 + 1 == 2 ?
+						if (bSubgnetFound_Flag) // 2 => 1 + 1
+						{
+							//const uint64_t ComputedSubnet_UInt64 = Subnet_UInt64 * Axiom_j.at(0); // Reduce: 1 + 1 >> 2
+							const auto it = RHSCallGraph_UInt64Map.find(i);
+							// Complete the RHSCallGraph_UInt64Map
+							if (it != RHSCallGraph_UInt64Map.end())
+							{
+								it->second.insert(std::make_pair(j, true));
+							}
+							else
+							{
+								std::cout << "Error - Bounds at [i,j] exceeded: RHSCallGraph_UInt64Map[" <<
+									i << ", " << j << "]. Attempting error recovery..." << std::endl;
+								std::unordered_map<uint64_t, bool> _cg;
+								_cg.insert(std::make_pair(j, true));
+								RHSCallGraph_UInt64Map.insert(std::make_pair(i, _cg));
+							}
+						}
+					}
 //
 	std::vector <uint64_t> v{};
 	v.resize(300'000);
