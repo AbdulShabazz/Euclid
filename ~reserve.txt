@@ -1,4 +1,75 @@
 
+//
+	for(const std::vector<uint64_t>& pKeyUInt64 : Axioms_UInt64Vec)
+	{
+        uint64_t  lhs = pKeyUInt64[0];
+        uint64_t  rhs = pKeyUInt64[1];
+        
+        uint64_t _lhs = pKeyUInt64[0];
+        uint64_t _rhs = pKeyUInt64[1];
+        
+        if (_lhs < _rhs)
+        {
+             lhs = _rhs;
+             rhs = _lhs;
+        }
+        
+        std::variant<Axiom_Struct,Theorem_Struct> tmp = (nIdxUInt64 > 0) ?
+            std::variant<Axiom_Struct, Theorem_Struct>(Axiom_Struct{}) : Theorem_Struct{};
+            
+        std::visit([&](auto &elem)
+        {
+            elem.guid = 0;
+            elem.guid = GUID++;
+            elem.LHSPrimaryKey_UInt64 = lhs;
+            elem.RHSPrimaryKey_UInt64 = rhs;
+            elem.LHSCallHistory_UInt64Map = LHSCallHistory_Map[nIdxUInt64];
+            elem.RHSCallHistory_UInt64Map = RHSCallHistory_Map[nIdxUInt64];
+            elem.LHSCallGraph_UInt64Map = LHSCallGraph_UInt64Map[nIdxUInt64];
+            elem.RHSCallGraph_UInt64Map = RHSCallGraph_UInt64Map[nIdxUInt64];
+            
+        }, tmp);
+        
+        if(nIdxUInt64 < 1 &&
+            std::is_same<decltype(tmp), 
+                decltype(Axiom_Struct{})>::value)
+            Axioms_Vec.emplace_back(tmp);
+            
+    	nIdxUInt64++;
+	}
+//
+        std::variant<Axiom_Struct,Theorem_Struct>& target = nIdxUInt64 > 0 ? 
+        []() noexcept -> void
+        {
+            Axioms_Vec.emplace_back
+            (
+                Axiom_Struct
+                {
+                    .guid = GUID++,
+                    .LHSPrimaryKey_UInt64 = lhs,
+                    .RHSPrimaryKey_UInt64 = rhs,
+                    .LHSCallHistory_Map = LHSCallHistory_Map[nIdxUInt64],
+                    .RHSCallHistory_Map = RHSCallHistory_Map[nIdxUInt64],
+                    .LHSCallGraph_UInt64Map = LHSCallGraph_UInt64Map[nIdxUInt64],
+                    .RHSCallGraph_UInt64Map = RHSCallGraph_UInt64Map[nIdxUInt64]
+                }
+            );
+        }()
+        : 
+        []() noexcept -> void
+        {
+            Theorem_Struct
+            {
+                .guid = GUID++,
+                .LHSPrimaryKey_UInt64 = lhs,
+                .RHSPrimaryKey_UInt64 = rhs,
+                .LHSCallHistory_Map = LHSCallHistory_Map[nIdxUInt64],
+                .RHSCallHistory_Map = RHSCallHistory_Map[nIdxUInt64],
+                .LHSCallGraph_UInt64Map = LHSCallGraph_UInt64Map[nIdxUInt64],
+                .RHSCallGraph_UInt64Map = RHSCallGraph_UInt64Map[nIdxUInt64]
+            };
+        }()
+        ;
 // Benchmarks (nanoseconds): 40'034
 	std::unordered_map<uint64_t, std::vector<uint64_t>> LHSPrimaryKeyHistory_VecMap;
 	std::unordered_map<uint64_t, std::vector<uint64_t>> RHSPrimaryKeyHistory_VecMap;
