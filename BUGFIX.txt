@@ -31,3 +31,9 @@ SYMP: Error: no matching function for call to 'PushAtFront(__x86i64Int&, const _
 SOLU:
 	bool PushAtFront(__x86i64Int& OutVecUInt64Ref, const __x86i64Int& InConstVecUInt64Ref) {...} >>
 	bool PushAtFront(__x86i64Int& OutVecUInt64Ref, const __x86i64Int& InConstVecUInt64Ref) const {...}
+
+SYMP: Error std::jthread parameter must be invokable, evaluates to false. std::jthread t(Auto, Theorem, Axioms_vec); // Auto(Theorem_Struct& InTheorem, std::vector<Axiom_Struct>& InAxioms_vec);
+SOLU: 
+	std::jthread t(Auto, Theorem, Axioms_vec); // Auto(Theorem_Struct InTheorem, std::vector<Axiom_Struct> InAxioms_vec); or
+	std::jthread t(Auto, std::ref(Theorem), std::ref(Axioms_vec)); // Auto(Theorem_Struct& InTheorem, std::vector<Axiom_Struct>& InAxioms_vec); or
+	std::jthread t(Auto, std::ref(Theorem), std::cref(Axioms_vec)); // Auto(Theorem_Struct& InTheorem, const std::vector<Axiom_Struct>& InAxioms_vec);
