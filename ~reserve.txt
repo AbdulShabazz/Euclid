@@ -1,5 +1,61 @@
+// lock-free implementations are scalable (but slow!) and lock-based implementations are fast (but are not easily scaled!)
+class RecursionLimiter
+{
+public:
+    static constexpr uint64_t kDefaultLimit = 2048;
 
+    explicit RecursionLimiter(uint64_t required_calls)
+        : required_calls_(required_calls), acquired_(false) 
+    {
+        Acquire();
+    }
 
+    ~RecursionLimiter()
+    {
+        if (acquired_)
+        {
+            Release();
+        }
+    }
+
+private:
+    void Acquire()
+    {
+        uint64_t current_available;
+        do {
+            current_available = recursive_calls_available.load(std::memory_order_relaxed);
+            if (current_available < required_calls_)
+            {
+                std::this_thread::yield();
+            }
+        } while (!recursive_calls_available.compare_exchange_weak(current_available, current_available - required_calls_, std::memory_order_acquire));
+        acquired_ = true;
+    }
+
+    void Release()
+    {
+        recursive_calls_available.fetch_add(required_calls_, std::memory_order_release);
+    }
+
+    static std::atomic<uint64_t> recursive_calls_available;
+    uint64_t required_calls_;
+    bool acquired_;
+};
+
+  // Initialize the static member
+std::atomic<uint64_t> RecursionLimiter::recursive_calls_available{RecursionLimiter::kDefaultLimit};
+
+std::for_each(std::execution::par_unseq, 
+            Axioms_Vec.begin(), 
+            Axioms_Vec.end(), 
+            [&](const Axiom_Struct& Axiom)
+            {
+                RecursionLimiter limiter(3);
+                    
+                Reduce(TheoremProto_0000, Axiom);
+                Reduce(TheoremProto_0001, Axiom);
+                Reduce(TheoremProto_0002, Axiom);
+            });
 //
     /*
     if (localProofFound_Flag)
