@@ -1,4 +1,38 @@
 
+
+//
+    /*
+    if (localProofFound_Flag)
+        cv.notify(ProofStack_VecUInt64)
+    // safe increment or uint64_t add: a, b
+    if (a > 0 && b > 0 && a > std::numeric_limits<uint64_t>::max() - b) {
+        throw std::overflow_error("overflow");
+    } 
+    std::this_thread::sleep_for(std::chrono::nanoseconds(12));
+    */
+    
+// Helper function to check if it is safe to make a recursive call
+bool can_make_recursive_call(const size_t N = 2)
+{
+    // Get the current stack size limit
+    struct rlimit stack_limit;
+    if (getrlimit(RLIMIT_STACK, &stack_limit) != 0)
+    {
+        // Failed to get the stack limit
+        return false;
+    }
+
+    // Get the stack size of the current thread
+    pthread_attr_t attr;
+    size_t thread_stack_size;
+    pthread_attr_init(&attr);
+    pthread_attr_getstacksize(&attr, &thread_stack_size);
+
+    // Check if there is enough stack space left for a recursive call
+    const size_t required_stack_size = N * thread_stack_size; // Modify the factor as required
+    return stack_limit.rlim_cur > required_stack_size;
+}
+
 //
 	for(const std::vector<uint64_t>& pKeyUInt64 : Axioms_UInt64Vec)
 	{
