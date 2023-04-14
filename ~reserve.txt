@@ -1,165 +1,609 @@
+
+//
+__attribute__((always_inline)) template<>
+void Auto<Indirection_EnumClass::_expand>(Theorem_Struct InTheorem, const Axiom_Struct& InAxiom)
+{
+	if (InTheorem.RHSReduceCallGraph_UInt64Map.count(InAxiom.guid) == 0) return;
+
+	if (InTheorem.RHSReduceCallHistory_UInt64Map.count(InAxiom.guid) > 0) return;
+
+	InTheorem.RHSReduceCallHistory_UInt64Map.insert(InAxiom.guid);
+
+	Theorem_Struct TheoremProto_0000 = InTheorem;
+	Theorem_Struct TheoremProto_0001 = InTheorem;
+	Theorem_Struct TheoremProto_0002 = InTheorem;
+
+	TheoremProto_0000.UpdatePrimaryKey_LHS(InAxiom.RHSPrimaryKey_UInt64, InAxiom.LHSPrimaryKey_UInt64);
+
+	TheoremProto_0001.UpdatePrimaryKey_RHS(InAxiom.RHSPrimaryKey_UInt64, InAxiom.LHSPrimaryKey_UInt64);
+
+	TheoremProto_0002.UpdatePrimaryKey_LHS(InAxiom.RHSPrimaryKey_UInt64, InAxiom.LHSPrimaryKey_UInt64);
+	TheoremProto_0002.UpdatePrimaryKey_RHS(InAxiom.RHSPrimaryKey_UInt64, InAxiom.LHSPrimaryKey_UInt64);
+
+	TheoremProto_0000.ProofStack_VecUInt64.push_back(InAxiom.guid);
+	TheoremProto_0001.ProofStack_VecUInt64.push_back(InAxiom.guid);
+	TheoremProto_0002.ProofStack_VecUInt64.push_back(InAxiom.guid);
+
+	if (TheoremProto_0000.LHSPrimaryKey_UInt64 == TheoremProto_0000.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	if (TheoremProto_0001.LHSPrimaryKey_UInt64 == TheoremProto_0001.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	if (TheoremProto_0002.LHSPrimaryKey_UInt64 == TheoremProto_0002.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	switch (InTheorem.Indir_EnumClass)
+	{
+		case Indirection_EnumClass::_reduce:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				while (recursive_calls_available.load(std::memory_order_relaxed) < 3)
+					std::this_thread::yield();
+					
+				recursive_calls_available.fetch_sub(3, std::memory_order_relaxed);
+					
+				Reduce(TheoremProto_0000, Axiom);
+				Reduce(TheoremProto_0001, Axiom);
+				Reduce(TheoremProto_0002, Axiom);
+					
+				recursive_calls_available.fetch_add(3, std::memory_order_relaxed);
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_expand:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				while (recursive_calls_available.load(std::memory_order_relaxed) < 3)
+					std::this_thread::yield();
+					
+				recursive_calls_available.fetch_sub(3, std::memory_order_relaxed);
+					
+				Expand(TheoremProto_0000, Axiom);
+				Expand(TheoremProto_0001, Axiom);
+				Expand(TheoremProto_0002, Axiom);
+					
+				recursive_calls_available.fetch_add(3, std::memory_order_relaxed);
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_auto:
+		default:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				while (recursive_calls_available.load(std::memory_order_relaxed) < 6)
+					std::this_thread::yield();
+					
+				recursive_calls_available.fetch_sub(6, std::memory_order_relaxed);
+				
+				Reduce(TheoremProto_0000, Axiom);
+				Reduce(TheoremProto_0001, Axiom);
+				Reduce(TheoremProto_0002, Axiom);
+				
+				Expand(TheoremProto_0000, Axiom);
+				Expand(TheoremProto_0001, Axiom);
+				Expand(TheoremProto_0002, Axiom);
+					
+				recursive_calls_available.fetch_add(6, std::memory_order_relaxed);
+			});
+			break;
+		}
+	}
+};
+
+__attribute__((always_inline)) template<>
+void Auto<Indirection_EnumClass::_auto>(Theorem_Struct InTheorem, const Axiom_Struct& InAxiom)
+{
+	if (InTheorem.RHSReduceCallGraph_UInt64Map.count(InAxiom.guid) == 0) return;
+
+	if (InTheorem.RHSReduceCallHistory_UInt64Map.count(InAxiom.guid) > 0) return;
+
+	InTheorem.RHSReduceCallHistory_UInt64Map.insert(InAxiom.guid);
+
+	Theorem_Struct TheoremProto_0000 = InTheorem;
+	Theorem_Struct TheoremProto_0001 = InTheorem;
+	Theorem_Struct TheoremProto_0002 = InTheorem;
+
+	TheoremProto_0000.UpdatePrimaryKey_LHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+
+	TheoremProto_0001.UpdatePrimaryKey_RHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+
+	TheoremProto_0002.UpdatePrimaryKey_LHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+	TheoremProto_0002.UpdatePrimaryKey_RHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+
+	TheoremProto_0000.ProofStack_VecUInt64.push_back(InAxiom.guid);
+	TheoremProto_0001.ProofStack_VecUInt64.push_back(InAxiom.guid);
+	TheoremProto_0002.ProofStack_VecUInt64.push_back(InAxiom.guid);
+
+	if (TheoremProto_0000.LHSPrimaryKey_UInt64 == TheoremProto_0000.RHSPrimaryKey_UInt64)
+	{
+		InTheorem.TotalProofsFound_UInt64++;
+		InTheorem.ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	if (TheoremProto_0001.LHSPrimaryKey_UInt64 == TheoremProto_0001.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	if (TheoremProto_0002.LHSPrimaryKey_UInt64 == TheoremProto_0002.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+	
+	switch (InTheorem.Indir_EnumClass)
+	{
+		case Indirection_EnumClass::_reduce:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired()) {
+					Auto(TheoremProto_0000, Axiom);
+					Auto(TheoremProto_0001, Axiom);
+					Auto(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_expand:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired())
+				{
+					Auto(TheoremProto_0003, Axiom);
+					Auto(TheoremProto_0004, Axiom);
+					Auto(TheoremProto_0005, Axiom);
+				}
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_auto:
+		default:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(6);
+				if (limiter.acquired())
+				{
+					Auto(TheoremProto_0000, Axiom);
+					Auto(TheoremProto_0001, Axiom);
+					Auto(TheoremProto_0002, Axiom);
+					
+					Auto(TheoremProto_0003, Axiom);
+					Auto(TheoremProto_0004, Axiom);
+					Auto(TheoremProto_0005, Axiom);
+				}
+			});
+			break;
+		}
+	}
+	
+	std::cout << "Invoke: Auto(...) : InAxioms_VecRef[0].guid: " << InAxioms_VecRef[0].guid << std::endl;
+};
+//
+__attribute__((always_inline))
+void Reduce(Theorem_Struct InTheorem, const Axiom_Struct& InAxiom)
+{
+	if (InTheorem.RHSReduceCallGraph_UInt64Map.count(InAxiom.guid) == 0) return;
+
+	if (InTheorem.RHSReduceCallHistory_UInt64Map.count(InAxiom.guid) > 0) return;
+
+	InTheorem.RHSReduceCallHistory_UInt64Map.insert(InAxiom.guid);
+
+	Theorem_Struct TheoremProto_0000 = InTheorem;
+	Theorem_Struct TheoremProto_0001 = InTheorem;
+	Theorem_Struct TheoremProto_0002 = InTheorem;
+
+	TheoremProto_0000.UpdatePrimaryKey_LHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+
+	TheoremProto_0001.UpdatePrimaryKey_RHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+
+	TheoremProto_0002.UpdatePrimaryKey_LHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+	TheoremProto_0002.UpdatePrimaryKey_RHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+
+	TheoremProto_0000.ProofStack_VecUInt64.push_back(InAxiom.guid);
+	TheoremProto_0001.ProofStack_VecUInt64.push_back(InAxiom.guid);
+	TheoremProto_0002.ProofStack_VecUInt64.push_back(InAxiom.guid);
+
+	if (TheoremProto_0000.LHSPrimaryKey_UInt64 == TheoremProto_0000.RHSPrimaryKey_UInt64)
+	{
+		InTheorem.TotalProofsFound_UInt64++;
+		InTheorem.ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	if (TheoremProto_0001.LHSPrimaryKey_UInt64 == TheoremProto_0001.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	if (TheoremProto_0002.LHSPrimaryKey_UInt64 == TheoremProto_0002.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	switch (InTheorem.Indir_EnumClass)
+	{
+		case Indirection_EnumClass::_reduce:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired()) {
+					Reduce(TheoremProto_0000, Axiom);
+					Reduce(TheoremProto_0001, Axiom);
+					Reduce(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_expand:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired())
+				{
+					Expand(TheoremProto_0000, Axiom);
+					Expand(TheoremProto_0001, Axiom);
+					Expand(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_auto:
+		default:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(6);
+				if (limiter.acquired())
+				{
+					Reduce(TheoremProto_0000, Axiom);
+					Reduce(TheoremProto_0001, Axiom);
+					Reduce(TheoremProto_0002, Axiom);
+					
+					Expand(TheoremProto_0000, Axiom);
+					Expand(TheoremProto_0001, Axiom);
+					Expand(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+	}
+};
+//
+				if (ijDoesNotCreateACallLoop_Flag)
+				{
+					const uint64_t Subnet_UInt64_lhsReduce = Axiom_i.at(0) % Axiom_j.at(0);
+					const uint64_t Subnet_UInt64_lhsExpand = Axiom_i.at(0) % Axiom_j.at(1);
+					const uint64_t Subnet_UInt64_rhsReduce = Axiom_i.at(1) % Axiom_j.at(0);
+					const uint64_t Subnet_UInt64_rhsExpand = Axiom_i.at(1) % Axiom_j.at(1);
+					
+					const bool bSubnetFound_Flag_lhsReduce = (Subnet_UInt64_lhsReduce == 0); // 1 + 1 ==> 2 ?
+					const bool bSubnetFound_Flag_lhsExpand = (Subnet_UInt64_lhsExpand == 0); // 2 ==> 1 + 1 ?
+					const bool bSubnetFound_Flag_rhsReduce = (Subnet_UInt64_rhsReduce == 0); // 2 <== 1 + 1 ?
+					const bool bSubnetFound_Flag_rhsExpand = (Subnet_UInt64_rhsExpand == 0); // 1 + 1 <== 2 ?
+
+					if (bSubnetFound_Flag_lhsReduce)
+					{
+						auto it = LHSReduceCallGraph_UInt64Map.find(i);
+						
+						if (it != LHSReduceCallGraph_UInt64Map.end())
+						{
+							it->second.insert(std::make_pair(j, true));
+						}
+					}
+
+					if (bSubnetFound_Flag_lhsExpand)
+					{
+						auto it = LHSExpandCallGraph_UInt64Map.find(i);
+						
+						if (it != LHSExpandCallGraph_UInt64Map.end())
+						{
+							it->second.insert(std::make_pair(j, true));
+						}
+					}
+
+					if (bSubnetFound_Flag_rhsReduce)
+					{
+						auto it = RHSReduceCallGraph_UInt64Map.find(i);
+						
+						if (it != RHSReduceCallGraph_UInt64Map.end())
+						{
+							it->second.insert(std::make_pair(j, true));
+						}
+					}
+
+					if (bSubnetFound_Flag_rhsExpand)
+					{
+						auto it = RHSExpandCallGraph_UInt64Map.find(i);
+						
+						if (it != RHSExpandCallGraph_UInt64Map.end())
+						{
+							it->second.insert(std::make_pair(j, true));
+						}
+					}
+				}
+//
+	switch (InTheorem.Indir_EnumClass)
+	{
+		case Indirection_EnumClass::_reduce:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired()) {
+					Reduce(TheoremProto_0000, Axiom);
+					Reduce(TheoremProto_0001, Axiom);
+					Reduce(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_expand:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired())
+				{
+					Expand(TheoremProto_0000, Axiom);
+					Expand(TheoremProto_0001, Axiom);
+					Expand(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_auto:
+		default:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired())
+				{
+					Auto(TheoremProto_0000, Axiom);
+					Auto(TheoremProto_0001, Axiom);
+					Auto(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+	}
 // lock-free implementations are scalable (but slow!) and lock-based implementations are fast (but are not easily scaled!)
 class RecursionLimiter
 {
 public:
-    static constexpr uint64_t kDefaultLimit = 2048;
+	static constexpr uint64_t kDefaultLimit = 2048;
 
-    explicit RecursionLimiter(uint64_t required_calls)
-        : required_calls_(required_calls), acquired_(false) 
-    {
-        Acquire();
-    }
+	explicit RecursionLimiter(uint64_t required_calls)
+		: required_calls_(required_calls), acquired_(false) 
+	{
+		Acquire();
+	}
 
-    ~RecursionLimiter()
-    {
-        if (acquired_)
-        {
-            Release();
-        }
-    }
+	~RecursionLimiter()
+	{
+		if (acquired_)
+		{
+			Release();
+		}
+	}
 
 private:
-    void Acquire()
-    {
-        uint64_t current_available;
-        do {
-            current_available = recursive_calls_available.load(std::memory_order_relaxed);
-            if (current_available < required_calls_)
-            {
-                std::this_thread::yield();
-            }
-        } while (!recursive_calls_available.compare_exchange_weak(current_available, current_available - required_calls_, std::memory_order_acquire));
-        acquired_ = true;
-    }
+	void Acquire()
+	{
+		uint64_t current_available;
+		do {
+			current_available = recursive_calls_available.load(std::memory_order_relaxed);
+			if (current_available < required_calls_)
+			{
+				std::this_thread::yield();
+			}
+		} while (!recursive_calls_available.compare_exchange_weak(current_available, current_available - required_calls_, std::memory_order_acquire));
+		acquired_ = true;
+	}
 
-    void Release()
-    {
-        recursive_calls_available.fetch_add(required_calls_, std::memory_order_release);
-    }
+	void Release()
+	{
+		recursive_calls_available.fetch_add(required_calls_, std::memory_order_release);
+	}
 
-    static std::atomic<uint64_t> recursive_calls_available;
-    uint64_t required_calls_;
-    bool acquired_;
+	static std::atomic<uint64_t> recursive_calls_available;
+	uint64_t required_calls_;
+	bool acquired_;
 };
 
   // Initialize the static member
 std::atomic<uint64_t> RecursionLimiter::recursive_calls_available{RecursionLimiter::kDefaultLimit};
 
 std::for_each(std::execution::par_unseq, 
-            Axioms_Vec.begin(), 
-            Axioms_Vec.end(), 
-            [&](const Axiom_Struct& Axiom)
-            {
-                RecursionLimiter limiter(3);
-                    
-                Reduce(TheoremProto_0000, Axiom);
-                Reduce(TheoremProto_0001, Axiom);
-                Reduce(TheoremProto_0002, Axiom);
-            });
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter limiter(3);
+					
+				Reduce(TheoremProto_0000, Axiom);
+				Reduce(TheoremProto_0001, Axiom);
+				Reduce(TheoremProto_0002, Axiom);
+			});
 //
-    /*
-    if (localProofFound_Flag)
-        cv.notify(ProofStack_VecUInt64)
-    // safe increment or uint64_t add: a, b
-    if (a > 0 && b > 0 && a > std::numeric_limits<uint64_t>::max() - b) {
-        throw std::overflow_error("overflow");
-    } 
-    std::this_thread::sleep_for(std::chrono::nanoseconds(12));
-    */
-    
+	/*
+	if (localProofFound_Flag)
+		cv.notify(ProofStack_VecUInt64)
+	// safe increment or uint64_t add: a, b
+	if (a > 0 && b > 0 && a > std::numeric_limits<uint64_t>::max() - b) {
+		throw std::overflow_error("overflow");
+	} 
+	std::this_thread::sleep_for(std::chrono::nanoseconds(12));
+	*/
+	
 // Helper function to check if it is safe to make a recursive call
 bool can_make_recursive_call(const size_t N = 2)
 {
-    // Get the current stack size limit
-    struct rlimit stack_limit;
-    if (getrlimit(RLIMIT_STACK, &stack_limit) != 0)
-    {
-        // Failed to get the stack limit
-        return false;
-    }
+	// Get the current stack size limit
+	struct rlimit stack_limit;
+	if (getrlimit(RLIMIT_STACK, &stack_limit) != 0)
+	{
+		// Failed to get the stack limit
+		return false;
+	}
 
-    // Get the stack size of the current thread
-    pthread_attr_t attr;
-    size_t thread_stack_size;
-    pthread_attr_init(&attr);
-    pthread_attr_getstacksize(&attr, &thread_stack_size);
+	// Get the stack size of the current thread
+	pthread_attr_t attr;
+	size_t thread_stack_size;
+	pthread_attr_init(&attr);
+	pthread_attr_getstacksize(&attr, &thread_stack_size);
 
-    // Check if there is enough stack space left for a recursive call
-    const size_t required_stack_size = N * thread_stack_size; // Modify the factor as required
-    return stack_limit.rlim_cur > required_stack_size;
+	// Check if there is enough stack space left for a recursive call
+	const size_t required_stack_size = N * thread_stack_size; // Modify the factor as required
+	return stack_limit.rlim_cur > required_stack_size;
 }
 
 //
 	for(const std::vector<uint64_t>& pKeyUInt64 : Axioms_UInt64Vec)
 	{
-        uint64_t  lhs = pKeyUInt64[0];
-        uint64_t  rhs = pKeyUInt64[1];
-        
-        uint64_t _lhs = pKeyUInt64[0];
-        uint64_t _rhs = pKeyUInt64[1];
-        
-        if (_lhs < _rhs)
-        {
-             lhs = _rhs;
-             rhs = _lhs;
-        }
-        
-        std::variant<Axiom_Struct,Theorem_Struct> tmp = (nIdxUInt64 > 0) ?
-            std::variant<Axiom_Struct, Theorem_Struct>(Axiom_Struct{}) : Theorem_Struct{};
-            
-        std::visit([&](auto &elem)
-        {
-            elem.guid = 0;
-            elem.guid = GUID++;
-            elem.LHSPrimaryKey_UInt64 = lhs;
-            elem.RHSPrimaryKey_UInt64 = rhs;
-            elem.LHSCallHistory_UInt64Map = LHSCallHistory_Map[nIdxUInt64];
-            elem.RHSCallHistory_UInt64Map = RHSCallHistory_Map[nIdxUInt64];
-            elem.LHSCallGraph_UInt64Map = LHSCallGraph_UInt64Map[nIdxUInt64];
-            elem.RHSCallGraph_UInt64Map = RHSCallGraph_UInt64Map[nIdxUInt64];
-            
-        }, tmp);
-        
-        if(nIdxUInt64 < 1 &&
-            std::is_same<decltype(tmp), 
-                decltype(Axiom_Struct{})>::value)
-            Axioms_Vec.emplace_back(tmp);
-            
-    	nIdxUInt64++;
+		uint64_t  lhs = pKeyUInt64[0];
+		uint64_t  rhs = pKeyUInt64[1];
+		
+		uint64_t _lhs = pKeyUInt64[0];
+		uint64_t _rhs = pKeyUInt64[1];
+		
+		if (_lhs < _rhs)
+		{
+			 lhs = _rhs;
+			 rhs = _lhs;
+		}
+		
+		std::variant<Axiom_Struct,Theorem_Struct> tmp = (nIdxUInt64 > 0) ?
+			std::variant<Axiom_Struct, Theorem_Struct>(Axiom_Struct{}) : Theorem_Struct{};
+			
+		std::visit([&](auto &elem)
+		{
+			elem.guid = 0;
+			elem.guid = GUID++;
+			elem.LHSPrimaryKey_UInt64 = lhs;
+			elem.RHSPrimaryKey_UInt64 = rhs;
+			elem.LHSCallHistory_UInt64Map = LHSCallHistory_Map[nIdxUInt64];
+			elem.RHSCallHistory_UInt64Map = RHSCallHistory_Map[nIdxUInt64];
+			elem.LHSCallGraph_UInt64Map = LHSCallGraph_UInt64Map[nIdxUInt64];
+			elem.RHSCallGraph_UInt64Map = RHSCallGraph_UInt64Map[nIdxUInt64];
+			
+		}, tmp);
+		
+		if(nIdxUInt64 < 1 &&
+			std::is_same<decltype(tmp), 
+				decltype(Axiom_Struct{})>::value)
+			Axioms_Vec.emplace_back(tmp);
+			
+		nIdxUInt64++;
 	}
 //
-        std::variant<Axiom_Struct,Theorem_Struct>& target = nIdxUInt64 > 0 ? 
-        []() noexcept -> void
-        {
-            Axioms_Vec.emplace_back
-            (
-                Axiom_Struct
-                {
-                    .guid = GUID++,
-                    .LHSPrimaryKey_UInt64 = lhs,
-                    .RHSPrimaryKey_UInt64 = rhs,
-                    .LHSCallHistory_Map = LHSCallHistory_Map[nIdxUInt64],
-                    .RHSCallHistory_Map = RHSCallHistory_Map[nIdxUInt64],
-                    .LHSCallGraph_UInt64Map = LHSCallGraph_UInt64Map[nIdxUInt64],
-                    .RHSCallGraph_UInt64Map = RHSCallGraph_UInt64Map[nIdxUInt64]
-                }
-            );
-        }()
-        : 
-        []() noexcept -> void
-        {
-            Theorem_Struct
-            {
-                .guid = GUID++,
-                .LHSPrimaryKey_UInt64 = lhs,
-                .RHSPrimaryKey_UInt64 = rhs,
-                .LHSCallHistory_Map = LHSCallHistory_Map[nIdxUInt64],
-                .RHSCallHistory_Map = RHSCallHistory_Map[nIdxUInt64],
-                .LHSCallGraph_UInt64Map = LHSCallGraph_UInt64Map[nIdxUInt64],
-                .RHSCallGraph_UInt64Map = RHSCallGraph_UInt64Map[nIdxUInt64]
-            };
-        }()
-        ;
+		std::variant<Axiom_Struct,Theorem_Struct>& target = nIdxUInt64 > 0 ? 
+		[]() noexcept -> void
+		{
+			Axioms_Vec.emplace_back
+			(
+				Axiom_Struct
+				{
+					.guid = GUID++,
+					.LHSPrimaryKey_UInt64 = lhs,
+					.RHSPrimaryKey_UInt64 = rhs,
+					.LHSCallHistory_Map = LHSCallHistory_Map[nIdxUInt64],
+					.RHSCallHistory_Map = RHSCallHistory_Map[nIdxUInt64],
+					.LHSCallGraph_UInt64Map = LHSCallGraph_UInt64Map[nIdxUInt64],
+					.RHSCallGraph_UInt64Map = RHSCallGraph_UInt64Map[nIdxUInt64]
+				}
+			);
+		}()
+		: 
+		[]() noexcept -> void
+		{
+			Theorem_Struct
+			{
+				.guid = GUID++,
+				.LHSPrimaryKey_UInt64 = lhs,
+				.RHSPrimaryKey_UInt64 = rhs,
+				.LHSCallHistory_Map = LHSCallHistory_Map[nIdxUInt64],
+				.RHSCallHistory_Map = RHSCallHistory_Map[nIdxUInt64],
+				.LHSCallGraph_UInt64Map = LHSCallGraph_UInt64Map[nIdxUInt64],
+				.RHSCallGraph_UInt64Map = RHSCallGraph_UInt64Map[nIdxUInt64]
+			};
+		}()
+		;
 // Benchmarks (nanoseconds): 40'034
 	std::unordered_map<uint64_t, std::vector<uint64_t>> LHSPrimaryKeyHistory_VecMap;
 	std::unordered_map<uint64_t, std::vector<uint64_t>> RHSPrimaryKeyHistory_VecMap;
@@ -167,63 +611,63 @@ bool can_make_recursive_call(const size_t N = 2)
 	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallHistory_Map;
 	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallGraph_UInt64Map;
 	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallGraph_UInt64Map;
-    std::atomic<uint64_t> i(0);
-    std::for_each(std::execution::unseq, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
-        [&](std::vector<uint64_t>& Axiom_i) {
-            {
-                const uint64_t _lhs = Axiom_i.at(0);
-                const uint64_t _rhs = Axiom_i.at(1);
-                if (_lhs < _rhs)
-                {
-                    const uint64_t lhs = _rhs;
-                    const uint64_t rhs = _lhs;
-                    Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 0, uint64_t{ lhs });
-                    Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 1, uint64_t{ rhs });
-                }
-            }
-    
-            std::unordered_map<uint64_t, bool> _cgl; // Build lhs call graph
-            std::unordered_map<uint64_t, bool> _cgr; // Build rhs call graph
-            std::unordered_map<uint64_t, bool> _cg2l; // Build lhs call history map
-            std::unordered_map<uint64_t, bool> _cg2r; // Build rhs call history map
-            LHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgl));
-            RHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgr));
-            LHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2l));
-            RHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2r));
-    
-            std::atomic<uint64_t> j(0);
-            std::for_each(std::execution::par, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
-                [&](const std::vector<uint64_t>& Axiom_j) {
-                    bool ijDoesNotCreateACallLoop_Flag = (i.load() != j.load()); // Avoid Call loops
-                    if (ijDoesNotCreateACallLoop_Flag)
-                    {
-                        const uint64_t Subnet_UInt64_lhs = Axiom_i.at(0) / Axiom_j.at(1);
-                        const uint64_t Subnet_UInt64_rhs = Axiom_i.at(1) / Axiom_j.at(0);
-                        const bool bSubnetFound_Flag_lhs = (Subnet_UInt64_lhs % 1 == 0); // 2 == 1 + 1 ?
-                        const bool bSubnetFound_Flag_rhs = (Subnet_UInt64_rhs % 1 == 0); // 1 + 1 == 2 ?
-    
-                        if (bSubnetFound_Flag_lhs)
-                        {
-                            auto it = LHSCallGraph_UInt64Map.find(i.load());
-                            if (it != LHSCallGraph_UInt64Map.end())
-                            {
-                                it->second.insert(std::make_pair(j.load(), true));
-                            }
-                        }
-    
-                        if (bSubnetFound_Flag_rhs)
-                        {
-                            auto it = RHSCallGraph_UInt64Map.find(j.load());
-                            if (it != RHSCallGraph_UInt64Map.end())
-                            {
-                                it->second.insert(std::make_pair(i.load(), true));
-                        }
-                    }
-                }
-                j.fetch_add(1);
-            });
-        i.fetch_add(1);
-    });
+	std::atomic<uint64_t> i(0);
+	std::for_each(std::execution::unseq, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
+		[&](std::vector<uint64_t>& Axiom_i) {
+			{
+				const uint64_t _lhs = Axiom_i.at(0);
+				const uint64_t _rhs = Axiom_i.at(1);
+				if (_lhs < _rhs)
+				{
+					const uint64_t lhs = _rhs;
+					const uint64_t rhs = _lhs;
+					Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 0, uint64_t{ lhs });
+					Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 1, uint64_t{ rhs });
+				}
+			}
+	
+			std::unordered_map<uint64_t, bool> _cgl; // Build lhs call graph
+			std::unordered_map<uint64_t, bool> _cgr; // Build rhs call graph
+			std::unordered_map<uint64_t, bool> _cg2l; // Build lhs call history map
+			std::unordered_map<uint64_t, bool> _cg2r; // Build rhs call history map
+			LHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgl));
+			RHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgr));
+			LHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2l));
+			RHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2r));
+	
+			std::atomic<uint64_t> j(0);
+			std::for_each(std::execution::par, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
+				[&](const std::vector<uint64_t>& Axiom_j) {
+					bool ijDoesNotCreateACallLoop_Flag = (i.load() != j.load()); // Avoid Call loops
+					if (ijDoesNotCreateACallLoop_Flag)
+					{
+						const uint64_t Subnet_UInt64_lhs = Axiom_i.at(0) / Axiom_j.at(1);
+						const uint64_t Subnet_UInt64_rhs = Axiom_i.at(1) / Axiom_j.at(0);
+						const bool bSubnetFound_Flag_lhs = (Subnet_UInt64_lhs % 1 == 0); // 2 == 1 + 1 ?
+						const bool bSubnetFound_Flag_rhs = (Subnet_UInt64_rhs % 1 == 0); // 1 + 1 == 2 ?
+	
+						if (bSubnetFound_Flag_lhs)
+						{
+							auto it = LHSCallGraph_UInt64Map.find(i.load());
+							if (it != LHSCallGraph_UInt64Map.end())
+							{
+								it->second.insert(std::make_pair(j.load(), true));
+							}
+						}
+	
+						if (bSubnetFound_Flag_rhs)
+						{
+							auto it = RHSCallGraph_UInt64Map.find(j.load());
+							if (it != RHSCallGraph_UInt64Map.end())
+							{
+								it->second.insert(std::make_pair(i.load(), true));
+						}
+					}
+				}
+				j.fetch_add(1);
+			});
+		i.fetch_add(1);
+	});
 // Benchmarks (nanoseconds): 1'570'893
 	std::unordered_map<uint64_t, std::vector<uint64_t>> LHSPrimaryKeyHistory_VecMap;
 	std::unordered_map<uint64_t, std::vector<uint64_t>> RHSPrimaryKeyHistory_VecMap;
@@ -231,62 +675,62 @@ bool can_make_recursive_call(const size_t N = 2)
 	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallHistory_Map;
 	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallGraph_UInt64Map;
 	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallGraph_UInt64Map;
-    uint64_t i = 0;
-    for (std::vector<uint64_t>& Axiom_i : Axioms_UInt64Vec)
-    {   
-        {// lhs < rhs ? swap!
-            const uint64_t _lhs = Axiom_i.at(0);
-            const uint64_t _rhs = Axiom_i.at(1);
-            if (_lhs < _rhs)
-            {
-                const uint64_t lhs = _rhs;
-                const uint64_t rhs = _lhs;
-                Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 0, uint64_t{ lhs });
-                Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 1, uint64_t{ rhs });
-            }
-        }
-        uint64_t j = 0;
-        std::unordered_map<uint64_t, bool> _cgl; // Build lhs call graph
-        std::unordered_map<uint64_t, bool> _cgr; // Build rhs call graph
-        std::unordered_map<uint64_t, bool> _cg2l; // Build lhs call history map
-        std::unordered_map<uint64_t, bool> _cg2r; // Build rhs call history map
-        LHSCallGraph_UInt64Map.insert(std::make_pair(i, _cgl));
-        RHSCallGraph_UInt64Map.insert(std::make_pair(i, _cgr));
-        LHSCallHistory_Map.insert(std::make_pair(i, _cg2l));
-        RHSCallHistory_Map.insert(std::make_pair(i, _cg2r));
-        for (const std::vector<uint64_t>& Axiom_j : Axioms_UInt64Vec)
-        {
-            bool ijDoesNotCreateACallLoop_Flag = (i != j); // Avoid Call loops
-            if (ijDoesNotCreateACallLoop_Flag) 
-            {
-                const uint64_t Subnet_UInt64_lhs = Axiom_i.at(0) / Axiom_j.at(1);
-                const uint64_t Subnet_UInt64_rhs = Axiom_i.at(1) / Axiom_j.at(0);
-                const bool bSubnetFound_Flag_lhs = (Subnet_UInt64_lhs % 1 == 0); // 2 == 1 + 1 ?
-                const bool bSubnetFound_Flag_rhs = (Subnet_UInt64_rhs % 1 == 0); // 1 + 1 == 2 ?
-                
-                if (bSubnetFound_Flag_lhs)
-                {
-                    auto it = LHSCallGraph_UInt64Map.find(i);
-                    if (it != LHSCallGraph_UInt64Map.end())
-                    {
-                        it->second.insert(std::make_pair(j, true));
-                    }
-                }
+	uint64_t i = 0;
+	for (std::vector<uint64_t>& Axiom_i : Axioms_UInt64Vec)
+	{   
+		{// lhs < rhs ? swap!
+			const uint64_t _lhs = Axiom_i.at(0);
+			const uint64_t _rhs = Axiom_i.at(1);
+			if (_lhs < _rhs)
+			{
+				const uint64_t lhs = _rhs;
+				const uint64_t rhs = _lhs;
+				Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 0, uint64_t{ lhs });
+				Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 1, uint64_t{ rhs });
+			}
+		}
+		uint64_t j = 0;
+		std::unordered_map<uint64_t, bool> _cgl; // Build lhs call graph
+		std::unordered_map<uint64_t, bool> _cgr; // Build rhs call graph
+		std::unordered_map<uint64_t, bool> _cg2l; // Build lhs call history map
+		std::unordered_map<uint64_t, bool> _cg2r; // Build rhs call history map
+		LHSCallGraph_UInt64Map.insert(std::make_pair(i, _cgl));
+		RHSCallGraph_UInt64Map.insert(std::make_pair(i, _cgr));
+		LHSCallHistory_Map.insert(std::make_pair(i, _cg2l));
+		RHSCallHistory_Map.insert(std::make_pair(i, _cg2r));
+		for (const std::vector<uint64_t>& Axiom_j : Axioms_UInt64Vec)
+		{
+			bool ijDoesNotCreateACallLoop_Flag = (i != j); // Avoid Call loops
+			if (ijDoesNotCreateACallLoop_Flag) 
+			{
+				const uint64_t Subnet_UInt64_lhs = Axiom_i.at(0) / Axiom_j.at(1);
+				const uint64_t Subnet_UInt64_rhs = Axiom_i.at(1) / Axiom_j.at(0);
+				const bool bSubnetFound_Flag_lhs = (Subnet_UInt64_lhs % 1 == 0); // 2 == 1 + 1 ?
+				const bool bSubnetFound_Flag_rhs = (Subnet_UInt64_rhs % 1 == 0); // 1 + 1 == 2 ?
+				
+				if (bSubnetFound_Flag_lhs)
+				{
+					auto it = LHSCallGraph_UInt64Map.find(i);
+					if (it != LHSCallGraph_UInt64Map.end())
+					{
+						it->second.insert(std::make_pair(j, true));
+					}
+				}
 
-                if (bSubnetFound_Flag_rhs)
-                {
-                    auto it = RHSCallGraph_UInt64Map.find(j);
-                    if (it != RHSCallGraph_UInt64Map.end())
-                    {
-                        it->second.insert(std::make_pair(i, true));
-                    }
-                }
-                
-            }
-            j++;
-        }
-        i++;
-    }
+				if (bSubnetFound_Flag_rhs)
+				{
+					auto it = RHSCallGraph_UInt64Map.find(j);
+					if (it != RHSCallGraph_UInt64Map.end())
+					{
+						it->second.insert(std::make_pair(i, true));
+					}
+				}
+				
+			}
+			j++;
+		}
+		i++;
+	}
 //
 /*
 	std::vector <uint64_t> v{};
@@ -326,65 +770,65 @@ bool can_make_recursive_call(const size_t N = 2)
 	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallHistory_Map;
 	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallGraph_UInt64Map;
 	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallGraph_UInt64Map;
-    std::atomic<uint64_t> i(0);
-    std::for_each(std::execution::par_unseq, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
-        [&](std::vector<uint64_t>& Axiom_i) {
-            {
-                const uint64_t _lhs = Axiom_i.at(0);
-                const uint64_t _rhs = Axiom_i.at(1);
-                if (_lhs < _rhs)
-                {
-                    const uint64_t lhs = _rhs;
-                    const uint64_t rhs = _lhs;
-                    Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 0, uint64_t{ lhs });
-                    Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 1, uint64_t{ rhs });
-                }
-            }
-    
-            std::unordered_map<uint64_t, bool> _cgl; // Build lhs call graph
-            std::unordered_map<uint64_t, bool> _cgr; // Build rhs call graph
-            std::unordered_map<uint64_t, bool> _cg2l; // Build lhs call history map
-            std::unordered_map<uint64_t, bool> _cg2r; // Build rhs call history map
-            LHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgl));
-            RHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgr));
-            LHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2l));
-            RHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2r));
-    
-            std::atomic<uint64_t> j(0);
-            std::for_each(std::execution::par, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
-                [&](const std::vector<uint64_t>& Axiom_j) {
-                    bool ijDoesNotCreateACallLoop_Flag = (i.load() != j.load()); // Avoid Call loops
-                    if (ijDoesNotCreateACallLoop_Flag)
-                    {
-                        const uint64_t Subnet_UInt64_lhs = Axiom_i.at(0) / Axiom_j.at(1);
-                        const uint64_t Subnet_UInt64_rhs = Axiom_i.at(1) / Axiom_j.at(0);
-                        const bool bSubnetFound_Flag_lhs = (Subnet_UInt64_lhs % 1 == 0); // 2 == 1 + 1 ?
-                        const bool bSubnetFound_Flag_rhs = (Subnet_UInt64_rhs % 1 == 0); // 1 + 1 == 2 ?
-    
-                        if (bSubnetFound_Flag_lhs)
-                        {
-                            auto it = LHSCallGraph_UInt64Map.find(i.load());
-                            if (it != LHSCallGraph_UInt64Map.end())
-                            {
-                                it->second.insert(std::make_pair(j.load(), true));
-                            }
-                        }
-    
-                        if (bSubnetFound_Flag_rhs)
-                        {
-                            auto it = RHSCallGraph_UInt64Map.find(j.load());
-                            if (it != RHSCallGraph_UInt64Map.end())
-                            {
-                                it->second.insert(std::make_pair(i.load(), true));
-                        }
-                    }
-                }
-                j.fetch_add(1);
-            });
-        i.fetch_add(1);
-    });
+	std::atomic<uint64_t> i(0);
+	std::for_each(std::execution::par_unseq, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
+		[&](std::vector<uint64_t>& Axiom_i) {
+			{
+				const uint64_t _lhs = Axiom_i.at(0);
+				const uint64_t _rhs = Axiom_i.at(1);
+				if (_lhs < _rhs)
+				{
+					const uint64_t lhs = _rhs;
+					const uint64_t rhs = _lhs;
+					Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 0, uint64_t{ lhs });
+					Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 1, uint64_t{ rhs });
+				}
+			}
+	
+			std::unordered_map<uint64_t, bool> _cgl; // Build lhs call graph
+			std::unordered_map<uint64_t, bool> _cgr; // Build rhs call graph
+			std::unordered_map<uint64_t, bool> _cg2l; // Build lhs call history map
+			std::unordered_map<uint64_t, bool> _cg2r; // Build rhs call history map
+			LHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgl));
+			RHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgr));
+			LHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2l));
+			RHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2r));
+	
+			std::atomic<uint64_t> j(0);
+			std::for_each(std::execution::par, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
+				[&](const std::vector<uint64_t>& Axiom_j) {
+					bool ijDoesNotCreateACallLoop_Flag = (i.load() != j.load()); // Avoid Call loops
+					if (ijDoesNotCreateACallLoop_Flag)
+					{
+						const uint64_t Subnet_UInt64_lhs = Axiom_i.at(0) / Axiom_j.at(1);
+						const uint64_t Subnet_UInt64_rhs = Axiom_i.at(1) / Axiom_j.at(0);
+						const bool bSubnetFound_Flag_lhs = (Subnet_UInt64_lhs % 1 == 0); // 2 == 1 + 1 ?
+						const bool bSubnetFound_Flag_rhs = (Subnet_UInt64_rhs % 1 == 0); // 1 + 1 == 2 ?
+	
+						if (bSubnetFound_Flag_lhs)
+						{
+							auto it = LHSCallGraph_UInt64Map.find(i.load());
+							if (it != LHSCallGraph_UInt64Map.end())
+							{
+								it->second.insert(std::make_pair(j.load(), true));
+							}
+						}
+	
+						if (bSubnetFound_Flag_rhs)
+						{
+							auto it = RHSCallGraph_UInt64Map.find(j.load());
+							if (it != RHSCallGraph_UInt64Map.end())
+							{
+								it->second.insert(std::make_pair(i.load(), true));
+						}
+					}
+				}
+				j.fetch_add(1);
+			});
+		i.fetch_add(1);
+	});
 //
-                    // Todo: move clause to rhs
+					// Todo: move clause to rhs
 					else if (ijCreatesAnExpandCall_Flag) // Expand
 					{
 						const uint64_t Subnet_UInt64 = Axiom_i.at(0) / Axiom_j.at(1);
@@ -1183,46 +1627,46 @@ bool can_make_recursive_call(const size_t N = 2)
 		}
 //
 class __x86i64Int {
-    // Assuming existing class members and methods
-    std::vector<uint64_t> digits_;
-    int sign_;
+	// Assuming existing class members and methods
+	std::vector<uint64_t> digits_;
+	int sign_;
 
-    // Assumed helper methods
-    size_t num_bits() const;
-    void shift_left(size_t n);
-    bool is_zero() const;
+	// Assumed helper methods
+	size_t num_bits() const;
+	void shift_left(size_t n);
+	bool is_zero() const;
 
 public:
-    __x86i64Int operator/ (const __x86i64Int& rhs) const
-    {
-        if (rhs.is_zero())
-        {
-            throw std::invalid_argument("divide by zero");
-        }
+	__x86i64Int operator/ (const __x86i64Int& rhs) const
+	{
+		if (rhs.is_zero())
+		{
+			throw std::invalid_argument("divide by zero");
+		}
 
-        __x86i64Int quotient{ "0" };
-        __x86i64Int remainder{ *this };
-        remainder.sign_ = 1; // Make remainder positive for comparison purposes
+		__x86i64Int quotient{ "0" };
+		__x86i64Int remainder{ *this };
+		remainder.sign_ = 1; // Make remainder positive for comparison purposes
 
-        size_t n = rhs.num_bits() - 1;
-        __x86i64Int divisor = rhs;
-        divisor.sign_ = 1; // Make divisor positive for comparison purposes
-        divisor.shift_left(n);
+		size_t n = rhs.num_bits() - 1;
+		__x86i64Int divisor = rhs;
+		divisor.sign_ = 1; // Make divisor positive for comparison purposes
+		divisor.shift_left(n);
 
-        while (n-- > 0)
-        {
-            quotient.shift_left(1);
-            if (remainder >= divisor)
-            {
-                remainder -= divisor;
-                quotient.digits_[0] |= 1; // Set the least significant bit of quotient
-            }
-            divisor.shift_right(1);
-        }
+		while (n-- > 0)
+		{
+			quotient.shift_left(1);
+			if (remainder >= divisor)
+			{
+				remainder -= divisor;
+				quotient.digits_[0] |= 1; // Set the least significant bit of quotient
+			}
+			divisor.shift_right(1);
+		}
 
-        quotient.sign_ = sign_ * rhs.sign_;
-        return quotient;
-    }
+		quotient.sign_ = sign_ * rhs.sign_;
+		return quotient;
+	}
 };
 
 //
