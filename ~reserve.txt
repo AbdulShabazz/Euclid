@@ -1,4 +1,107 @@
 
+
+    // Compile
+    auto processAxioms = [&]() noexcept -> void
+    {
+        auto find_and_insert = [&](const bool& check, const uint64_t& idx, auto& map)
+        {
+            if (check)
+            {
+                auto it = map.find(i);
+    
+                if (it != map.end())
+                {
+                    it->second.insert(std::make_pair(j, true));
+                }
+            }
+        };
+        
+        auto init_call_graph = [&]<typename T>(const T& idx, auto& map)
+        {
+            std::unordered_map<T, bool> _cg;
+            map.insert(std::make_pair(idx, _cg));
+        }
+        
+        uint64_t i{};
+        for(std::vector<uint64_t>& Axiom_i : Axioms_UInt64Vec) 
+        {
+            std::jthread t1(init_call_graph, i, std::ref(LHSExpandCallGraph_UInt64Map));
+            std::jthread t2(init_call_graph, i, std::ref(LHSReduceCallGraph_UInt64Map));
+            std::jthread t3(init_call_graph, i, std::ref(RHSExpandCallGraph_UInt64Map));
+            std::jthread t4(init_call_graph, i, std::ref(RHSReduceCallGraph_UInt64Map));
+        
+            t1.join();
+            t2.join();
+            t3.join();
+            t4.join();
+
+            uint64_t j{};
+            for(std::vector<uint64_t>& Axiom_j : Axioms_UInt64Vec) 
+            {
+                bool ijAvoidsACallLoop_Flag = (i != j); // Avoid Call loops
+                
+                if (ijAvoidsACallLoop_Flag)
+                {
+					const bool bSubnetFound_Flag_lhsReduce = (Axiom_i.at(0) % Axiom_j.at(0)) == 0); // 1 + 1 ==> 2 ?
+					const bool bSubnetFound_Flag_lhsExpand = (Axiom_i.at(0) % Axiom_j.at(1)) == 0); // 2 ==> 1 + 1 ?
+					const bool bSubnetFound_Flag_rhsReduce = (Axiom_i.at(1) % Axiom_j.at(0)) == 0); // 2 <== 1 + 1 ?
+					const bool bSubnetFound_Flag_rhsExpand = (Axiom_i.at(1) % Axiom_j.at(1)) == 0); // 1 + 1 <== 2 ?
+
+                    // better performance ?
+                    std::jthread t1(find_and_insert, bSubnetFound_Flag_lhsReduce, std::ref(LHSReduceCallGraph_UInt64Map));
+                    std::jthread t2(find_and_insert, bSubnetFound_Flag_lhsExpand, std::ref(LHSExpandCallGraph_UInt64Map));
+                    std::jthread t3(find_and_insert, bSubnetFound_Flag_rhsReduce, std::ref(RHSReduceCallGraph_UInt64Map));
+                    std::jthread t4(find_and_insert, bSubnetFound_Flag_rhsExpand, std::ref(RHSExpandCallGraph_UInt64Map));
+                
+                    t1.join();
+                    t2.join();
+                    t3.join();
+                    t4.join();
+                }
+                j++;
+            }
+            i++;
+        }
+    };
+//
+struct AxiomProto_Struct
+{
+    uint64_t LHSPrimaryKey_UInt64{};
+    uint64_t RHSPrimaryKey_UInt64{};
+    
+    std::vector<std::string> LHSAxiom_StdStrVec;
+    std::vector<std::string> RHSAxiom_StdStrVec;
+    
+    std::unordered_map<uint64_t,bool> LHSExpandCallGraph_UInt64Map;
+    std::unordered_map<uint64_t,bool> LHSReduceCallGraph_UInt64Map;
+    std::unordered_map<uint64_t,bool> RHSExpandCallGraph_UInt64Map;
+    std::unordered_map<uint64_t,bool> RHSReduceCallGraph_UInt64Map;
+    
+    std::unordered_map<uint64_t,bool> LHSExpandCallHistory_UInt64Map;
+    std::unordered_map<uint64_t,bool> LHSReduceCallHistory_UInt64Map;
+    std::unordered_map<uint64_t,bool> RHSExpandCallHistory_UInt64Map;
+    std::unordered_map<uint64_t,bool> RHSReduceCallHistory_UInt64Map;
+    
+    bool bParseStrict_Flag = false;
+    
+    bool UpdatePrimaryKey_LHS(const uint64_t& PKeyFind, const uint64_t& PKeyReplacement)
+    {
+        bool ReturnStatus_Flag{};
+        LHSPrimaryKey_UInt64 = LHSPrimaryKey_UInt64 / PKeyFind * PKeyReplacement;
+        ReturnStatus_Flag = true;
+        return ReturnStatus_Flag;
+    }
+    
+    bool UpdatePrimaryKey_RHS(const uint64_t& PKeyFind, const uint64_t& PKeyReplacement)
+    {
+        bool ReturnStatus_Flag{};
+        RHSPrimaryKey_UInt64 = RHSPrimaryKey_UInt64 / PKeyFind * PKeyReplacement;
+        ReturnStatus_Flag = true;
+        return ReturnStatus_Flag;
+    }
+    
+    uint64_t guid{};
+};
 //
 __attribute__((always_inline)) template<>
 void Auto<Indirection_EnumClass::_expand>(Theorem_Struct InTheorem, const Axiom_Struct& InAxiom)
