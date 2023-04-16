@@ -37,3 +37,11 @@ SOLU:
 	std::jthread t(Auto, Theorem, Axioms_vec); // Auto(Theorem_Struct InTheorem, std::vector<Axiom_Struct> InAxioms_vec); or
 	std::jthread t(Auto, std::ref(Theorem), std::ref(Axioms_vec)); // Auto(Theorem_Struct& InTheorem, std::vector<Axiom_Struct>& InAxioms_vec); or
 	std::jthread t(Auto, std::ref(Theorem), std::cref(Axioms_vec)); // Auto(Theorem_Struct& InTheorem, const std::vector<Axiom_Struct>& InAxioms_vec);
+
+SYMP: 
+	route map collisions: 
+	if(theorem.SubnetFound_LHS(Axiom.LHSPrimaryKey_UInt64){ Axiom.RHSCallGraph_UInt64Map[theorem.guid] = true; }
+	if(theorem.SubnetFound_RHS(Axiom.LHSPrimaryKey_UInt64){ Axiom.RHSCallGraph_UInt64Map[theorem.guid] = true; }
+SOLU: 
+	if(theorem.SubnetFound_LHS(Axiom.LHSPrimaryKey_UInt64){ Axiom.RHSCallGraph_UInt64Map[SourceRoute_EnumClass::Src_LHS][theorem.guid] = true; }
+	if(theorem.SubnetFound_RHS(Axiom.LHSPrimaryKey_UInt64){ Axiom.RHSCallGraph_UInt64Map[SourceRoute_EnumClass::Src_RHS][theorem.guid] = true; }
