@@ -1,5 +1,8 @@
 
 
+	std::unordered_map<uint64_t, std::vector<uint64_t>> LHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::vector<uint64_t>> RHSPrimaryKeyHistory_VecMap;
+//
     // Compile
     auto processAxioms = [&]() noexcept -> void
     {
