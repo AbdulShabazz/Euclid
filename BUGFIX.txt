@@ -43,8 +43,8 @@ SYMP:
 	if(theorem.SubnetFound_LHS(Axiom.LHSPrimaryKey_UInt64)){ Axiom.RHSCallGraph_UInt64Map[theorem.guid] = true; }
 	if(theorem.SubnetFound_RHS(Axiom.LHSPrimaryKey_UInt64)){ Axiom.RHSCallGraph_UInt64Map[theorem.guid] = true; }
 SOLU: 
-	if(theorem.SubnetFound_LHS(Axiom.LHSPrimaryKey_UInt64)){ Axiom.RHSCallGraph_UInt64Map[RouteSource_EnumClass::Src_LHS][theorem.guid] = true; }
-	if(theorem.SubnetFound_RHS(Axiom.LHSPrimaryKey_UInt64){ Axiom.RHSCallGraph_UInt64Map[RouteSource_EnumClass::Src_RHS][theorem.guid] = true; }
+	if(theorem.SubnetFound_LHS(Axiom.LHSPrimaryKey_UInt64)){ Axiom.RHSCallGraph_UInt64Map[RouteSource_EnumClass::_lhs][theorem.guid] = true; }
+	if(theorem.SubnetFound_RHS(Axiom.LHSPrimaryKey_UInt64){ Axiom.RHSCallGraph_UInt64Map[RouteSource_EnumClass::_rhs][theorem.guid] = true; }
 
 SYMP: Error: passing ‘const Axiom_Struct’ argument discards qualifiers [-fpermissive]: Axiom_i.SubnetFound_LHS(Axiom_j.LHSPrimaryKey_UInt64))
 SOLU: bool SubnetFound_LHS(const uint64_t& PKeyFind) noexcept >> bool SubnetFound_LHS(const uint64_t& PKeyFind) const noexcept
