@@ -51,7 +51,6 @@ SOLU: bool SubnetFound_LHS(const uint64_t& PKeyFind) noexcept >> bool SubnetFoun
 
 SYMP: Axiom_0:{ lhs:0, rhs:0}; // Within the for-loop, Axiom_0 is uninitialized
 SOLU:
-
 	if (_lhs < _rhs)
 	{
 		lhs = _rhs;
