@@ -40,10 +40,38 @@ SOLU:
 
 SYMP: 
 	route map collisions: 
-	if(theorem.SubnetFound_LHS(Axiom.LHSPrimaryKey_UInt64){ Axiom.RHSCallGraph_UInt64Map[theorem.guid] = true; }
-	if(theorem.SubnetFound_RHS(Axiom.LHSPrimaryKey_UInt64){ Axiom.RHSCallGraph_UInt64Map[theorem.guid] = true; }
+	if(theorem.SubnetFound_LHS(Axiom.LHSPrimaryKey_UInt64)){ Axiom.RHSCallGraph_UInt64Map[theorem.guid] = true; }
+	if(theorem.SubnetFound_RHS(Axiom.LHSPrimaryKey_UInt64)){ Axiom.RHSCallGraph_UInt64Map[theorem.guid] = true; }
 SOLU: 
-	if(theorem.SubnetFound_LHS(Axiom.LHSPrimaryKey_UInt64){ Axiom.RHSCallGraph_UInt64Map[SourceRoute_EnumClass::Src_LHS][theorem.guid] = true; }
-	if(theorem.SubnetFound_RHS(Axiom.LHSPrimaryKey_UInt64){ Axiom.RHSCallGraph_UInt64Map[SourceRoute_EnumClass::Src_RHS][theorem.guid] = true; }
+	if(theorem.SubnetFound_LHS(Axiom.LHSPrimaryKey_UInt64)){ Axiom.RHSCallGraph_UInt64Map[RouteSource_EnumClass::Src_LHS][theorem.guid] = true; }
+	if(theorem.SubnetFound_RHS(Axiom.LHSPrimaryKey_UInt64){ Axiom.RHSCallGraph_UInt64Map[RouteSource_EnumClass::Src_RHS][theorem.guid] = true; }
 
-SOLU: error: passing ‘const Axiom_Struct’ argument discards qualifiers [-fpermissive]: Axiom_i.SubnetFound_LHS(Axiom_j.LHSPrimaryKey_UInt64))
+SYMP: Error: passing ‘const Axiom_Struct’ argument discards qualifiers [-fpermissive]: Axiom_i.SubnetFound_LHS(Axiom_j.LHSPrimaryKey_UInt64))
+SOLU: bool SubnetFound_LHS(const uint64_t& PKeyFind) noexcept >> bool SubnetFound_LHS(const uint64_t& PKeyFind) const noexcept
+
+SYMP: Axiom_0:{ lhs:0, rhs:0}; // Within the for-loop, Axiom_0 is uninitialized
+SOLU:
+
+	if (_lhs < _rhs)
+	{
+		lhs = _rhs;
+		rhs = _lhs;
+	}
+	
+	Axiom_Struct Axiom; >>
+
+	if (_lhs < _rhs)
+	{
+		lhs = _rhs;
+		rhs = _lhs;
+	}
+	
+	if(GUID < 1)
+	{
+		Theorem.guid = GUID++;
+		Theorem.LHSPrimaryKey_UInt64 = lhs;
+		Theorem.RHSPrimaryKey_UInt64 = rhs;
+		continue;
+	}
+	
+	Axiom_Struct Axiom;
