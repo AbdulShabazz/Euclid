@@ -1,3 +1,14 @@
+
+
+// local scope: Get the current stack size limit
+{ 
+	struct rlimit stack_limit;
+	if (getrlimit(RLIMIT_STACK, &stack_limit) == 0)
+	{
+		RecursionLimiter::set_recursion_limit(stack_limit.rlim_cur); 
+	}
+}
+//
 #include <vector>
 #include <chrono>
 #include <iostream>
