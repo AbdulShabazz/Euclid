@@ -74,3 +74,9 @@ SOLU:
 	}
 	
 	Axiom_Struct Axiom;
+
+SYMP:
+	Error	C2908	explicit specialization; 'void Auto<RouteSource_EnumClass::_lhs,Indirection_EnumClass::_reduce>(Theorem_Struct,const Axiom_Struct &,const bool &,const bool &)' has already been instantiated	main.cpp	Line 1226	
+	Error	C2908	explicit specialization; 'void Auto<RouteSource_EnumClass::_lhs,Indirection_EnumClass::_expand>(Theorem_Struct,const Axiom_Struct &,const bool &,const bool &)' has already been instantiated	main.cpp	Line 1458	
+SOLU:
+
