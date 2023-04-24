@@ -1,5 +1,30 @@
 
 
+//
+                    else 
+                    {
+                        std::cout << "Error: Improperly initialized Theorem at in index Tasks_Thread[N]." << std::endl;
+                        continue;
+                    }
+//
+            /*
+            There are atleast 16 permutations of these, 
+            such as (LHSCallGraph && !find(RouteGoal::_lhs)), 
+            (LHSCallGraph && !find(RouteGoal::_rhs)), ... etc.
+            Only include those which are useful.
+            */
+//
+    //std::vector<Theorem_Struct> InOut;
+    
+    /*
+    int i = 3;
+    
+    while(i)
+    {
+        std::cout << static_cast<unsigned int>(Round.NextRound_UInt8()) << std::endl;
+        --i;
+    }
+    */
 // local scope: Get the current stack size limit
 { 
 	struct rlimit stack_limit;
