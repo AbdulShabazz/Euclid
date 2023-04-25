@@ -113,6 +113,9 @@ Todo: Cache axioms-, lemmas-, intermedite results-, proof statements- and their 
 Todo: Implement a proof-search caching algorithm (asynchronous) w/ co_routines; and use threadpools for the nextprime calculation.
 Todo: convert data types to auto to allow the theorem prover in the c++ compiler to perform optimizations on data types.
 Todo: Iff N % M == 0, then M is a multiple of N; iff (N / M) % 2 == 0, then M is a scalar multiple of N; if (N / M) % 1 == 0 then M is a composite of N.
+Todo: Add support for ~=
+Todo: Add support to Remove Axioms (Delete)
+Todo: Add support to Disable Axioms (SendOffline)
 
 NOTES
 [+] Add a strict specifier, eg. st{ { 2 } - { 1 } } = { 1 }
