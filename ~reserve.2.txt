@@ -1,4 +1,88 @@
 
+//
+    AxiomProto_Struct()
+    {
+        LHSCallHistory[RouteGoal_EnumClass::_lhs] = {};
+        LHSCallHistory[RouteGoal_EnumClass::_rhs] = {};
+        
+        RHSCallHistory[RouteGoal_EnumClass::_lhs] = {};
+        RHSCallHistory[RouteGoal_EnumClass::_rhs] = {};
+        
+        
+        LHSCallGraph_UInt64Map[RouteGoal_EnumClass::_lhs] = {};
+        LHSCallGraph_UInt64Map[RouteGoal_EnumClass::_rhs] = {};
+            
+        RHSCallGraph_UInt64Map[RouteGoal_EnumClass::_lhs] = {};
+        RHSCallGraph_UInt64Map[RouteGoal_EnumClass::_rhs] = {};
+    };
+    
+//
+    Tasks_Thread[0].push_back(Theorem);
+    
+    auto _0000 = Theorem.LHSCallGraph_UInt64Map.find(RouteGoal_EnumClass::_lhs);
+    if(_0000 != Theorem.LHSCallGraph_UInt64Map.end())
+    {
+        std::cout << "Theorem.LHSCallGraph_UInt64Map[RouteGoal_EnumClass::_lhs] = {";
+        bool NextCall_Flag {};
+        for (const auto& [idx_UInt64, boolType] : _0000->second)
+        {   if (NextCall_Flag)
+            {
+                std::cout << ", ";
+                NextCall_Flag = false;
+            }
+            std::cout << idx_UInt64 << "";
+            NextCall_Flag = true;
+        }
+        std::cout << "}" << std::endl;
+    }
+    _0000 = Theorem.LHSCallGraph_UInt64Map.find(RouteGoal_EnumClass::_rhs);
+    if(_0000 != Theorem.LHSCallGraph_UInt64Map.end())
+    {
+        std::cout << "Theorem.LHSCallGraph_UInt64Map[RouteGoal_EnumClass::_rhs] = {";
+        bool NextCall_Flag {};
+        for (const auto& [idx_UInt64, boolType] : _0000->second)
+        {   if (NextCall_Flag)
+            {
+                std::cout << ", ";
+                NextCall_Flag = false;
+            }
+            std::cout << idx_UInt64 << "";
+            NextCall_Flag = true;
+        }
+        std::cout << "}" << std::endl;
+    }
+    _0000 = Theorem.RHSCallGraph_UInt64Map.find(RouteGoal_EnumClass::_lhs);
+    if(_0000 != Theorem.RHSCallGraph_UInt64Map.end())
+    {
+        std::cout << "Theorem.RHSCallGraph_UInt64Map[RouteGoal_EnumClass::_lhs] = {";
+        bool NextCall_Flag {};
+        for (const auto& [idx_UInt64, boolType] : _0000->second)
+        {   if (NextCall_Flag)
+            {
+                std::cout << ", ";
+                NextCall_Flag = false;
+            }
+            std::cout << idx_UInt64 << "";
+            NextCall_Flag = true;
+        }
+        std::cout << "}" << std::endl;
+    }
+    _0000 = Theorem.RHSCallGraph_UInt64Map.find(RouteGoal_EnumClass::_rhs);
+    if(_0000 != Theorem.RHSCallGraph_UInt64Map.end())
+    {
+        std::cout << "Theorem.RHSCallGraph_UInt64Map[RouteGoal_EnumClass::_rhs] = {";
+        bool NextCall_Flag {};
+        for (const auto& [idx_UInt64, boolType] : _0000->second)
+        {   if (NextCall_Flag)
+            {
+                std::cout << ", ";
+                NextCall_Flag = false;
+            }
+            std::cout << idx_UInt64 << "";
+            NextCall_Flag = true;
+        }
+        std::cout << "}" << std::endl;
+    }
 
 //
                     else 
