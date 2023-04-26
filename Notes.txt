@@ -116,6 +116,9 @@ Todo: Iff N % M == 0, then M is a multiple of N; iff (N / M) % 2 == 0, then M is
 Todo: Add support for ~=
 Todo: Add support to Remove Axioms (Delete)
 Todo: Add support to Disable Axioms (SendOffline)
+Todo: online repository: UnrealEngine-Seagat2011-2023/Engine/Plugins/Runtime/EuclidProver
+
+/EuclidProver/
 
 NOTES
 [+] Add a strict specifier, eg. st{ { 2 } - { 1 } } = { 1 }
