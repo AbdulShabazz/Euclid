@@ -1,4 +1,1085 @@
 
+                const bool lhs_mod_lhs_flag = Theorem[LHS] % Axiom[LHS] == 0;
+                const bool lhs_mod_rhs_flag = Theorem[LHS] % Axiom[RHS] == 0;
+                const bool rhs_mod_lhs_flag = Theorem[RHS] % Axiom[LHS] == 0;
+                const bool rhs_mod_rhs_flag = Theorem[RHS] % Axiom[RHS] == 0;
+                
+                const bool lhs_call_lhs_flag = CallHistory[ Theorem[LHS] ][ Axiom[LHS] ] == false;
+                const bool lhs_call_rhs_flag = CallHistory[ Theorem[LHS] ][ Axiom[RHS] ] == false;
+                const bool rhs_call_lhs_flag = CallHistory[ Theorem[RHS] ][ Axiom[LHS] ] == false;
+                const bool rhs_call_rhs_flag = CallHistory[ Theorem[RHS] ][ Axiom[RHS] ] == false;
+//
+                uint16_t flags = 0;
+
+                flags |= (Theorem[LHS] % Axiom[LHS] == 0) << 0;
+                flags |= (Theorem[LHS] % Axiom[RHS] == 0) << 1;
+                flags |= (Theorem[RHS] % Axiom[LHS] == 0) << 2;
+                flags |= (Theorem[RHS] % Axiom[RHS] == 0) << 3;
+                
+                flags |= (CallHistory[Theorem[LHS]][Axiom[LHS]] == false) << 4;
+                flags |= (CallHistory[Theorem[LHS]][Axiom[RHS]] == false) << 5;
+                flags |= (CallHistory[Theorem[RHS]][Axiom[LHS]] == false) << 6;
+                flags |= (CallHistory[Theorem[RHS]][Axiom[RHS]] == false) << 7;
+                
+                switch (flags)
+                {
+                    case (0b10001): // lhs_mod_lhs_flag && lhs_call_lhs_flag
+                        break;
+                    case (0b01010): // lhs_mod_rhs_flag && lhs_call_rhs_flag
+                        break;
+                    case (0b001100): // rhs_mod_lhs_flag && rhs_call_lhs_flag
+                        break;
+                    case (0b00001000): // rhs_mod_rhs_flag && rhs_call_rhs_flag
+                        break;
+                    default:
+                        break;
+                }
+//
+#include <iostream>
+#include <thread>
+#include <atomic>
+#include <cstdint>
+#include <cstdlib>
+#include <array>
+#include <chrono>
+#include <vector>
+#include <deque>
+#include <string>
+#include <unordered_map>
+
+int main()
+{
+    const auto start_time_chrono = std::chrono::high_resolution_clock::now();
+
+    /*
+    token: [ "1" "2" "4" "+" ]
+    prime: [  2   3   5   7 ]
+    */
+    
+    bool QED {};
+
+    const uint64_t N = 2; // Update as needed;
+
+    std::array < uint64_t, 2 > Axioms_Vec;
+
+    //std::unordered_map <uint64_t, Axiom_Struct> Axioms_LibraryMap;
+    
+    std::array<uint64_t, 2> Theorem_UInt64Vec = 
+    {
+        5488, // "1 + 1 + 1 + 1"
+        5 // "4"
+    };
+
+    std::vector<std::array<uint64_t, 2>> Axioms_UInt64Vec = 
+    {
+        {
+            28, // "1 + 1"
+            3 // "2"
+        },
+
+        {
+            63, // "2 + 2"
+            5 // "4"
+        }
+    };
+    
+    std::deque<
+    std::array<uint64_t, 2 >> Tasks_Thread;
+    
+    Tasks_Thread.push_back ( Theorem_UInt64Vec );
+    
+    constexpr int LHS = 0;
+    constexpr int RHS = 1;
+
+    constexpr uint64_t MaxAllowedProofs_UInt64{ 1 };
+    uint64_t TotalProofsFound_UInt64 {};
+    
+    std::unordered_map<uint64_t,
+    std::unordered_map<uint64_t,bool>> CallHistory {};
+    
+    while (!Tasks_Thread.empty() && !QED)
+    {
+        std::array<uint64_t, 2 > Theorem = 
+        Tasks_Thread.front();
+        Tasks_Thread.pop_front();
+        
+        if (Theorem[LHS] == Theorem[RHS])
+        {
+            std::cout << std::endl;
+            std::cout << "Proof Found" << std::endl;
+            std::cout << "Theorem_0000 {" << Theorem[LHS] << ", " << Theorem[RHS] << "}" << std::endl;
+            std::cout << std::endl;
+            std::cout << "Q.E.D." << std::endl;
+            
+          ++TotalProofsFound_UInt64;
+            if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64)
+            {
+                QED = true;
+                break;
+            }
+            
+        } else {
+            
+            for (const std::array<uint64_t,2>& Axiom : Axioms_UInt64Vec)
+            {
+                const bool lhs_mod_lhs_flag = Theorem[LHS] % Axiom[LHS] == 0;
+                const bool lhs_mod_rhs_flag = Theorem[LHS] % Axiom[RHS] == 0;
+                const bool rhs_mod_lhs_flag = Theorem[RHS] % Axiom[LHS] == 0;
+                const bool rhs_mod_rhs_flag = Theorem[RHS] % Axiom[RHS] == 0;
+                
+                const bool lhs_call_lhs_flag = CallHistory[ Theorem[LHS] ][ Axiom[LHS] ] == false;
+                const bool lhs_call_rhs_flag = CallHistory[ Theorem[LHS] ][ Axiom[RHS] ] == false;
+                const bool rhs_call_lhs_flag = CallHistory[ Theorem[RHS] ][ Axiom[LHS] ] == false;
+                const bool rhs_call_rhs_flag = CallHistory[ Theorem[RHS] ][ Axiom[RHS] ] == false;
+                
+                if (lhs_mod_lhs_flag && lhs_call_lhs_flag)
+                {
+                    CallHistory[ Theorem[LHS] ][ Axiom[LHS] ] = true;
+                    
+                    std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                    Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[LHS] * Axiom[RHS];
+                    std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                    
+                    //Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    Tasks_Thread.push_back ( Theorem_0000 );
+                }
+                else
+                if (lhs_mod_rhs_flag && lhs_call_rhs_flag)
+                {
+                    CallHistory[ Theorem[LHS] ][ Axiom[RHS] ] = true;
+                    
+                    std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                    Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[RHS] * Axiom[LHS];
+                    std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                    
+                    //Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    Tasks_Thread.push_back ( Theorem_0000 );
+                }
+                else
+                if (rhs_mod_lhs_flag && rhs_call_lhs_flag)
+                {
+                    CallHistory[ Theorem[RHS] ][ Axiom[LHS] ] = true;
+                    
+                    std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                    Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[LHS] * Axiom[RHS];
+                    std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                    
+                    //Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    Tasks_Thread.push_back ( Theorem_0000 );
+                }
+                else
+                if (rhs_mod_rhs_flag && rhs_call_rhs_flag)
+                {
+                    CallHistory[ Theorem[RHS] ][ Axiom[RHS] ] = true;
+                    
+                    std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                    Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[RHS] * Axiom[LHS];
+                    std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                    
+                    //Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    Tasks_Thread.push_back ( Theorem_0000 );
+                }
+            } // end for (...Axiom : Axioms_UInt64Vec)
+        } // end for (...Theorem : Tasks_Thread[Read])
+        
+    } // end for (...!Tasks_Thread[Read].empty() && !QED))
+    
+    if (!QED)
+    {   
+        std::cout << "No Proof Found." << std::endl;
+    }
+
+    const auto end_time_chrono = std::chrono::high_resolution_clock::now();
+    const auto duration_chrono = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time_chrono - start_time_chrono).count();
+    std::cout << "Total Duration (nanoseconds): " << duration_chrono << std::endl;
+
+    return EXIT_SUCCESS;
+}
+
+//
+
+// Define a linked list to store the tasks.
+struct Task {
+  uint64_t lhs;
+  uint64_t rhs;
+  Task* next;
+};
+
+// Define a function to search the linked list for the next task.
+Task* FindNextTask(Task* head) {
+  if (head == nullptr) {
+    return nullptr;
+  }
+
+  // Use a binary search to find the next task.
+  Task* current = head;
+  Task* previous = nullptr;
+  while (current != nullptr) {
+    if (current->lhs == lhs && current->rhs == rhs) {
+      return current;
+    }
+    previous = current;
+    current = current->next;
+  }
+
+  // If no task was found, return nullptr.
+  return nullptr;
+};
+
+// Define a function to perform the proofs.
+bool PerformProof(uint64_t lhs, uint64_t rhs, const std::vector<uint64_t>& axioms) {
+  // Use a backtracking algorithm to perform the proofs.
+  for (uint64_t i = 0; i < axioms.size(); i++) {
+    if (lhs % axioms[i] == 0) {
+      lhs /= axioms[i];
+      rhs *= axioms[i];
+      if (lhs == rhs) {
+        return true;
+      }
+    }
+  }
+
+  // If no proof was found, return false.
+  return false;
+};
+
+// Main function.
+int main() {
+  // Create a linked list to store the tasks.
+  Task* head = nullptr;
+
+  // Add some tasks to the linked list.
+  head = new Task();
+  head->lhs = 1;
+  head->rhs = 2;
+  head->next = new Task();
+  head->next->lhs = 3;
+  head->next->rhs = 4;
+  head->next->next = nullptr;
+
+  // Search the linked list for the next task.
+  Task* current = FindNextTask(head);
+
+  // If a task was found, perform the proof.
+  if (current != nullptr) {
+    if (PerformProof(current->lhs, current->rhs, axioms)) {
+      std::cout << "Proof found!" << std::endl;
+    } else {
+      std::cout << "No proof found." << std::endl;
+    }
+  } else {
+    std::cout << "No tasks found." << std::endl;
+  }
+
+  // Free the linked list.
+  while (head != nullptr) {
+    Task* next = head->next;
+    delete head;
+    head = next;
+  }
+
+  return EXIT_SUCCESS;
+}
+//
+#include <vector>
+
+using namespace std;
+
+int main() {
+  // Create a vector of tasks.
+  vector<array<uint64_t, 2>> tasks;
+
+  // Create a vector of axioms.
+  vector<array<uint64_t, 2>> axioms;
+
+  // Iterate over the tasks and axioms.
+  for (const auto& task : tasks) {
+    for (const auto& axiom : axioms) {
+      // Check for a match.
+      if (task[LHS] == axiom[LHS] || task[LHS] == axiom[RHS] || task[RHS] == axiom[LHS] || task[RHS] == axiom[RHS]) {
+        // Print the theorem.
+        cout << "Theorem_0000 {" << task[LHS] << ", " << task[RHS] << "}" << endl;
+      }
+    }
+  }
+
+  return 0;
+}
+
+//
+#include <iostream>
+#include <thread>
+#include <atomic>
+#include <cstdint>
+#include <cstdlib>
+#include <array>
+#include <chrono>
+#include <vector>
+#include <string>
+#include <unordered_map>
+
+struct NextRound_Struct
+{
+    bool Round_Flag {};
+    bool init_flag {};
+    
+    uint8_t iCurrentRound_UInt8 = 0;
+    uint8_t iNextRound_UInt8 = 1;
+
+    uint8_t NextRound_UInt8 (const bool UpdateRound_Flag = true)
+    {
+        if(UpdateRound_Flag && init_flag)
+            std::swap (iCurrentRound_UInt8,iNextRound_UInt8);
+            
+        init_flag = true;
+
+        return iNextRound_UInt8;
+    };
+
+    uint8_t CurrentRound_UInt8 ()
+    {
+        return iCurrentRound_UInt8;
+    };
+};
+
+int main()
+{
+    const auto start_time_chrono = std::chrono::high_resolution_clock::now();
+
+    /*
+    token: [ "1" "2" "4" "+" ]
+    prime: [  2   3   5   7 ]
+    */
+    
+    NextRound_Struct Round;
+    
+    bool QED {};
+
+    const uint64_t N = 2; // Update as needed;
+
+    std::array < uint64_t, 2 > Axioms_Vec;
+
+    //std::unordered_map <uint64_t, Axiom_Struct> Axioms_LibraryMap;
+    
+    std::array<uint64_t, 2> Theorem_UInt64Vec = 
+    {
+        5488, // "1 + 1 + 1 + 1"
+        5 // "4"
+    };
+
+    std::vector<std::array<uint64_t, 2>> Axioms_UInt64Vec = 
+    {
+        {
+            28, // "1 + 1"
+            3 // "2"
+        },
+
+        {
+            63, // "2 + 2"
+            5 // "4"
+        }
+    };
+
+    std::array < std::vector < std::array<uint64_t, 2 > >, 2 > Tasks_Thread = {};
+    
+    Tasks_Thread[0].emplace_back(Theorem_UInt64Vec);
+    
+    constexpr int LHS = 0;
+    constexpr int RHS = 1;
+
+    constexpr uint64_t MaxAllowedProofs_UInt64{ 1 };
+    uint64_t TotalProofsFound_UInt64 {};
+    
+    uint8_t Write = Round.NextRound_UInt8();
+    uint8_t Read = Round.CurrentRound_UInt8();
+    
+    std::unordered_map<uint64_t,
+    std::unordered_map<uint64_t,bool>> CallHistory {};
+    
+    while (!Tasks_Thread[Read].empty() && !QED)
+    {
+        for (const std::array<uint64_t, 2>& Theorem: Tasks_Thread[Read])
+        {
+            for (const std::array<uint64_t,2>& Axiom : Axioms_UInt64Vec)
+            {
+                if (Theorem[LHS] == Theorem[RHS])
+                {
+                    std::cout << std::endl;
+                    std::cout << "Proof Found" << std::endl;
+                    std::cout << "Theorem_0000 {" << Theorem[LHS] << ", " << Theorem[RHS] << "}" << std::endl;
+                    std::cout << std::endl;
+                    std::cout << "Q.E.D." << std::endl;
+                    
+                  ++TotalProofsFound_UInt64;
+                    if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64)
+                    {
+                        QED = true;
+                        break;
+                    }
+                }
+            
+                if (QED)
+                {
+                    break;
+                } else {
+                    
+                    if (Theorem[LHS] % Axiom[LHS] == 0)
+                    {
+                        //CallHistory[ Theorem[LHS] ][ Axiom[LHS] ] = true;
+                        
+                        std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                        Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[LHS] * Axiom[RHS];
+                        std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                        
+                        Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                    else
+                    if (Theorem[LHS] % Axiom[RHS] == 0)
+                    {
+                        //CallHistory[ Theorem[LHS] ][ Axiom[RHS] ] = true;
+                        
+                        std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                        Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[RHS] * Axiom[LHS];
+                        std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                        
+                        Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                    else
+                    if (Theorem[RHS] % Axiom[LHS] == 0)
+                    {
+                        //CallHistory[ Theorem[RHS] ][ Axiom[LHS] ] = true;
+                        
+                        std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                        Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[LHS] * Axiom[RHS];
+                        std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                        
+                        Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                    else
+                    if (Theorem[RHS] % Axiom[RHS] == 0)
+                    {
+                        //CallHistory[ Theorem[RHS] ][ Axiom[RHS] ] = true;
+                        
+                        std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                        Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[RHS] * Axiom[LHS];
+                        std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                        
+                        Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                    else
+                    if (
+                    Theorem[LHS] % Axiom[LHS] == 0 &&
+                    Theorem[RHS] % Axiom[LHS] == 0)
+                    {
+                    	std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                    
+                    	Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[LHS] * Axiom[RHS];
+                    	Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[LHS] * Axiom[RHS];
+                    	std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                    
+                    	Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                                        else
+                    if (
+                    Theorem[LHS] % Axiom[LHS] == 0 &&
+                    Theorem[RHS] % Axiom[RHS] == 0)
+                    {
+                    	std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                    
+                    	Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[LHS] * Axiom[RHS];
+                    	Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[RHS] * Axiom[LHS];
+                    	std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                    
+                    	Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                                        else
+                    if (
+                    Theorem[LHS] % Axiom[RHS] == 0 &&
+                    Theorem[RHS] % Axiom[LHS] == 0)
+                    {
+                    	std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                    
+                    	Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[RHS] * Axiom[LHS];
+                    	Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[LHS] * Axiom[RHS];
+                    	std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                    
+                    	Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                                        else
+                    if (
+                    Theorem[LHS] % Axiom[RHS] == 0 &&
+                    Theorem[RHS] % Axiom[RHS] == 0)
+                    {
+                    	std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                    
+                    	Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[RHS] * Axiom[LHS];
+                    	Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[RHS] * Axiom[LHS];
+                    	std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                    
+                    	Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                                        else
+                    if (
+                    Theorem[RHS] % Axiom[LHS] == 0 &&
+                    Theorem[LHS] % Axiom[LHS] == 0)
+                    {
+                    	std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                    
+                    	Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[LHS] * Axiom[RHS];
+                    	Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[LHS] * Axiom[RHS];
+                    	std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                    
+                    	Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                                        else
+                    if (
+                    Theorem[RHS] % Axiom[LHS] == 0 &&
+                    Theorem[LHS] % Axiom[RHS] == 0)
+                    {
+                    	std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                    
+                    	Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[LHS] * Axiom[RHS];
+                    	Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[RHS] * Axiom[LHS];
+                    	std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                    
+                    	Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                                        else
+                    if (
+                    Theorem[RHS] % Axiom[RHS] == 0 &&
+                    Theorem[LHS] % Axiom[LHS] == 0)
+                    {
+                    	std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                    
+                    	Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[RHS] * Axiom[LHS];
+                    	Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[LHS] * Axiom[RHS];
+                    	std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                    
+                    	Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                                        else
+                    if (
+                    Theorem[RHS] % Axiom[RHS] == 0 &&
+                    Theorem[LHS] % Axiom[RHS] == 0)
+                    {
+                    	std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                    
+                    	Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[RHS] * Axiom[LHS];
+                    	Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[RHS] * Axiom[LHS];
+                    	std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                    
+                    	Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+
+                } // end test (QED)
+            } // end for (...Axiom : Axioms_UInt64Vec)
+            
+            if (QED)
+            {
+                break;
+            } 
+        } // end for (...Theorem : Tasks_Thread[Read])
+    
+        Tasks_Thread[Read] = {};
+        
+        Write = Round.NextRound_UInt8 ();
+        Read = Round.CurrentRound_UInt8 ();
+    } // end while (Tasks_Thread[Read].size() && !QED)
+    
+    if (!QED)
+    {   
+        std::cout << "No Proof Found." << std::endl;
+    }
+
+    const auto end_time_chrono = std::chrono::high_resolution_clock::now();
+    const auto duration_chrono = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time_chrono - start_time_chrono).count();
+    std::cout << "Total Duration (nanoseconds): " << duration_chrono << std::endl;
+
+    return EXIT_SUCCESS;
+}
+
+
+
+//
+#include <iostream>
+#include <thread>
+#include <atomic>
+#include <cstdint>
+#include <cstdlib>
+#include <array>
+#include <chrono>
+#include <vector>
+#include <string>
+#include <unordered_map>
+
+struct NextRound_Struct
+{
+    bool Round_Flag {};
+    bool init_flag {};
+    
+    uint8_t iCurrentRound_UInt8 = 0;
+    uint8_t iNextRound_UInt8 = 1;
+
+    uint8_t NextRound_UInt8 (const bool UpdateRound_Flag = true)
+    {
+        if(UpdateRound_Flag && init_flag)
+            std::swap (iCurrentRound_UInt8,iNextRound_UInt8);
+            
+        init_flag = true;
+
+        return iNextRound_UInt8;
+    };
+
+    uint8_t CurrentRound_UInt8 ()
+    {
+        return iCurrentRound_UInt8;
+    };
+};
+
+int main()
+{
+    const auto start_time_chrono = std::chrono::high_resolution_clock::now();
+
+    /*
+    token: [ "1" "2" "4" "+" ]
+    prime: [  2   3   5   7 ]
+    */
+    
+    NextRound_Struct Round;
+    
+    bool QED {};
+
+    const uint64_t N = 2; // Update as needed;
+
+    std::array < uint64_t, 2 > Axioms_Vec;
+
+    //std::unordered_map <uint64_t, Axiom_Struct> Axioms_LibraryMap;
+    
+    std::array<uint64_t, 2> Theorem_UInt64Vec = 
+    {
+        5488, // "1 + 1 + 1 + 1"
+        5 // "4"
+    };
+
+    std::vector<std::array<uint64_t, 2>> Axioms_UInt64Vec = 
+    {
+        {
+            28, // "1 + 1"
+            3 // "2"
+        },
+
+        {
+            63, // "2 + 2"
+            5 // "4"
+        }
+    };
+
+    std::array < std::vector < std::array<uint64_t, 2 > >, 2 > Tasks_Thread = {};
+    
+    Tasks_Thread[0].emplace_back(Theorem_UInt64Vec);
+    
+    constexpr int LHS = 0;
+    constexpr int RHS = 1;
+
+    constexpr uint64_t MaxAllowedProofs_UInt64{ 1 };
+    uint64_t TotalProofsFound_UInt64 {};
+    
+    uint8_t Write = Round.NextRound_UInt8();
+    uint8_t Read = Round.CurrentRound_UInt8();
+    
+    std::unordered_map<uint64_t,
+    std::unordered_map<uint64_t,bool>> CallHistory {};
+    
+    while (!Tasks_Thread[Read].empty() && !QED)
+    {
+        for (const std::array<uint64_t, 2>& Theorem: Tasks_Thread[Read])
+        {
+            for (const std::array<uint64_t,2>& Axiom : Axioms_UInt64Vec)
+            {
+                if (Theorem[LHS] == Theorem[RHS])
+                {
+                    std::cout << std::endl;
+                    std::cout << "Proof Found" << std::endl;
+                    std::cout << "Theorem_0000 {" << Theorem[LHS] << ", " << Theorem[RHS] << "}" << std::endl;
+                    std::cout << std::endl;
+                    std::cout << "Q.E.D." << std::endl;
+                    
+                  ++TotalProofsFound_UInt64;
+                    if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64)
+                    {
+                        QED = true;
+                        break;
+                    }
+                }
+            
+                if (QED)
+                {
+                    break;
+                } else {
+                    
+                    if (
+                        Theorem[LHS] % Axiom[LHS] == 0 &&
+                        CallHistory[ Theorem[LHS] ][ Axiom[LHS] ] == 
+                        false)
+                    {
+                        CallHistory[ Theorem[LHS] ][ Axiom[LHS] ] = true;
+                        
+                        std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                        Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[LHS] * Axiom[RHS];
+                        std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                        
+                        Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                    
+                    if (
+                        Theorem[LHS] % Axiom[RHS] == 0 &&
+                        CallHistory[ Theorem[LHS] ][ Axiom[RHS] ] == 
+                        false)
+                    {
+                        CallHistory[ Theorem[LHS] ][ Axiom[RHS] ] = true;
+                        
+                        std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                        Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[RHS] * Axiom[LHS];
+                        std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                        
+                        Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                    
+                    if (
+                        Theorem[RHS] % Axiom[LHS] == 0 &&
+                        CallHistory[ Theorem[RHS] ][ Axiom[LHS] ] == 
+                        false)
+                    {
+                        CallHistory[ Theorem[RHS] ][ Axiom[LHS] ] = true;
+                        
+                        std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                        Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[LHS] * Axiom[RHS];
+                        std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                        
+                        Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                    
+                    if (Theorem[RHS] % Axiom[RHS] == 0 &&
+                        CallHistory[ Theorem[RHS] ][ Axiom[RHS] ] == 
+                        false)
+                    {
+                        CallHistory[ Theorem[RHS] ][ Axiom[RHS] ] = true;
+                        
+                        std::array<uint64_t, 2> Theorem_0000 = Theorem;
+                        Theorem_0000[RHS] = Theorem_0000[RHS] / Axiom[RHS] * Axiom[LHS];
+                        std::cout << "Theorem_0000 {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+                        
+                        Tasks_Thread[Write].emplace_back(Theorem_0000);
+                    }
+                } // end test (QED)
+            } // end for (...Axiom : Axioms_UInt64Vec)
+            
+            if (QED)
+            {
+                break;
+            } 
+        } // end for (...Theorem : Tasks_Thread[Read])
+    
+        Tasks_Thread[Read] = {};
+        
+        Write = Round.NextRound_UInt8 ();
+        Read = Round.CurrentRound_UInt8 ();
+    } // end while (Tasks_Thread[Read].size() && !QED)
+    
+    if (!QED)
+    {   
+        std::cout << "No Proof Found." << std::endl;
+    }
+
+    const auto end_time_chrono = std::chrono::high_resolution_clock::now();
+    const auto duration_chrono = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time_chrono - start_time_chrono).count();
+    std::cout << "Total Duration (nanoseconds): " << duration_chrono << std::endl;
+
+    return EXIT_SUCCESS;
+}
+//
+struct AxiomProto_Struct
+{
+    AxiomProto_Struct()
+    {
+        
+    };
+    
+    AxiomProto_Struct(AxiomProto_Struct& other)
+    {
+        LHSPrimaryKey_UInt64 = other.LHSPrimaryKey_UInt64;
+        RHSPrimaryKey_UInt64 = other.RHSPrimaryKey_UInt64;
+        
+        LHS_StdStrVec = other.LHS_StdStrVec;
+        RHS_StdStrVec = other.RHS_StdStrVec;
+        
+        LHSCallHistory = other.LHSCallHistory;
+        RHSCallHistory = other.RHSCallHistory;
+        
+        CallHistory = other.CallHistory;
+        
+        LHSCallGraph_UInt64Map = other.LHSCallGraph_UInt64Map;
+        RHSCallGraph_UInt64Map = other.RHSCallGraph_UInt64Map;
+
+        bParseStrict_Flag = other.bParseStrict_Flag;
+    
+        guid = other.guid;
+    };
+    
+    uint64_t LHSPrimaryKey_UInt64 {};
+    uint64_t RHSPrimaryKey_UInt64 {};
+
+    std::vector<std::string> LHS_StdStrVec {};
+    std::vector<std::string> RHS_StdStrVec {};
+
+    std::unordered_map<RouteGoal_EnumClass,
+        std::unordered_map<uint64_t, bool>>
+        LHSCallHistory {};
+
+    std::unordered_map<RouteGoal_EnumClass,
+        std::unordered_map<uint64_t, bool>>
+        RHSCallHistory {};
+
+    std::unordered_map<uint64_t, bool>
+        CallHistory {};
+
+    std::unordered_map<RouteGoal_EnumClass,
+        std::unordered_map<uint64_t, bool>>
+        LHSCallGraph_UInt64Map {};
+
+    std::unordered_map<RouteGoal_EnumClass,
+        std::unordered_map<uint64_t, bool>>
+        RHSCallGraph_UInt64Map {};
+
+    bool SubnetFound_LHS(const uint64_t& PKeyFind) const noexcept
+    {
+        const bool ret = (LHSPrimaryKey_UInt64 % PKeyFind) == 0;
+        return ret;
+    }
+
+    bool SubnetFound_RHS(const uint64_t& PKeyFind) const noexcept
+    {
+        const bool ret = (RHSPrimaryKey_UInt64 % PKeyFind) == 0;
+        return ret;
+    }
+
+    bool bParseStrict_Flag {};
+
+    uint64_t guid {};
+};
+//
+    //Theorem.Indir_EnumClass = Indirection_EnumClass::_auto; // _reduce; // _expand;
+
+    auto _0000 = Theorem.LHSCallGraph_UInt64Map.find(RouteGoal_EnumClass::_lhs);
+    if (_0000 != Theorem.LHSCallGraph_UInt64Map.end())
+    {
+        std::cout << "Theorem.LHSCallGraph_UInt64Map[RouteGoal_EnumClass::_lhs] = {";
+        bool NextCall_Flag{};
+        for (const auto& [idx_UInt64, boolType] : _0000->second)
+        {
+            if (NextCall_Flag)
+            {
+                std::cout << ", ";
+                NextCall_Flag = false;
+            }
+            std::cout << idx_UInt64 << "";
+            NextCall_Flag = true;
+        }
+        std::cout << "}" << std::endl;
+    }
+    _0000 = Theorem.LHSCallGraph_UInt64Map.find(RouteGoal_EnumClass::_rhs);
+    if (_0000 != Theorem.LHSCallGraph_UInt64Map.end())
+    {
+        std::cout << "Theorem.LHSCallGraph_UInt64Map[RouteGoal_EnumClass::_rhs] = {";
+        bool NextCall_Flag{};
+        for (const auto& [idx_UInt64, boolType] : _0000->second)
+        {
+            if (NextCall_Flag)
+            {
+                std::cout << ", ";
+                NextCall_Flag = false;
+            }
+            std::cout << idx_UInt64 << "";
+            NextCall_Flag = true;
+        }
+        std::cout << "}" << std::endl;
+    }
+    _0000 = Theorem.RHSCallGraph_UInt64Map.find(RouteGoal_EnumClass::_lhs);
+    if (_0000 != Theorem.RHSCallGraph_UInt64Map.end())
+    {
+        std::cout << "Theorem.RHSCallGraph_UInt64Map[RouteGoal_EnumClass::_lhs] = {";
+        bool NextCall_Flag{};
+        for (const auto& [idx_UInt64, boolType] : _0000->second)
+        {
+            if (NextCall_Flag)
+            {
+                std::cout << ", ";
+                NextCall_Flag = false;
+            }
+            std::cout << idx_UInt64 << "";
+            NextCall_Flag = true;
+        }
+        std::cout << "}" << std::endl;
+    }
+    _0000 = Theorem.RHSCallGraph_UInt64Map.find(RouteGoal_EnumClass::_rhs);
+    if (_0000 != Theorem.RHSCallGraph_UInt64Map.end())
+    {
+        std::cout << "Theorem.RHSCallGraph_UInt64Map[RouteGoal_EnumClass::_rhs] = {";
+        bool NextCall_Flag{};
+        for (const auto& [idx_UInt64, boolType] : _0000->second)
+        {
+            if (NextCall_Flag)
+            {
+                std::cout << ", ";
+                NextCall_Flag = false;
+            }
+            std::cout << idx_UInt64 << "";
+            NextCall_Flag = true;
+        }
+        std::cout << "}" << std::endl;
+    }
+
+    //std::cout << Tasks_Thread[0][0].guid << std::endl;
+//
+            if (idx_UInt64 == InTheorem.guid)
+            {
+                // guid are the same //
+                std::cout << "processTheorem: Exiting callHistory_0000[]... guids are the same." << std::endl;
+                continue;
+            }
+//
+    Axiom_Struct():
+        AxiomProto_Struct()
+    {
+      
+    };
+
+    Axiom_Struct(const Axiom_Struct& other) :
+        AxiomProto_Struct(other)
+    {
+        
+    };
+    
+    Axiom_Struct(Axiom_Struct&& other) noexcept :
+        AxiomProto_Struct(std::move(other))
+    {
+        
+    };
+    
+    Axiom_Struct& operator=(Axiom_Struct&& other) noexcept
+    {
+        if (this != &other) {
+            AxiomProto_Struct::operator=(std::move(other));
+        }
+        return *this;
+    }
+    
+    Axiom_Struct& operator=(const Axiom_Struct& other)
+    {
+        if (this != &other) {
+            AxiomProto_Struct::operator=(other);
+        }
+        return *this;
+    };
+//
+    Theorem_Struct() :
+        AxiomProto_Struct()
+    {
+        
+    };
+        
+    Theorem_Struct(const Theorem_Struct& other) :
+        AxiomProto_Struct(other),
+        TotalProofsFound_UInt64(other.TotalProofsFound_UInt64),
+        MaxAllowedProofs_UInt64(other.MaxAllowedProofs_UInt64),
+        ProofFound_Flag(other.ProofFound_Flag),
+        ProofStack_VecUInt64(other.ProofStack_VecUInt64),
+        ProofString_StdStrVec(other.ProofString_StdStrVec),
+        Indir_EnumClass(other.Indir_EnumClass)
+    {
+    };
+    
+    Theorem_Struct(Theorem_Struct&& other) noexcept :
+        AxiomProto_Struct(std::move(other)),
+        TotalProofsFound_UInt64(std::move(other.TotalProofsFound_UInt64)),
+        MaxAllowedProofs_UInt64(std::move(other.MaxAllowedProofs_UInt64)),
+        ProofFound_Flag(std::move(other.ProofFound_Flag)),
+        ProofStack_VecUInt64(std::move(other.ProofStack_VecUInt64)),
+        ProofString_StdStrVec(std::move(other.ProofString_StdStrVec)),
+        Indir_EnumClass(std::move(other.Indir_EnumClass))
+    {
+        other.TotalProofsFound_UInt64 = 0;
+        other.MaxAllowedProofs_UInt64 = 0;
+        other.ProofFound_Flag = false;
+        other.ProofStack_VecUInt64.clear();
+        other.ProofString_StdStrVec.clear();
+        other.Indir_EnumClass = Indirection_EnumClass::_auto;
+    };
+    
+    Theorem_Struct& operator= (Theorem_Struct&& other) noexcept
+    {
+        if (this != &other) {
+            AxiomProto_Struct::operator=(std::move(other));
+            TotalProofsFound_UInt64 = std::move(other.TotalProofsFound_UInt64);
+            MaxAllowedProofs_UInt64 = std::move(other.MaxAllowedProofs_UInt64);
+            ProofFound_Flag = std::move(other.ProofFound_Flag);
+            ProofStack_VecUInt64 = std::move(other.ProofStack_VecUInt64);
+            ProofString_StdStrVec = std::move(other.ProofString_StdStrVec);
+            Indir_EnumClass = std::move(other.Indir_EnumClass);
+            
+            other.TotalProofsFound_UInt64 = 0;
+            other.MaxAllowedProofs_UInt64 = 0;
+            other.ProofFound_Flag = false;
+            other.ProofStack_VecUInt64.clear();
+            other.ProofString_StdStrVec.clear();
+            other.Indir_EnumClass = Indirection_EnumClass::_auto;
+        }
+        return *this;
+    };
+    
+    Theorem_Struct& operator= (const Theorem_Struct& other)
+    {
+        if (this != &other) {
+        AxiomProto_Struct::operator=(other);
+        TotalProofsFound_UInt64 = other.TotalProofsFound_UInt64;
+        MaxAllowedProofs_UInt64 = other.MaxAllowedProofs_UInt64;
+        ProofFound_Flag = other.ProofFound_Flag;
+        ProofStack_VecUInt64 = other.ProofStack_VecUInt64;
+        ProofString_StdStrVec = other.ProofString_StdStrVec;
+        Indir_EnumClass = other.Indir_EnumClass;
+        }
+        return *this;
+    };
+//
+    Axiom_Struct():
+        AxiomProto_Struct()
+    {
+      
+    };
+
+    Axiom_Struct(const Axiom_Struct& other) :
+        AxiomProto_Struct(other)
+    {
+    };
+//
+    Theorem_Struct() :
+        AxiomProto_Struct()
+    {
+        
+    };
+        
+    Theorem_Struct(const Theorem_Struct& other) :
+        AxiomProto_Struct(other),
+        TotalProofsFound_UInt64(other.TotalProofsFound_UInt64),
+        MaxAllowedProofs_UInt64(other.MaxAllowedProofs_UInt64),
+        ProofFound_Flag(other.ProofFound_Flag),
+        ProofStack_VecUInt64(other.ProofStack_VecUInt64),
+        ProofString_StdStrVec(other.ProofString_StdStrVec),
+        Indir_EnumClass(other.Indir_EnumClass)
+    {
+    };
+
+    
 //
     AxiomProto_Struct()
     {
