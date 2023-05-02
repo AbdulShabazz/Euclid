@@ -116,12 +116,11 @@ Todo: Iff N % M == 0, then M is a multiple of N; iff (N / M) % 2 == 0, then M is
 Todo: Add support for ~=
 Todo: Add support to Remove Axioms (Delete)
 Todo: Add support to Disable Axioms (SendOffline)
-Todo: online repository: UnrealEngine-Seagat2011-2023/Engine/Plugins/Runtime/EuclidProver
-
-/EuclidProver/
+Todo: online repository: UnrealEngine-Seagat2011-2023/EuclidProver/Engine/Plugins/Runtime/EuclidProver/Euclid.h
 
 NOTES
-[+] Add a strict specifier, eg. st{ { 2 } - { 1 } } = { 1 }
+[+] Support a strict specifier, eg. st{ { 2 } - { 1 } } = { 1 }
+[+] std::priority_queue::top offers impressive performance. However std::queue::front remains my first choice for a first-in-first-out (FIFO) data stack because each element is guaranteed to be visited, whereas unviable small or large elements may bottleneck read performance at both ends of the stack.
 
 Benchmarks: for_each(std::execution::unseq: (nanoseconds) 1062400
 Benchmarks: for-loop: (nanoseconds) 64900
