@@ -17,11 +17,11 @@ To deploy the prover in your game logic, you provide it with axioms and lemmas r
 
 [ ] = Brackets
 
-( ) = Brackets
+( ) = General Use Brackets
 
 { variable } = Variable
 
-Example psuedo code: 
+Example pseudo code: 
 
 ```c++
 	// Axiom
@@ -66,64 +66,74 @@ Example C++ Code:
 
  	// Instantiate Prover (module)
 	EuclidProver<BracketType::CurlyBraces> Euclid;
+	
+	Euclid.Axiom
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" },  // lhs
+		 {"{", "StyxBoat", "}", "IsIn", "{", "StyxRiver", "}" } // rhs
+	);
+	Euclid.Axiom
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}"}, // lhs
+		{ "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}", "and", "{", "Vehicle", "{", "QuadUtilityVehicle", "{", "VehicleDriveDisabled", "}", "}", "}" } // rhs
+	);
+	Euclid.Axiom
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "EuropaLand", "}" }, // lhs
+		{ "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}" } // rhs
+	);
+	Euclid.Axiom
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}" }, // lhs
+		{ "{", "Vehicle", "{", "QuadUtilityVehicle", "{", "VehicleDriveDisabled", "}", "}" } // rhs
+	);
+	Euclid.Axiom
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsNotIn", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}" }, // lhs
+		{ "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}" } // rhs
+	);
+	Euclid.Axiom
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}" }, // lhs
+		{ "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" } // rhs
+	);
+	
+	Euclid.Lemma
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" }, // lhs
+		{ "{", "StyxBoat", "}", "IsNotIn", "{", "StyxRiver", "}" } // rhs
+	); // These are axiom rewrite helpers
+	
+	const bool ProofFound_Flag = 
+	Euclid.Prove
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}" }, // rhs
+		{ "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" }, // lhs
+		ProofStep // Result
+	);
 
-	// Axiom
-	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}", "=", "{", "StyxBoat", "}", "IsIn", "{", "StyxRiver", "}" }); // Current Game State
-	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "=", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}", "and", "{", "Vehicle", "{", "QuadUtilityVehicle", "{", "VehicleDriveDisabled", "}", "}", "}" });
-	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "EuropaLand", "}", "=", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}" });
-	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}", "=", "{", "Vehicle", "{", "QuadUtilityVehicle", "{", "VehicleDriveDisabled", "}", "}" });
-	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsNotIn", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "=", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}" });
-	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}", "=", "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" });
-
-	// Lemma
-	Euclid.Lemma({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}", "=", "{", "StyxBoat", "}", "IsNotIn", "{", "StyxRiver", "}" }); // These are connectives, and axiom helpers
-
-	// Theorem
-	Euclid.Prove({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}", "=", "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" });
-
-	if (Euclid.Prove(Prove, ProofStep))
+	if (ProofFound_Flag))
 	{
 		std::cout << "Proof found:\n";
 		Euclid.PrintPath(ProofStep);
 	}
-	else
+	else if (ProofStep.size())
 	{
+		std::cout << "Partial Proof found:\n";
+		Euclid.PrintPath(ProofStep);
+	} else {
 		std::cout << "Proof failed\n";
 	}
 
-	// Optional Solver: Expand
-	std::vector<std::vector<std::string>> ProofStep;
-	if (Euclid.ProveViaExpand(Prove, ProofStep))
-	{
-		std::cout << "Proof via Expand:\n";
-		Euclid.PrintPath(ProofStep);
-	}
-	else
-	{
-		std::cout << "Proof via Expand failed\n";
-	}
-
-	// Optional Solver: Reduce
-	std::vector<std::vector<std::string>> ProofStep;
-	if (Euclid.ProveViaReduce(Prove, ProofStep))
-	{
-		std::cout << "Proof via Reduce:\n";
-		Euclid.PrintPath(ProofStep);
-	}
-	else
-	{
-		std::cout << "Proof via Reduce failed\n";
-	}	
-
-	// Suspend a Solver for proof(GUID)
+	// Suspend a proof for current (GUID)
 	const uint64_t guid = Euclid.Suspend(); 
-	std::cout << "Proof Solver suspended for: guid_" << guid << std::endl;
+	std::cout << "Proof suspended for: guid_" << guid << std::endl;
 
-	// Resume a Solver for proof(GUID)
+	// Resume a proof for (GUID)
 	if(Euclid.Resume(guid))
 	{
-		std::cout << "Proof Solver resumed for: guid_" << guid << std::endl;
-	} 
+		std::cout << "Proof resumed for: guid_" << guid << std::endl;
+	}
 
 ```
 
