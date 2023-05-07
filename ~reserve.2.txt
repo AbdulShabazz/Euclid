@@ -1,4 +1,144 @@
+// Add new rewrites to the task queue //
+			for (const std::vector<BigInt128_t>& Axiom : Axioms_UInt64Vec)
+			{
+				if
+				(
+					AxiomCallGraph_Map["lhs_reduce"][Theorem[last_UInt64]][Axiom[guid_UInt64]] == false &&
+					Theorem[LHS] % Axiom[LHS] == 0
+					/*AxiomCallGraph_Map["lhs_reduce"][Theorem[last_UInt64]][Axiom[guid_UInt64]] == true /* &&
+					CallHistory[Theorem[last_UInt64]][Axiom[guid_UInt64]] == false*/
+				)
+				{
+					AxiomCallGraph_Map.emplace
+					(
+						"lhs_reduce",
+						std::unordered_map<
+						BigInt128_t,
+						std::unordered_map<
+						BigInt128_t, bool>>
+						{ {Theorem[last_UInt64], { {Axiom[guid_UInt64], true} } }}
+					);
 
+					NextRoundCallHistory.emplace
+					(
+						Theorem[last_UInt64],
+						std::unordered_map<BigInt128_t, bool>{ {Axiom[guid_UInt64], true}}
+					);
+
+					std::vector<BigInt128_t> Theorem_0000{ Theorem };
+					Theorem_0000[LHS] = Theorem_0000[LHS] / Axiom[LHS] * Axiom[RHS];
+					Theorem_0000[last_UInt64] = Axiom[guid_UInt64];
+					Theorem_0000.emplace_back(0x00); // Push opcode 0x00 onto the proofstack because we performed a _lhs _reduce operation) //
+					Theorem_0000.emplace_back(Axiom[guid_UInt64]); // Push the Axiom ID onto the proofstack //
+					std::cout << "_reduce Module_0000 via Axiom_" << Axiom[guid_UInt64] << " {" << Theorem_0000[LHS] << ", " << Theorem_0000[RHS] << "}" << std::endl;
+
+					Tasks_Thread.push(Theorem_0000);
+				}
+
+				if
+				(
+					AxiomCallGraph_Map["lhs_expand"][Theorem[last_UInt64]][Axiom[guid_UInt64]] == false &&
+					Theorem[LHS] % Axiom[RHS] == 0
+					/*AxiomCallGraph_Map["lhs_expand"][Theorem[last_UInt64]][Axiom[guid_UInt64]] == true /*&&
+					!CallHistory[Theorem[last_UInt64]][Axiom[guid_UInt64]] == false*/
+				)
+				{
+					AxiomCallGraph_Map.emplace
+					(
+						"lhs_expand",
+						std::unordered_map<
+						BigInt128_t,
+						std::unordered_map<
+						BigInt128_t, bool>>
+						{ {Theorem[last_UInt64], { {Axiom[guid_UInt64], true} } }}
+					);
+
+					NextRoundCallHistory.emplace
+					(
+						Theorem[last_UInt64],
+						std::unordered_map<BigInt128_t, bool>{ {Axiom[guid_UInt64], true}}
+					);
+
+					std::vector<BigInt128_t> Theorem_0001{ Theorem };
+					Theorem_0001[LHS] = Theorem_0001[LHS] / Axiom[RHS] * Axiom[LHS];
+					Theorem_0001[last_UInt64] = Axiom[guid_UInt64];
+					Theorem_0001.emplace_back(0x01); // Push opcode 0x01 onto the proofstack because we performed a _lhs _expand operation) //
+					Theorem_0001.emplace_back(Axiom[guid_UInt64]); // Push the Axiom ID onto the proofstack //
+					std::cout << "_expand Module_0001 via Axiom_" << Axiom[guid_UInt64] << " {" << Theorem_0001[LHS] << ", " << Theorem_0001[RHS] << "}" << std::endl;
+
+					Tasks_Thread.push(Theorem_0001);
+				}
+
+				if
+				(
+					AxiomCallGraph_Map["rhs_reduce"][Theorem_UInt64Vec[last_UInt64]][Axiom[guid_UInt64]] == false &&
+					Theorem[RHS] % Axiom[LHS] == 0
+					/*AxiomCallGraph_Map["rhs_reduce"][Theorem[last_UInt64]][Axiom[guid_UInt64]] == true /*&&
+					!CallHistory[Theorem[last_UInt64]][Axiom[guid_UInt64]] == false*/
+				)
+				{
+					AxiomCallGraph_Map.emplace
+					(
+						"rhs_reduce",
+						std::unordered_map<
+						BigInt128_t,
+						std::unordered_map<
+						BigInt128_t, bool>>
+						{ {Theorem[last_UInt64], { {Axiom[guid_UInt64], true} } }}
+					);
+
+					NextRoundCallHistory.emplace
+					(
+						Theorem[last_UInt64],
+						std::unordered_map<BigInt128_t, bool>{ {Axiom[guid_UInt64], true}}
+					);
+
+					std::vector<BigInt128_t> Theorem_0002{ Theorem };
+					Theorem_0002[RHS] = Theorem_0002[RHS] / Axiom[LHS] * Axiom[RHS];
+					Theorem_0002[last_UInt64] = Axiom[guid_UInt64];
+					Theorem_0002.emplace_back(0x02); // Push opcode 0x02 onto the proofstack because we performed a _rhs _reduce operation) //
+					Theorem_0002.emplace_back(Axiom[guid_UInt64]); // Push the Axiom ID onto the proofstack //
+					std::cout << "_reduce Module_0002 via Axiom_" << Axiom[guid_UInt64] << " {" << Theorem_0002[LHS] << ", " << Theorem_0002[RHS] << "}" << std::endl;
+
+					Tasks_Thread.push(Theorem_0002);
+				}
+
+				if
+				(
+					AxiomCallGraph_Map["rhs_expand"][Theorem[last_UInt64]][Axiom[guid_UInt64]] == false &&
+					Theorem[RHS] % Axiom[RHS] == 0
+					/*AxiomCallGraph_Map["rhs_expand"][Theorem[last_UInt64]][Axiom[guid_UInt64]] == true /*&&
+					!CallHistory[Theorem[last_UInt64]][Axiom[guid_UInt64]] == false*/
+				)
+				{
+					AxiomCallGraph_Map.emplace
+					(
+						"rhs_expand",
+						std::unordered_map<
+						BigInt128_t,
+						std::unordered_map<
+						BigInt128_t, bool>>
+						{ {Theorem[last_UInt64], { {Axiom[guid_UInt64], true} } }}
+					);
+
+					NextRoundCallHistory.emplace
+					(
+						Theorem[last_UInt64],
+						std::unordered_map<BigInt128_t, bool>{ {Axiom[guid_UInt64], true}}
+					);
+
+					std::vector<BigInt128_t> Theorem_0003{ Theorem };
+					Theorem_0003[RHS] = Theorem_0003[RHS] / Axiom[RHS] * Axiom[LHS];
+					Theorem_0003[last_UInt64] = Axiom[guid_UInt64];
+					Theorem_0003.emplace_back(0x03); // Push opcode 0x03 onto the proofstack because we performed a _rhs _expand operation) //
+					Theorem_0003.emplace_back(Axiom[guid_UInt64]); // Push the Axiom ID onto the proofstack //
+					std::cout << "_expand Module_0003 via Axiom_" << Axiom[guid_UInt64] << " {" << Theorem_0003[LHS] << ", " << Theorem_0003[RHS] << "}" << std::endl;
+
+					Tasks_Thread.push(Theorem_0003);
+				}
+				CallHistory = NextRoundCallHistory;
+				std::cout << std::endl;
+			} // end for (...Axiom : InAxioms_UInt64Vec)
 //
 				if
 				(
