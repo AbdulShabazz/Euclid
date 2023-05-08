@@ -329,6 +329,6 @@ PROOFGUIDE
     EFFICIENT SCOPED FORMAT
 
         TEST CASE [PASS]
-        primes = { a } raised { 2 } + { b } raised { 2 }
-        { 1 } mod { 4 } = { a } raised { 2 } + { b } raised { 2 }
-        Prove primes = { 1 } mod { 4 }
+        { a } raised { 2 } + { b } raised { 2 } = primes
+        { a } raised { 2 } + { b } raised { 2 } = { 1 } mod { 4 }
+        Prove { 1 } mod { 4 } = primes
