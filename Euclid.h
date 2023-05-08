@@ -310,7 +310,11 @@ namespace Euclid_Prover
 		std::vector<
 		std::vector<
 		std::vector<
-		std::string>>>>&OutProofStep_StdStrVec
+		std::string>>>>&OutProofStep_StdStrVec,
+
+		std::vector<
+		std::string>
+		OutAxiomCommitLog_StdStrVec
 	)
 	{
 
@@ -1343,7 +1347,11 @@ namespace Euclid_Prover
 			std::vector<
 			std::vector<
 			std::string>>>>&
-			OutPath4DStdStrVecRef
+			OutPath4DStdStrVecRef,
+
+			std::vector<
+			std::string>&
+			OutAxiomCommitLog_StdStrVecRef
 		)
 		{
 			bool TentativeProofFoundFlag = true;
@@ -1378,7 +1386,8 @@ namespace Euclid_Prover
 				std::cref(Theorem_UInt64Vec),
 				std::cref(Axioms_UInt64Vec),
 				/*std::ref(promise),*/
-				std::ref(ProofStep_4DStdStrVec)
+				std::ref(ProofStep_4DStdStrVec),
+				std::ref(OutAxiomCommitLog_StdStrVecRef)
 			);
 
 			th.join();
