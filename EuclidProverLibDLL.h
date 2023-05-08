@@ -223,7 +223,7 @@
 #include <functional>
 #include <future>
 #include <limits>
-#include <_boost/multiprecision/cpp_int.hpp> /* Project > [ProjectName] Properties > VC++ Directories > General > Include Directories > $(Local[ProjectName]WorkingDirectory) */
+#include <boost/multiprecision/cpp_int.hpp> 
 
 namespace Euclid_Prover
 {
