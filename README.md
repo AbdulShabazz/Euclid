@@ -1,5 +1,5 @@
 # EuclidAutomatedTheoremProver_
-C++ Edition
+C++23 Edition
 
 ## Description
 
@@ -9,7 +9,11 @@ Additionally, Euclid can be beneficial in debugging game logic.
 
 ## Instructions
 
-To deploy the prover in your game logic, you provide it with axioms and lemmas related to the state of your game, and then request it to prove a theorem or desired outcome. Each proof-step can be used to perhaps update a state-machine, or update the game state; or in more advanced implementations, its proof-steps can be utilized by helper A.I. that aim to achieve the proof-step as a desired outcome in your game. This feeding process is repeated until the game state reflects the final proof, as a desired outcome (i.e., the theorem is proven). The prover can also produce a path of proof-steps using the available Expand- and Reduce- solvers.
+To deploy the prover in your game logic, you must provide it with axioms and lemmas related to the current state of your game, and request it to prove a theorem or desired outcome. Each proof-step can be used to perhaps update a state-machine, or update the game state; or in more advanced implementations, its proof-steps can be utilized by helper A.I. that aim to achieve the proof-step as a desired outcome in your game. This feeding process is repeated until the game state reflects the final proof, as a desired outcome (i.e., the theorem is proven). The prover can also produce a path of proof-steps using the available Expand- and Reduce- solvers.
+
+To compile the boost library, in for example Visual Studio, go to Project > [ProjectName] Properties > VC++ Directories > General > Include Directories > and include one of the macros: `$(Local[ProjectName]WorkingDirectory)` or `$(ProjectDirectory)`. If you do not have the latest boost library in your local directory, you must first download the boost library from https://www.boost.org/ and extract it to the local directory. 
+
+Compiler flags: ```/permissive- /Yu"pch.h" /ifcOutput "x64\Release\" /GS /GL /W3 /Gy /Zc:wchar_t /Zi /Gm- /O2 /Ob2 /sdl /Fd"x64\Release\vc143.pdb" /Zc:inline /fp:precise /D "NDEBUG" /D "EUCLIDPROVERLIBDLL_EXPORTS" /D "_WINDOWS" /D "_USRDLL" /D "_WINDLL" /D "_UNICODE" /D "UNICODE" /errorReport:prompt /WX- /Zc:forScope /std:c17 /Gd /Oy /Oi /MD /std:c++20 /FC /Fa"x64\Release\" /EHsc /nologo /Fo"x64\Release\" /Ot /Fp"x64\Release\EuclidProverLibDLL.pch" /diagnostics:column```
 
 ## Formatting
 
@@ -19,30 +23,34 @@ To deploy the prover in your game logic, you provide it with axioms and lemmas r
 
 ( ) = General Use Brackets
 
-{ variable } = Variable
+{ variable }
 
-Example pseudo code: 
+[ variable ]
 
-```c++
-	// Axiom
+( variable )
+
+Usage Example pseudo code: 
+
+```
+	// Axioms
 	{ PlayerCharacterSideKick } IsIn { StyxBoat } = { StyxBoat } IsIn { StyxRiver } // Current Game State
 	{ PlayerCharacterSideKick } IsIn { Vehicle { QuadUtilityVehicle } } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand } and { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
 	{ PlayerCharacterSideKick } IsIn { EuropaLand } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand }
 	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
 	{ PlayerCharacterSideKick } IsNotIn { Vehicle { QuadUtilityVehicle } } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand }
 	.
-	. Other available Game States, in the current environment, for the PlayerCharacterSideKick to choose from
+	. Other available but non-relavant Game States, in the current environment, for the PlayerCharacterSideKick to choose from
 	.
 	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled } 
 
-	// Lemma
-	{ PlayerCharacterSideKick } IsIn { StyxBoat } = { StyxBoat } IsNotIn { StyxRiver } // These are connectives, and axiom helpers
-	{ PlayerCharacterSideKick } IsOn { Vehicle } = { VehicleDriveDisabled }
-	{ PlayerCharacterSideKick } IsIn { Vehicle { QuadUtilityVehicle } } = { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle }
-	{ PlayerCharacterSideKick } IsNotIn { StyxBoat } = { StyxBoat } IsNotIn { StyxRiver }
+	// Lemmas
+	{ PlayerCharacterSideKick } IsIn { StyxBoat } ==> { StyxBoat } IsNotIn { StyxRiver } // These are connectives, and axiom rewrite helpers
+	{ PlayerCharacterSideKick } IsOn { Vehicle } <== { VehicleDriveDisabled }
+	{ PlayerCharacterSideKick } IsIn { Vehicle { QuadUtilityVehicle } } ==> { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle }
+	{ PlayerCharacterSideKick } IsNotIn { StyxBoat } <==> { StyxBoat } IsNotIn { StyxRiver }
 
 	// Theorem to prove
-	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled } // Game State goal
+	Prove { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled } // Goal Game State
 
 	// Proof-Step
 	{ PlayerCharacterSideKick } IsIn { StyxBoat } = { StyxBoat } IsIn { StyxRiver }
@@ -52,98 +60,190 @@ Example pseudo code:
 	{ PlayerCharacterSideKick } IsNotIn { Vehicle { QuadUtilityVehicle } } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand }
 	{ PlayerCharacterSideKick } IsIn { Vehicle { QuadUtilityVehicle } } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand } and { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
 	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
-	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled } 
-
-	// Theorem
-	Prove = { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled }
+	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled }
 ```
 
-Example C++ Code:
+Usage Example C++20 Code:
 
 ```c++
-	// Create empty ProofStep[lineNumber][proofStep] vector to store proof
-	std::vector<std::vector<std::string>> ProofStep;
+#include <cstdlib>
+#include <string>
+#include <vector>
+#include <iostream>
+#include <Euclid.h>
 
- 	// Instantiate Prover (module)
-	EuclidProver<BracketType::CurlyBraces> Euclid;
+int main()
+{
+	using EuclidProverClass = 
+
+	Euclid_Prover::EuclidProver<
+	Euclid_Prover::BracketType::CurlyBraces>;
+
+	// Instantiate Prover (module)
+	EuclidProverClass Euclid;
+
+	Euclid.Axioms
+	(
+		{
+			// Axiom_1
+			{
+				{"1", "+", "1"}, // (lhs) Prime Composite: 8303 //
+				{"2"} // (rhs) Prime Composite: 31 //
+			},
+
+			// Axiom_2
+			{
+				{"2", "+", "2"}, // (lhs) Prime Composite: 22103 //
+				{"4"} // (rhs) Prime Composite: 29 //
+			}
+		}
+	);
+
+	std::vector<
+	std::vector<
+	std::vector<
+	std::vector<
+	std::string>>>>
+
+	// Instantiate ProofStep_4DStdStrVec[line][step][lhs/rhs][token]
+	ProofStep_4DStdStrVec;
 	
-	Euclid.Axiom
-	(
-		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" },  // lhs
-		 {"{", "StyxBoat", "}", "IsIn", "{", "StyxRiver", "}" } // rhs
-	);
-	Euclid.Axiom
-	(
-		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}"}, // lhs
-		{ "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}", "and", "{", "Vehicle", "{", "QuadUtilityVehicle", "{", "VehicleDriveDisabled", "}", "}", "}" } // rhs
-	);
-	Euclid.Axiom
-	(
-		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "EuropaLand", "}" }, // lhs
-		{ "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}" } // rhs
-	);
-	Euclid.Axiom
-	(
-		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}" }, // lhs
-		{ "{", "Vehicle", "{", "QuadUtilityVehicle", "{", "VehicleDriveDisabled", "}", "}" } // rhs
-	);
-	Euclid.Axiom
-	(
-		{ "{", "PlayerCharacterSideKick", "}", "IsNotIn", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}" }, // lhs
-		{ "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}" } // rhs
-	);
-	Euclid.Axiom
-	(
-		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}" }, // lhs
-		{ "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" } // rhs
-	);
-	
-	Euclid.Lemma
-	(
-		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" }, // lhs
-		{ "{", "StyxBoat", "}", "IsNotIn", "{", "StyxRiver", "}" } // rhs
-	); // These are axiom rewrite helpers
+	std::vector<
+	std::string>>
+
+	// Instantiate AxiomCommitLog_StdStrVec[step]
+	AxiomCommitLog_StdStrVec;
 	
 	const bool ProofFound_Flag = 
+
 	Euclid.Prove
 	(
-		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}" }, // rhs
-		{ "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" }, // lhs
-		ProofStep // Result
+		{
+			{"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
+			{"4"}, // (rhs) Prime Composite: 29 //
+		},
+
+		ProofStep_4DStdStrVec,
+		AxiomCommitLog_StdStrVec
 	);
-
-	if (ProofFound_Flag))
+	
+	if (ProofFound_Flag)
 	{
-		std::cout << "Proof found:\n";
-		Euclid.PrintPath(ProofStep);
-	}
-	else if (ProofStep.size())
-	{
-		std::cout << "Partial Proof found:\n";
-		Euclid.PrintPath(ProofStep);
+		std::cout << "Proof Found." << std::endl;
+		ProofStep_4DStdStrVec;
+		AxiomCommitLog_StdStrVec;
+	} else if (ProofStep_4DStdStrVec.size()) {
+		std::cout << "Partial Proof Found." << std::endl;
+		ProofStep_4DStdStrVec;
+		AxiomCommitLog_StdStrVec;
 	} else {
-		std::cout << "Proof failed\n";
+		std::cout << "No Proof Found." << std::endl;
 	}
 
-	// Suspend a proof for current (GUID)
-	const uint64_t guid = Euclid.Suspend(); 
-	std::cout << "Proof suspended for: guid_" << guid << std::endl;
+	return EXIT_SUCCESS;
+}
 
-	// Resume a proof for (GUID)
-	if(Euclid.Resume(guid))
+/*
+Output:
+
+ProofStep_4DStdStrVec:
+{
 	{
-		std::cout << "Proof resumed for: guid_" << guid << std::endl;
+		// Step 1 (Original).
+		{
+			{"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
+			{"4"} // (rhs) Prime Composite: 29 //
+		},
+
+		// Step 2. (rhs_expand via Axiom_2)
+		{
+			{"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
+			{"2", "+", "2"} // (rhs) Prime Composite: 22103 //
+		},
+		
+		// Step 3. (rhs_expand via Axiom_1)
+		{
+			{"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
+			{"1", "+", "1", "+", "2"} // (rhs) Prime Composite: 5920039 //
+		},
+		
+		// Step 4. (rhs_expand via Axiom_1)
+		{
+			{"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
+			{"1", "+", "1", "+", "1", "+", "1"} // (rhs) Prime Composite: 1585615607 (QED) //
+		}
 	}
+}
+
+AxiomCommitLog_StdStrVec:
+{
+	{"rhs_expand via Axiom_2"},
+	{"rhs_expand via Axiom_1"},
+	{"rhs_expand via Axiom_1"}
+}
+*/
 
 ```
 
+Usage Example C++20 code
+
+```c++
+Euclid.Axioms
+(
+	{
+		// Axiom_1
+		{
+			{
+				"{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" 
+			}, // lhs //
+		
+			{
+				"{", "StyxBoat", "}", "IsIn", "{", "StyxRiver", "}" 
+			} // rhs //
+		}, 
+	.
+	.
+	}
+);
+	
+Euclid.Lemmas
+(
+	{
+		// Lemma_1
+		{
+			{
+				"{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" 
+			}, // lhs //
+	
+			{				
+				"{", "StyxBoat", "}", "IsNotIn", "{", "StyxRiver", "}" // These are connectives, and axiom helpers
+			} // rhs //
+		},
+	.
+	.
+	}
+);
+
+Euclid.Prove
+(
+	{
+		{
+			"{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}"
+		}, // lhs//
+	
+		{
+			"{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}"
+		} // rhs //
+	}
+);
+```
 ## Format
 
 The required format for the expressions is as follows:
 
 { LHS }... = { RHS }..., where LHS and RHS are properly-formed sets of expressions.
 
-The "=" is the equality operator, is required, and should be interpreted as a connective, used to delimit and or separate the LHS and RHS. 
+The "=" is the equality operator, its required, and should be interpreted as a connective, used to delimit and or separate the LHS and RHS. 
 The equality operator is the only builtin operator that is reserved. All other symbols may be used in your expressions.
 
 The equality operator can also be used to separate multiple expressions, as shown:
@@ -152,7 +252,7 @@ The equality operator can also be used to separate multiple expressions, as show
 
 If you have any questions, please contact me at: https://github.com/Seagat2011/UnrealEngine-Seagat2011-2023
 
-Compatibility C++20 (Windows x86 i64)
+Compatibility: C++20 (Windows x86 i64)
 
 STYLEGUIDE
 
@@ -168,10 +268,15 @@ STYLEGUIDE
     GOOD FORMATTING
 
         TEST CASE [PASS]
+
+		// Axioms
+        ( { a } plus { b } ) raised { 2 } = { { c } raised { 2 } } plus { 2ab }
+
+		// Lemmas
         { { a } raised { 2 } } plus { 2ab } plus { b raised { 2 } } <== ( { a } plus { b } ) raised { 2 }
         ( { a } plus { b } ) raised { 2 } minus { 2ab } = { c } raised { 2 } <== ( { a } plus { b } ) raised { 2 } = { { c } raised { 2 } } plus { 2ab }
         { { a } raised { 2 } } plus { 2ab } minus { 2ab } plus { b raised { 2 } } ==> { { a } raised { 2 } } plus { { b } raised { 2 } }
-        ( { a } plus { b } ) raised { 2 } = { { c } raised { 2 } } plus { 2ab }
+
         Prove { { a } raised { 2 } } plus { { b } raised { 2 } } = { c } raised { 2 }
 
         TEST CASE [PASS]
