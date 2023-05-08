@@ -24,18 +24,18 @@
     <ClInclude Include="pch.h">
       <Filter>Public</Filter>
     </ClInclude>
-    <ClInclude Include="EuclidProverLibDLL.h">
+    <ClInclude Include="Euclid.h">
       <Filter>Public</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="EuclidProverLibDLL.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
     <ClCompile Include="dllmain.cpp">
       <Filter>Private</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="EuclidProverLibDLL.cpp">
       <Filter>Private</Filter>
     </ClCompile>
   </ItemGroup>
