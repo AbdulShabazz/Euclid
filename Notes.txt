@@ -30,6 +30,8 @@ Algorithm
 
 NOTES
 
+unordered_map gripes about const key values.
+
 To improve performance, Proof-search is conducted on arrays of primes. 
 
 	Example:
@@ -88,37 +90,42 @@ But how to represent the proof-search space internally?
 		NumberSet.insert(Number.first)
 		NumberSet.insert(Number.second) // Is there enough variance to rely only on Number.second?
 
-		// iff Number.second == 0.0, then rely on Number.first ?
+		// iff ever Number.second == 0.0, then rely on Number.first ?
 
 		Limitations: Set inclusion requires combinatorial expansion (ie. combinatorial explosion)
 
 	Solution: (abandoned)
 
-		// Overall builtin support (uint64_t) with BigInt support (__x86i64Int ) as needed
+		// Default builtin support (for unsigned long long) on strict token types, with added BigInt support (__x86i64Int ) where needed
 		2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...
 
-		Limitations: non-exceptional multiplication performance		
-
-	Solution: (abandoned)
-
-		// Managing (uint64_t) single- byte words 
-		 2 3 5 7 11 13...
-		[1 1 1 1 1  1]
-
-		Limitations: token order not preserved
+		Limitations: (complex library implementation)
 
 	Solution: (in-process)
 
-		// Managing (uint64_t) multi-byte words % num_tokens
-		 2 3 5 7 11 13  2 3 5 7 11 13  2 3 5 7 11 13...
-		[1 0 0 0 0  0] [0 0 0 1 0  0] [0 1 0 0 0  0]
+		// Default builtin support (for unsigned long long) on strict token types, with added BigInt support (cpp_int ) where needed
+		2^1 * 7^2 * 3^3 * 13^4 * 2^5 * 7^6 * 3^7 * 5^8 * 2^9 * 11^10 * 3^11...
 
-		Limitations: token order not preserved
+		Limitations: (in-process)
 
 Todo: Add an optional constraint flag parameter to axioms and or lemmas to require or ignore their use
 Todo: Cache axioms-, lemmas-, intermedite results-, proof statements- and their proofsteps-, to disk, for ready retrieval when game play conditions re-present themselves (perhaps using a cocktail of thread-management and async co-routines)
-Todo: Implement the proof-search and caching algorithm using (async) co_routines and use threadpools for the nextprime computation.
-Todo: convert data types to auto to allow the theorem prover that is the compiler to perform optimizations on the data types.
+Todo: Implement a proof-search caching algorithm (asynchronous) w/ co_routines; and use threadpools for the nextprime calculation.
+Todo: convert data types to auto to allow the theorem prover in the c++ compiler to perform optimizations on data types.
+Todo: Iff N % M == 0, then M is a multiple of N; iff (N / M) % 2 == 0, then M is a scalar multiple of N; if (N / M) % 1 == 0 then M is a composite of N.
+Todo: Add support for ~=
+Todo: Add support to Remove Axioms (Delete)
+Todo: Add support to Disable Axioms (SendOffline)
+Todo: online repository: UnrealEngine-Seagat2011-2023/EuclidProver/Engine/Plugins/Runtime/EuclidProver/Euclid.h
 
 NOTES
-[+] Add a strict specifier, eg. st{ { 2 } - { 1 } } = { 1 }
+[+] Support a strict specifier, eg. st{ { 2 } - { 1 } } = { 1 }
+[+] std::priority_queue::top offers impressive performance. However std::queue::front remains my first choice for a first-in-first-out (FIFO) data stack because each element is guaranteed to be visited, whereas unviable small or large elements may bottleneck read performance at both ends of the stack.
+
+Benchmarks: for_each(std::execution::unseq: (nanoseconds) 1062400
+Benchmarks: for-loop: (nanoseconds) 64900
+Benchmarks: for_each(std::execution::par: (nanoseconds) 596800
+Benchmarks: std::async(std::launch::async, [](){ for_each(std::execution::par_unseq: (nanoseconds) 1343400
+Benchmarks: for_each(std::execution::par_unseq: (nanoseconds) 1436700
+Benchmarks: for(threads.emplace_back: (nanoseconds) DNF
+Benchmarks: for_each(std::execution::unseq, threads.emplace_back: (nanoseconds) DNF

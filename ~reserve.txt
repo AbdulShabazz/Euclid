@@ -1,4 +1,2274 @@
 
+
+	std::unordered_map<uint64_t, std::vector<uint64_t>> LHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::vector<uint64_t>> RHSPrimaryKeyHistory_VecMap;
+//
+    // Compile
+    auto processAxioms = [&]() noexcept -> void
+    {
+        auto find_and_insert = [&](const bool& check, const uint64_t& idx, auto& map)
+        {
+            if (check)
+            {
+                auto it = map.find(i);
+    
+                if (it != map.end())
+                {
+                    it->second.insert(std::make_pair(j, true));
+                }
+            }
+        };
+        
+        auto init_call_graph = [&]<typename T>(const T& idx, auto& map)
+        {
+            std::unordered_map<T, bool> _cg;
+            map.insert(std::make_pair(idx, _cg));
+        }
+        
+        uint64_t i{};
+        for(std::vector<uint64_t>& Axiom_i : Axioms_UInt64Vec) 
+        {
+            std::jthread t1(init_call_graph, i, std::ref(LHSExpandCallGraph_UInt64Map));
+            std::jthread t2(init_call_graph, i, std::ref(LHSReduceCallGraph_UInt64Map));
+            std::jthread t3(init_call_graph, i, std::ref(RHSExpandCallGraph_UInt64Map));
+            std::jthread t4(init_call_graph, i, std::ref(RHSReduceCallGraph_UInt64Map));
+        
+            t1.join();
+            t2.join();
+            t3.join();
+            t4.join();
+
+            uint64_t j{};
+            for(std::vector<uint64_t>& Axiom_j : Axioms_UInt64Vec) 
+            {
+                bool ijAvoidsACallLoop_Flag = (i != j); // Avoid Call loops
+                
+                if (ijAvoidsACallLoop_Flag)
+                {
+					const bool bSubnetFound_Flag_lhsReduce = (Axiom_i.at(0) % Axiom_j.at(0)) == 0); // 1 + 1 ==> 2 ?
+					const bool bSubnetFound_Flag_lhsExpand = (Axiom_i.at(0) % Axiom_j.at(1)) == 0); // 2 ==> 1 + 1 ?
+					const bool bSubnetFound_Flag_rhsReduce = (Axiom_i.at(1) % Axiom_j.at(0)) == 0); // 2 <== 1 + 1 ?
+					const bool bSubnetFound_Flag_rhsExpand = (Axiom_i.at(1) % Axiom_j.at(1)) == 0); // 1 + 1 <== 2 ?
+
+                    // better performance ?
+                    std::jthread t1(find_and_insert, bSubnetFound_Flag_lhsReduce, std::ref(LHSReduceCallGraph_UInt64Map));
+                    std::jthread t2(find_and_insert, bSubnetFound_Flag_lhsExpand, std::ref(LHSExpandCallGraph_UInt64Map));
+                    std::jthread t3(find_and_insert, bSubnetFound_Flag_rhsReduce, std::ref(RHSReduceCallGraph_UInt64Map));
+                    std::jthread t4(find_and_insert, bSubnetFound_Flag_rhsExpand, std::ref(RHSExpandCallGraph_UInt64Map));
+                
+                    t1.join();
+                    t2.join();
+                    t3.join();
+                    t4.join();
+                }
+                j++;
+            }
+            i++;
+        }
+    };
+//
+struct AxiomProto_Struct
+{
+    uint64_t LHSPrimaryKey_UInt64{};
+    uint64_t RHSPrimaryKey_UInt64{};
+    
+    std::vector<std::string> LHSAxiom_StdStrVec;
+    std::vector<std::string> RHSAxiom_StdStrVec;
+    
+    std::unordered_map<uint64_t,bool> LHSExpandCallGraph_UInt64Map;
+    std::unordered_map<uint64_t,bool> LHSReduceCallGraph_UInt64Map;
+    std::unordered_map<uint64_t,bool> RHSExpandCallGraph_UInt64Map;
+    std::unordered_map<uint64_t,bool> RHSReduceCallGraph_UInt64Map;
+    
+    std::unordered_map<uint64_t,bool> LHSExpandCallHistory_UInt64Map;
+    std::unordered_map<uint64_t,bool> LHSReduceCallHistory_UInt64Map;
+    std::unordered_map<uint64_t,bool> RHSExpandCallHistory_UInt64Map;
+    std::unordered_map<uint64_t,bool> RHSReduceCallHistory_UInt64Map;
+    
+    bool bParseStrict_Flag = false;
+    
+    bool UpdatePrimaryKey_LHS(const uint64_t& PKeyFind, const uint64_t& PKeyReplacement)
+    {
+        bool ReturnStatus_Flag{};
+        LHSPrimaryKey_UInt64 = LHSPrimaryKey_UInt64 / PKeyFind * PKeyReplacement;
+        ReturnStatus_Flag = true;
+        return ReturnStatus_Flag;
+    }
+    
+    bool UpdatePrimaryKey_RHS(const uint64_t& PKeyFind, const uint64_t& PKeyReplacement)
+    {
+        bool ReturnStatus_Flag{};
+        RHSPrimaryKey_UInt64 = RHSPrimaryKey_UInt64 / PKeyFind * PKeyReplacement;
+        ReturnStatus_Flag = true;
+        return ReturnStatus_Flag;
+    }
+    
+    uint64_t guid{};
+};
+//
+__attribute__((always_inline)) template<>
+void Auto<Indirection_EnumClass::_expand>(Theorem_Struct InTheorem, const Axiom_Struct& InAxiom)
+{
+	if (InTheorem.RHSReduceCallGraph_UInt64Map.count(InAxiom.guid) == 0) return;
+
+	if (InTheorem.RHSReduceCallHistory_UInt64Map.count(InAxiom.guid) > 0) return;
+
+	InTheorem.RHSReduceCallHistory_UInt64Map.insert(InAxiom.guid);
+
+	Theorem_Struct TheoremProto_0000 = InTheorem;
+	Theorem_Struct TheoremProto_0001 = InTheorem;
+	Theorem_Struct TheoremProto_0002 = InTheorem;
+
+	TheoremProto_0000.UpdatePrimaryKey_LHS(InAxiom.RHSPrimaryKey_UInt64, InAxiom.LHSPrimaryKey_UInt64);
+
+	TheoremProto_0001.UpdatePrimaryKey_RHS(InAxiom.RHSPrimaryKey_UInt64, InAxiom.LHSPrimaryKey_UInt64);
+
+	TheoremProto_0002.UpdatePrimaryKey_LHS(InAxiom.RHSPrimaryKey_UInt64, InAxiom.LHSPrimaryKey_UInt64);
+	TheoremProto_0002.UpdatePrimaryKey_RHS(InAxiom.RHSPrimaryKey_UInt64, InAxiom.LHSPrimaryKey_UInt64);
+
+	TheoremProto_0000.ProofStack_VecUInt64.push_back(InAxiom.guid);
+	TheoremProto_0001.ProofStack_VecUInt64.push_back(InAxiom.guid);
+	TheoremProto_0002.ProofStack_VecUInt64.push_back(InAxiom.guid);
+
+	if (TheoremProto_0000.LHSPrimaryKey_UInt64 == TheoremProto_0000.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	if (TheoremProto_0001.LHSPrimaryKey_UInt64 == TheoremProto_0001.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	if (TheoremProto_0002.LHSPrimaryKey_UInt64 == TheoremProto_0002.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	switch (InTheorem.Indir_EnumClass)
+	{
+		case Indirection_EnumClass::_reduce:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				while (recursive_calls_available.load(std::memory_order_relaxed) < 3)
+					std::this_thread::yield();
+					
+				recursive_calls_available.fetch_sub(3, std::memory_order_relaxed);
+					
+				Reduce(TheoremProto_0000, Axiom);
+				Reduce(TheoremProto_0001, Axiom);
+				Reduce(TheoremProto_0002, Axiom);
+					
+				recursive_calls_available.fetch_add(3, std::memory_order_relaxed);
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_expand:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				while (recursive_calls_available.load(std::memory_order_relaxed) < 3)
+					std::this_thread::yield();
+					
+				recursive_calls_available.fetch_sub(3, std::memory_order_relaxed);
+					
+				Expand(TheoremProto_0000, Axiom);
+				Expand(TheoremProto_0001, Axiom);
+				Expand(TheoremProto_0002, Axiom);
+					
+				recursive_calls_available.fetch_add(3, std::memory_order_relaxed);
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_auto:
+		default:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				while (recursive_calls_available.load(std::memory_order_relaxed) < 6)
+					std::this_thread::yield();
+					
+				recursive_calls_available.fetch_sub(6, std::memory_order_relaxed);
+				
+				Reduce(TheoremProto_0000, Axiom);
+				Reduce(TheoremProto_0001, Axiom);
+				Reduce(TheoremProto_0002, Axiom);
+				
+				Expand(TheoremProto_0000, Axiom);
+				Expand(TheoremProto_0001, Axiom);
+				Expand(TheoremProto_0002, Axiom);
+					
+				recursive_calls_available.fetch_add(6, std::memory_order_relaxed);
+			});
+			break;
+		}
+	}
+};
+
+__attribute__((always_inline)) template<>
+void Auto<Indirection_EnumClass::_auto>(Theorem_Struct InTheorem, const Axiom_Struct& InAxiom)
+{
+	if (InTheorem.RHSReduceCallGraph_UInt64Map.count(InAxiom.guid) == 0) return;
+
+	if (InTheorem.RHSReduceCallHistory_UInt64Map.count(InAxiom.guid) > 0) return;
+
+	InTheorem.RHSReduceCallHistory_UInt64Map.insert(InAxiom.guid);
+
+	Theorem_Struct TheoremProto_0000 = InTheorem;
+	Theorem_Struct TheoremProto_0001 = InTheorem;
+	Theorem_Struct TheoremProto_0002 = InTheorem;
+
+	TheoremProto_0000.UpdatePrimaryKey_LHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+
+	TheoremProto_0001.UpdatePrimaryKey_RHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+
+	TheoremProto_0002.UpdatePrimaryKey_LHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+	TheoremProto_0002.UpdatePrimaryKey_RHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+
+	TheoremProto_0000.ProofStack_VecUInt64.push_back(InAxiom.guid);
+	TheoremProto_0001.ProofStack_VecUInt64.push_back(InAxiom.guid);
+	TheoremProto_0002.ProofStack_VecUInt64.push_back(InAxiom.guid);
+
+	if (TheoremProto_0000.LHSPrimaryKey_UInt64 == TheoremProto_0000.RHSPrimaryKey_UInt64)
+	{
+		InTheorem.TotalProofsFound_UInt64++;
+		InTheorem.ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	if (TheoremProto_0001.LHSPrimaryKey_UInt64 == TheoremProto_0001.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	if (TheoremProto_0002.LHSPrimaryKey_UInt64 == TheoremProto_0002.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+	
+	switch (InTheorem.Indir_EnumClass)
+	{
+		case Indirection_EnumClass::_reduce:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired()) {
+					Auto(TheoremProto_0000, Axiom);
+					Auto(TheoremProto_0001, Axiom);
+					Auto(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_expand:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired())
+				{
+					Auto(TheoremProto_0003, Axiom);
+					Auto(TheoremProto_0004, Axiom);
+					Auto(TheoremProto_0005, Axiom);
+				}
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_auto:
+		default:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(6);
+				if (limiter.acquired())
+				{
+					Auto(TheoremProto_0000, Axiom);
+					Auto(TheoremProto_0001, Axiom);
+					Auto(TheoremProto_0002, Axiom);
+					
+					Auto(TheoremProto_0003, Axiom);
+					Auto(TheoremProto_0004, Axiom);
+					Auto(TheoremProto_0005, Axiom);
+				}
+			});
+			break;
+		}
+	}
+	
+	std::cout << "Invoke: Auto(...) : InAxioms_VecRef[0].guid: " << InAxioms_VecRef[0].guid << std::endl;
+};
+//
+__attribute__((always_inline))
+void Reduce(Theorem_Struct InTheorem, const Axiom_Struct& InAxiom)
+{
+	if (InTheorem.RHSReduceCallGraph_UInt64Map.count(InAxiom.guid) == 0) return;
+
+	if (InTheorem.RHSReduceCallHistory_UInt64Map.count(InAxiom.guid) > 0) return;
+
+	InTheorem.RHSReduceCallHistory_UInt64Map.insert(InAxiom.guid);
+
+	Theorem_Struct TheoremProto_0000 = InTheorem;
+	Theorem_Struct TheoremProto_0001 = InTheorem;
+	Theorem_Struct TheoremProto_0002 = InTheorem;
+
+	TheoremProto_0000.UpdatePrimaryKey_LHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+
+	TheoremProto_0001.UpdatePrimaryKey_RHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+
+	TheoremProto_0002.UpdatePrimaryKey_LHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+	TheoremProto_0002.UpdatePrimaryKey_RHS(InAxiom.LHSPrimaryKey_UInt64, InAxiom.RHSPrimaryKey_UInt64);
+
+	TheoremProto_0000.ProofStack_VecUInt64.push_back(InAxiom.guid);
+	TheoremProto_0001.ProofStack_VecUInt64.push_back(InAxiom.guid);
+	TheoremProto_0002.ProofStack_VecUInt64.push_back(InAxiom.guid);
+
+	if (TheoremProto_0000.LHSPrimaryKey_UInt64 == TheoremProto_0000.RHSPrimaryKey_UInt64)
+	{
+		InTheorem.TotalProofsFound_UInt64++;
+		InTheorem.ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	if (TheoremProto_0001.LHSPrimaryKey_UInt64 == TheoremProto_0001.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	if (TheoremProto_0002.LHSPrimaryKey_UInt64 == TheoremProto_0002.RHSPrimaryKey_UInt64)
+	{
+		TotalProofsFound_UInt64++;
+		ProofFound_Flag = true;
+		if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64) return;
+	}
+
+	switch (InTheorem.Indir_EnumClass)
+	{
+		case Indirection_EnumClass::_reduce:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired()) {
+					Reduce(TheoremProto_0000, Axiom);
+					Reduce(TheoremProto_0001, Axiom);
+					Reduce(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_expand:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired())
+				{
+					Expand(TheoremProto_0000, Axiom);
+					Expand(TheoremProto_0001, Axiom);
+					Expand(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_auto:
+		default:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(6);
+				if (limiter.acquired())
+				{
+					Reduce(TheoremProto_0000, Axiom);
+					Reduce(TheoremProto_0001, Axiom);
+					Reduce(TheoremProto_0002, Axiom);
+					
+					Expand(TheoremProto_0000, Axiom);
+					Expand(TheoremProto_0001, Axiom);
+					Expand(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+	}
+};
+//
+				if (ijDoesNotCreateACallLoop_Flag)
+				{
+					const uint64_t Subnet_UInt64_lhsReduce = Axiom_i.at(0) % Axiom_j.at(0);
+					const uint64_t Subnet_UInt64_lhsExpand = Axiom_i.at(0) % Axiom_j.at(1);
+					const uint64_t Subnet_UInt64_rhsReduce = Axiom_i.at(1) % Axiom_j.at(0);
+					const uint64_t Subnet_UInt64_rhsExpand = Axiom_i.at(1) % Axiom_j.at(1);
+					
+					const bool bSubnetFound_Flag_lhsReduce = (Subnet_UInt64_lhsReduce == 0); // 1 + 1 ==> 2 ?
+					const bool bSubnetFound_Flag_lhsExpand = (Subnet_UInt64_lhsExpand == 0); // 2 ==> 1 + 1 ?
+					const bool bSubnetFound_Flag_rhsReduce = (Subnet_UInt64_rhsReduce == 0); // 2 <== 1 + 1 ?
+					const bool bSubnetFound_Flag_rhsExpand = (Subnet_UInt64_rhsExpand == 0); // 1 + 1 <== 2 ?
+
+					if (bSubnetFound_Flag_lhsReduce)
+					{
+						auto it = LHSReduceCallGraph_UInt64Map.find(i);
+						
+						if (it != LHSReduceCallGraph_UInt64Map.end())
+						{
+							it->second.insert(std::make_pair(j, true));
+						}
+					}
+
+					if (bSubnetFound_Flag_lhsExpand)
+					{
+						auto it = LHSExpandCallGraph_UInt64Map.find(i);
+						
+						if (it != LHSExpandCallGraph_UInt64Map.end())
+						{
+							it->second.insert(std::make_pair(j, true));
+						}
+					}
+
+					if (bSubnetFound_Flag_rhsReduce)
+					{
+						auto it = RHSReduceCallGraph_UInt64Map.find(i);
+						
+						if (it != RHSReduceCallGraph_UInt64Map.end())
+						{
+							it->second.insert(std::make_pair(j, true));
+						}
+					}
+
+					if (bSubnetFound_Flag_rhsExpand)
+					{
+						auto it = RHSExpandCallGraph_UInt64Map.find(i);
+						
+						if (it != RHSExpandCallGraph_UInt64Map.end())
+						{
+							it->second.insert(std::make_pair(j, true));
+						}
+					}
+				}
+//
+	switch (InTheorem.Indir_EnumClass)
+	{
+		case Indirection_EnumClass::_reduce:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired()) {
+					Reduce(TheoremProto_0000, Axiom);
+					Reduce(TheoremProto_0001, Axiom);
+					Reduce(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_expand:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired())
+				{
+					Expand(TheoremProto_0000, Axiom);
+					Expand(TheoremProto_0001, Axiom);
+					Expand(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+
+		case Indirection_EnumClass::_auto:
+		default:
+		{
+			std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter::Invoke limiter(3);
+				if (limiter.acquired())
+				{
+					Auto(TheoremProto_0000, Axiom);
+					Auto(TheoremProto_0001, Axiom);
+					Auto(TheoremProto_0002, Axiom);
+				}
+			});
+			break;
+		}
+	}
+// lock-free implementations are scalable (but slow!) and lock-based implementations are fast (but are not easily scaled!)
+class RecursionLimiter
+{
+public:
+	static constexpr uint64_t kDefaultLimit = 2048;
+
+	explicit RecursionLimiter(uint64_t required_calls)
+		: required_calls_(required_calls), acquired_(false) 
+	{
+		Acquire();
+	}
+
+	~RecursionLimiter()
+	{
+		if (acquired_)
+		{
+			Release();
+		}
+	}
+
+private:
+	void Acquire()
+	{
+		uint64_t current_available;
+		do {
+			current_available = recursive_calls_available.load(std::memory_order_relaxed);
+			if (current_available < required_calls_)
+			{
+				std::this_thread::yield();
+			}
+		} while (!recursive_calls_available.compare_exchange_weak(current_available, current_available - required_calls_, std::memory_order_acquire));
+		acquired_ = true;
+	}
+
+	void Release()
+	{
+		recursive_calls_available.fetch_add(required_calls_, std::memory_order_release);
+	}
+
+	static std::atomic<uint64_t> recursive_calls_available;
+	uint64_t required_calls_;
+	bool acquired_;
+};
+
+  // Initialize the static member
+std::atomic<uint64_t> RecursionLimiter::recursive_calls_available{RecursionLimiter::kDefaultLimit};
+
+std::for_each(std::execution::par_unseq, 
+			Axioms_Vec.begin(), 
+			Axioms_Vec.end(), 
+			[&](const Axiom_Struct& Axiom)
+			{
+				RecursionLimiter limiter(3);
+					
+				Reduce(TheoremProto_0000, Axiom);
+				Reduce(TheoremProto_0001, Axiom);
+				Reduce(TheoremProto_0002, Axiom);
+			});
+//
+	/*
+	if (localProofFound_Flag)
+		cv.notify(ProofStack_VecUInt64)
+	// safe increment or uint64_t add: a, b
+	if (a > 0 && b > 0 && a > std::numeric_limits<uint64_t>::max() - b) {
+		throw std::overflow_error("overflow");
+	} 
+	std::this_thread::sleep_for(std::chrono::nanoseconds(12));
+	*/
+	
+// Helper function to check if it is safe to make a recursive call
+bool can_make_recursive_call(const size_t N = 2)
+{
+	// Get the current stack size limit
+	struct rlimit stack_limit;
+	if (getrlimit(RLIMIT_STACK, &stack_limit) != 0)
+	{
+		// Failed to get the stack limit
+		return false;
+	}
+
+	// Get the stack size of the current thread
+	pthread_attr_t attr;
+	size_t thread_stack_size;
+	pthread_attr_init(&attr);
+	pthread_attr_getstacksize(&attr, &thread_stack_size);
+
+	// Check if there is enough stack space left for a recursive call
+	const size_t required_stack_size = N * thread_stack_size; // Modify the factor as required
+	return stack_limit.rlim_cur > required_stack_size;
+}
+
+//
+	for(const std::vector<uint64_t>& pKeyUInt64 : Axioms_UInt64Vec)
+	{
+		uint64_t  lhs = pKeyUInt64[0];
+		uint64_t  rhs = pKeyUInt64[1];
+		
+		uint64_t _lhs = pKeyUInt64[0];
+		uint64_t _rhs = pKeyUInt64[1];
+		
+		if (_lhs < _rhs)
+		{
+			 lhs = _rhs;
+			 rhs = _lhs;
+		}
+		
+		std::variant<Axiom_Struct,Theorem_Struct> tmp = (nIdxUInt64 > 0) ?
+			std::variant<Axiom_Struct, Theorem_Struct>(Axiom_Struct{}) : Theorem_Struct{};
+			
+		std::visit([&](auto &elem)
+		{
+			elem.guid = 0;
+			elem.guid = GUID++;
+			elem.LHSPrimaryKey_UInt64 = lhs;
+			elem.RHSPrimaryKey_UInt64 = rhs;
+			elem.LHSCallHistory_UInt64Map = LHSCallHistory_Map[nIdxUInt64];
+			elem.RHSCallHistory_UInt64Map = RHSCallHistory_Map[nIdxUInt64];
+			elem.LHSCallGraph_UInt64Map = LHSCallGraph_UInt64Map[nIdxUInt64];
+			elem.RHSCallGraph_UInt64Map = RHSCallGraph_UInt64Map[nIdxUInt64];
+			
+		}, tmp);
+		
+		if(nIdxUInt64 < 1 &&
+			std::is_same<decltype(tmp), 
+				decltype(Axiom_Struct{})>::value)
+			Axioms_Vec.emplace_back(tmp);
+			
+		nIdxUInt64++;
+	}
+//
+		std::variant<Axiom_Struct,Theorem_Struct>& target = nIdxUInt64 > 0 ? 
+		[]() noexcept -> void
+		{
+			Axioms_Vec.emplace_back
+			(
+				Axiom_Struct
+				{
+					.guid = GUID++,
+					.LHSPrimaryKey_UInt64 = lhs,
+					.RHSPrimaryKey_UInt64 = rhs,
+					.LHSCallHistory_Map = LHSCallHistory_Map[nIdxUInt64],
+					.RHSCallHistory_Map = RHSCallHistory_Map[nIdxUInt64],
+					.LHSCallGraph_UInt64Map = LHSCallGraph_UInt64Map[nIdxUInt64],
+					.RHSCallGraph_UInt64Map = RHSCallGraph_UInt64Map[nIdxUInt64]
+				}
+			);
+		}()
+		: 
+		[]() noexcept -> void
+		{
+			Theorem_Struct
+			{
+				.guid = GUID++,
+				.LHSPrimaryKey_UInt64 = lhs,
+				.RHSPrimaryKey_UInt64 = rhs,
+				.LHSCallHistory_Map = LHSCallHistory_Map[nIdxUInt64],
+				.RHSCallHistory_Map = RHSCallHistory_Map[nIdxUInt64],
+				.LHSCallGraph_UInt64Map = LHSCallGraph_UInt64Map[nIdxUInt64],
+				.RHSCallGraph_UInt64Map = RHSCallGraph_UInt64Map[nIdxUInt64]
+			};
+		}()
+		;
+// Benchmarks (nanoseconds): 40'034
+	std::unordered_map<uint64_t, std::vector<uint64_t>> LHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::vector<uint64_t>> RHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallHistory_Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallHistory_Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallGraph_UInt64Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallGraph_UInt64Map;
+	std::atomic<uint64_t> i(0);
+	std::for_each(std::execution::unseq, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
+		[&](std::vector<uint64_t>& Axiom_i) {
+			{
+				const uint64_t _lhs = Axiom_i.at(0);
+				const uint64_t _rhs = Axiom_i.at(1);
+				if (_lhs < _rhs)
+				{
+					const uint64_t lhs = _rhs;
+					const uint64_t rhs = _lhs;
+					Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 0, uint64_t{ lhs });
+					Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 1, uint64_t{ rhs });
+				}
+			}
+	
+			std::unordered_map<uint64_t, bool> _cgl; // Build lhs call graph
+			std::unordered_map<uint64_t, bool> _cgr; // Build rhs call graph
+			std::unordered_map<uint64_t, bool> _cg2l; // Build lhs call history map
+			std::unordered_map<uint64_t, bool> _cg2r; // Build rhs call history map
+			LHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgl));
+			RHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgr));
+			LHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2l));
+			RHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2r));
+	
+			std::atomic<uint64_t> j(0);
+			std::for_each(std::execution::par, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
+				[&](const std::vector<uint64_t>& Axiom_j) {
+					bool ijDoesNotCreateACallLoop_Flag = (i.load() != j.load()); // Avoid Call loops
+					if (ijDoesNotCreateACallLoop_Flag)
+					{
+						const uint64_t Subnet_UInt64_lhs = Axiom_i.at(0) / Axiom_j.at(1);
+						const uint64_t Subnet_UInt64_rhs = Axiom_i.at(1) / Axiom_j.at(0);
+						const bool bSubnetFound_Flag_lhs = (Subnet_UInt64_lhs % 1 == 0); // 2 == 1 + 1 ?
+						const bool bSubnetFound_Flag_rhs = (Subnet_UInt64_rhs % 1 == 0); // 1 + 1 == 2 ?
+	
+						if (bSubnetFound_Flag_lhs)
+						{
+							auto it = LHSCallGraph_UInt64Map.find(i.load());
+							if (it != LHSCallGraph_UInt64Map.end())
+							{
+								it->second.insert(std::make_pair(j.load(), true));
+							}
+						}
+	
+						if (bSubnetFound_Flag_rhs)
+						{
+							auto it = RHSCallGraph_UInt64Map.find(j.load());
+							if (it != RHSCallGraph_UInt64Map.end())
+							{
+								it->second.insert(std::make_pair(i.load(), true));
+						}
+					}
+				}
+				j.fetch_add(1);
+			});
+		i.fetch_add(1);
+	});
+// Benchmarks (nanoseconds): 1'570'893
+	std::unordered_map<uint64_t, std::vector<uint64_t>> LHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::vector<uint64_t>> RHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallHistory_Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallHistory_Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallGraph_UInt64Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallGraph_UInt64Map;
+	uint64_t i = 0;
+	for (std::vector<uint64_t>& Axiom_i : Axioms_UInt64Vec)
+	{   
+		{// lhs < rhs ? swap!
+			const uint64_t _lhs = Axiom_i.at(0);
+			const uint64_t _rhs = Axiom_i.at(1);
+			if (_lhs < _rhs)
+			{
+				const uint64_t lhs = _rhs;
+				const uint64_t rhs = _lhs;
+				Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 0, uint64_t{ lhs });
+				Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 1, uint64_t{ rhs });
+			}
+		}
+		uint64_t j = 0;
+		std::unordered_map<uint64_t, bool> _cgl; // Build lhs call graph
+		std::unordered_map<uint64_t, bool> _cgr; // Build rhs call graph
+		std::unordered_map<uint64_t, bool> _cg2l; // Build lhs call history map
+		std::unordered_map<uint64_t, bool> _cg2r; // Build rhs call history map
+		LHSCallGraph_UInt64Map.insert(std::make_pair(i, _cgl));
+		RHSCallGraph_UInt64Map.insert(std::make_pair(i, _cgr));
+		LHSCallHistory_Map.insert(std::make_pair(i, _cg2l));
+		RHSCallHistory_Map.insert(std::make_pair(i, _cg2r));
+		for (const std::vector<uint64_t>& Axiom_j : Axioms_UInt64Vec)
+		{
+			bool ijDoesNotCreateACallLoop_Flag = (i != j); // Avoid Call loops
+			if (ijDoesNotCreateACallLoop_Flag) 
+			{
+				const uint64_t Subnet_UInt64_lhs = Axiom_i.at(0) / Axiom_j.at(1);
+				const uint64_t Subnet_UInt64_rhs = Axiom_i.at(1) / Axiom_j.at(0);
+				const bool bSubnetFound_Flag_lhs = (Subnet_UInt64_lhs % 1 == 0); // 2 == 1 + 1 ?
+				const bool bSubnetFound_Flag_rhs = (Subnet_UInt64_rhs % 1 == 0); // 1 + 1 == 2 ?
+				
+				if (bSubnetFound_Flag_lhs)
+				{
+					auto it = LHSCallGraph_UInt64Map.find(i);
+					if (it != LHSCallGraph_UInt64Map.end())
+					{
+						it->second.insert(std::make_pair(j, true));
+					}
+				}
+
+				if (bSubnetFound_Flag_rhs)
+				{
+					auto it = RHSCallGraph_UInt64Map.find(j);
+					if (it != RHSCallGraph_UInt64Map.end())
+					{
+						it->second.insert(std::make_pair(i, true));
+					}
+				}
+				
+			}
+			j++;
+		}
+		i++;
+	}
+//
+/*
+	std::vector <uint64_t> v{};
+	v.resize(300'000);
+	std::mutex mtx;
+	std::vector<std::jthread> threads;
+	constexpr std::size_t num_threads = 1; // std::thread::hardware_concurrency();
+	const std::size_t chunk_size = v.size() / num_threads;
+	// Create one jthread per chunk of elements in the vector
+	for (std::size_t i = 0; i < v.size(); i += chunk_size) { // v.resize(300'000); Benchmarks (nanoseconds): 3848300
+		std::size_t chunk_end = i + chunk_size;
+		if (chunk_end > v.size()) {
+			chunk_end = v.size();
+		}
+		threads.emplace_back([i, chunk_end, &v, &mtx](std::stop_token st) noexcept -> void {
+			// Execute the for-each loop on the chunk of elements
+			if (st.stop_requested()) {
+				return;
+			}
+			//std::unique_lock<std::mutex> lock(mtx);
+			std::for_each(std::execution::unseq, v.begin() + i, v.begin() + chunk_end, [](uint64_t& n) {
+				n = 2;
+				//std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+			});
+		});
+	}
+	for (std::jthread& th : threads)
+	{
+		th.join();
+	}
+	std::cout << v[0] << std::endl;
+*/	
+// Benchmark (nanosecond): 1'729'652 
+	std::unordered_map<uint64_t, std::vector<uint64_t>> LHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::vector<uint64_t>> RHSPrimaryKeyHistory_VecMap;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallHistory_Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallHistory_Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> LHSCallGraph_UInt64Map;
+	std::unordered_map<uint64_t, std::unordered_map<uint64_t, bool>> RHSCallGraph_UInt64Map;
+	std::atomic<uint64_t> i(0);
+	std::for_each(std::execution::par_unseq, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
+		[&](std::vector<uint64_t>& Axiom_i) {
+			{
+				const uint64_t _lhs = Axiom_i.at(0);
+				const uint64_t _rhs = Axiom_i.at(1);
+				if (_lhs < _rhs)
+				{
+					const uint64_t lhs = _rhs;
+					const uint64_t rhs = _lhs;
+					Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 0, uint64_t{ lhs });
+					Axiom_i.emplace<uint64_t>(Axiom_i.begin() + 1, uint64_t{ rhs });
+				}
+			}
+	
+			std::unordered_map<uint64_t, bool> _cgl; // Build lhs call graph
+			std::unordered_map<uint64_t, bool> _cgr; // Build rhs call graph
+			std::unordered_map<uint64_t, bool> _cg2l; // Build lhs call history map
+			std::unordered_map<uint64_t, bool> _cg2r; // Build rhs call history map
+			LHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgl));
+			RHSCallGraph_UInt64Map.insert(std::make_pair(i.load(), _cgr));
+			LHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2l));
+			RHSCallHistory_Map.insert(std::make_pair(i.load(), _cg2r));
+	
+			std::atomic<uint64_t> j(0);
+			std::for_each(std::execution::par, Axioms_UInt64Vec.begin(), Axioms_UInt64Vec.end(),
+				[&](const std::vector<uint64_t>& Axiom_j) {
+					bool ijDoesNotCreateACallLoop_Flag = (i.load() != j.load()); // Avoid Call loops
+					if (ijDoesNotCreateACallLoop_Flag)
+					{
+						const uint64_t Subnet_UInt64_lhs = Axiom_i.at(0) / Axiom_j.at(1);
+						const uint64_t Subnet_UInt64_rhs = Axiom_i.at(1) / Axiom_j.at(0);
+						const bool bSubnetFound_Flag_lhs = (Subnet_UInt64_lhs % 1 == 0); // 2 == 1 + 1 ?
+						const bool bSubnetFound_Flag_rhs = (Subnet_UInt64_rhs % 1 == 0); // 1 + 1 == 2 ?
+	
+						if (bSubnetFound_Flag_lhs)
+						{
+							auto it = LHSCallGraph_UInt64Map.find(i.load());
+							if (it != LHSCallGraph_UInt64Map.end())
+							{
+								it->second.insert(std::make_pair(j.load(), true));
+							}
+						}
+	
+						if (bSubnetFound_Flag_rhs)
+						{
+							auto it = RHSCallGraph_UInt64Map.find(j.load());
+							if (it != RHSCallGraph_UInt64Map.end())
+							{
+								it->second.insert(std::make_pair(i.load(), true));
+						}
+					}
+				}
+				j.fetch_add(1);
+			});
+		i.fetch_add(1);
+	});
+//
+					// Todo: move clause to rhs
+					else if (ijCreatesAnExpandCall_Flag) // Expand
+					{
+						const uint64_t Subnet_UInt64 = Axiom_i.at(0) / Axiom_j.at(1);
+						const bool bSubgnetFound_Flag = (Subnet_UInt64 % 1 == 0); // 1 + 1 == 2 ?
+						if (bSubgnetFound_Flag) // 2 => 1 + 1
+						{
+							//const uint64_t ComputedSubnet_UInt64 = Subnet_UInt64 * Axiom_j.at(0); // Reduce: 1 + 1 >> 2
+							const auto it = RHSCallGraph_UInt64Map.find(i);
+							// Complete the RHSCallGraph_UInt64Map
+							if (it != RHSCallGraph_UInt64Map.end())
+							{
+								it->second.insert(std::make_pair(j, true));
+							}
+							else
+							{
+								std::cout << "Error - Bounds at [i,j] exceeded: RHSCallGraph_UInt64Map[" <<
+									i << ", " << j << "]. Attempting error recovery..." << std::endl;
+								std::unordered_map<uint64_t, bool> _cg;
+								_cg.insert(std::make_pair(j, true));
+								RHSCallGraph_UInt64Map.insert(std::make_pair(i, _cg));
+							}
+						}
+					}
+//
+	std::vector <uint64_t> v{};
+	v.resize(300'000);
+
+	std::mutex mtx;
+	constexpr std::size_t num_threads = 1; // std::thread::hardware_concurrency();
+	const std::size_t chunk_size = v.size() / num_threads;
+	std::vector<std::jthread> threads;
+
+	// Create one jthread per chunk of elements in the vector
+	for (std::size_t i = 0; i < v.size(); i += chunk_size) { // v.resize(300'000); Benchmarks (nanoseconds): 3848300
+		std::size_t chunk_end = i + chunk_size;
+		if (chunk_end > v.size()) {
+			chunk_end = v.size();
+		}
+		threads.emplace_back([i, chunk_end, &v, &mtx](std::stop_token st) noexcept -> void {
+			// Execute the for-each loop on the chunk of elements
+			if (st.stop_requested()) {
+				return;
+			}
+			//std::unique_lock<std::mutex> lock(mtx);
+			std::for_each(std::execution::unseq, v.begin() + i, v.begin() + chunk_end, [](uint64_t& n) {
+				n = 2;
+				//std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+			});
+		});
+	}
+	for (std::jthread& th : threads)
+	{
+		th.join();
+	}
+	std::cout << v[0] << std::endl;
+// Note: more threads reduce performance. Most likely due to malware multiplexing our workload onto a single thread.
+	std::vector <uint64_t> v{};
+	v.resize(300'000);
+
+		const std::size_t num_threads = 1e3; // std::thread::hardware_concurrency();
+		const std::size_t chunk_size = v.size() / num_threads;
+		std::vector<std::jthread> threads;
+
+		// Create one jthread per chunk of elements in the vector
+		for (std::size_t i = 0; i < v.size(); i += chunk_size) { // v.resize(300'000); Benchmarks (nanoseconds): 2583489400
+			std::size_t chunk_end = i + chunk_size;
+			if (chunk_end > v.size()) {
+				chunk_end = v.size();
+			}
+			threads.emplace_back([i, chunk_end, &v](std::stop_token st) noexcept -> void {
+				// Execute the for-each loop on the chunk of elements
+				if (st.stop_requested()) {
+					return;
+				}
+				std::for_each(std::execution::unseq, v.begin() + i, v.begin() + chunk_end, [](uint64_t& n) {
+					n = 2;
+					std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+				});
+			});
+		}
+		for (std::jthread& th : threads)
+		{
+			th.join();
+		}
+//
+	std::vector <uint64_t> v{};
+	v.resize(300'000);
+
+		const std::size_t num_threads = 1; // std::thread::hardware_concurrency();
+		const std::size_t chunk_size = v.size() / num_threads;
+		std::vector<std::jthread> threads;
+
+		// Create one jthread per chunk of elements in the vector
+		for (std::size_t i = 0; i < v.size(); i += chunk_size) { // v.resize(300'000); Benchmarks (nanoseconds): 2989900
+			std::size_t chunk_end = i + chunk_size;
+			if (chunk_end > v.size()) {
+				chunk_end = v.size();
+			}
+			threads.emplace_back([i, chunk_end, &v](std::stop_token st) noexcept -> void {
+				// Execute the for-each loop on the chunk of elements
+				if (st.stop_requested()) {
+					return;
+				}
+				std::for_each(std::execution::unseq, v.begin() + i, v.begin() + chunk_end, [](uint64_t& n) {
+					n = 2;
+				});
+			});
+		}
+		for (std::jthread& th : threads)
+		{
+			th.join();
+		}
+		std::cout << v[0] << std::endl;
+//
+	std::vector <uint64_t> v{};
+	v.resize(300'000);
+
+		const std::size_t num_threads = std::thread::hardware_concurrency();
+		const std::size_t chunk_size = v.size() / num_threads;
+		std::vector<std::jthread> threads;
+
+		// Create one jthread per chunk of elements in the vector
+		for (std::size_t i = 0; i < v.size(); i += chunk_size) { // v.resize(300'000); Benchmarks (nanoseconds): 1677483000
+			std::size_t chunk_end = i + chunk_size;
+			if (chunk_end > v.size()) {
+				chunk_end = v.size();
+			}
+			threads.emplace_back([i, chunk_end, &v](std::stop_token st) noexcept -> void {
+				// Execute the for-each loop on the chunk of elements
+				if (st.stop_requested()) {
+					return;
+				}
+				std::for_each(std::execution::par_unseq, v.begin() + i, v.begin() + chunk_end, [](uint64_t& n) {
+					n = 2;
+					std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+				});
+			});
+		}
+		for (std::jthread& th : threads)
+		{
+			th.join();
+		}
+		std::cout << v[0] << std::endl;
+//
+		auto fute = std::async(std::launch::async, [&v] { // v.resize(300'000); Benchmarks (nanoseconds): 1383600
+			std::for_each(std::execution::unseq, v.begin(), v.end(), [](uint64_t& n) noexcept -> void {
+				std::atomic<uint64_t> u{ 2 };
+				n = u;
+				});
+			});
+		fute.wait();
+//
+		// Create one jthread per element in the vector
+		std::for_each(std::execution::unseq, v.begin(), v.end(), [&threads](uint64_t& elem) noexcept -> void {
+			elem = 2;
+		});
+// Create one jthread per element in the vector
+		std::for_each(std::execution::par_unseq, v.begin(), v.end(), [&threads](uint64_t& elem) noexcept -> void {
+			std::atomic<uint64_t> _elem{elem};
+			threads.emplace_back([&_elem](std::stop_token st) noexcept -> void {
+				if (st.stop_requested()) {
+					return;
+				}
+				_elem.store(2, std::memory_order_relaxed);
+			});
+		});
+
+		// Wait for all jthreads to finish
+		for (auto& thread : threads) {
+			thread.join();
+		}
+//
+	std::atomic<uint64_t> u{};
+	std::vector <std::atomic<uint64_t>> v{};
+	v.resize(300'000);
+
+		std::vector<std::jthread> threads;
+
+		// Create one jthread per element in the vector
+		std::for_each(std::execution::unseq, v.begin(), v.end(), [&threads](std::atomic<uint64_t>& elem) noexcept -> void {
+			threads.emplace_back([&elem](std::stop_token st) noexcept -> void {
+				if (st.stop_requested()) {
+					return;
+				}
+				elem.store(2, std::memory_order_relaxed);
+			});
+		});
+
+		// Wait for all jthreads to finish
+		for (auto& thread : threads) {
+			thread.join();
+		}
+//
+		[[nodiscard]] std::vector<std::vector<std::string>> Auto(const Theorem& InProof_Theorem,
+			const std::vector<AxiomAtom>& InAxioms_AxiomAtomVec,
+			std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec,
+			const Indirection Indir_IndirectionEnum = Indirection::auto_)
+		{
+
+		}
+//
+			switch (Indir_IndirectionEnum)
+			{
+				case Indirection::auto_:
+				{
+					Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+					Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+					break;
+				}
+
+				case Indirection::reduce_:
+				{
+					Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+					break;
+				}
+
+				case Indirection::expand_:
+				{
+					Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+					break;
+				}
+
+				default: // Auto
+				{
+					Reduce(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+					Expand(InProof_Theorem, InAxioms_AxiomAtomVec, OutProofStack_StdStr2DVec, Indir_IndirectionEnum);
+					break;
+				}
+			}
+//
+		void Expand(const Theorem InTheorem,
+			const AxiomAtom InAxiom,
+			uint64_t& OutPrimaryKeyRHS_UInt64,
+			std::vector<const std::vector<std::string>&> OutProofStack_VecStdStr,
+			std::unordered_map<uint64_t, bool>& OutProofHistoryMap)
+		{
+			ThreadPool.emplace_back([&]()
+				{
+					{ // local thread scope 
+						std::unique_lock<std::mutex> lock(Mutex);
+						if (!(ProofsFound_UInt64 < InTheorem.MaxAllowedProofs_UInt64))
+						{
+							CV.notify_one();
+							return;
+						}
+					}
+
+					Expand(InTheorem,
+						InAxiom,
+						OutPrimaryKeyRHS_UInt64,
+						OutProofStack_VecStdStr,
+						OutProofHistoryMap);
+
+					{ // local thread scope 
+						std::unique_lock<std::mutex> lock(Mutex);
+						++AvailableThreads_SizeT;
+						CV.notify_one();
+					}
+
+				});
+
+			if (InTheorem.Indirection_Enum == Indirection::auto_)
+			{
+				ThreadPool.emplace_back([&]()
+					{
+						{ // local thread scope 
+							std::unique_lock<std::mutex> lock(Mutex);
+							if (!(ProofsFound_UInt64 < InTheorem.MaxAllowedProofs_UInt64))
+							{
+								CV.notify_one();
+								return;
+							}
+						}
+
+						Reduce(InTheorem,
+							InAxiom,
+							OutPrimaryKeyRHS_UInt64,
+							OutProofStack_VecStdStr,
+							OutProofHistoryMap);
+
+						{ // local thread scope 
+							std::unique_lock<std::mutex> lock(Mutex);
+							++AvailableThreads_SizeT;
+							CV.notify_one();
+						}
+
+					});
+			}
+		};
+
+		void Reduce(const Theorem InTheorem,
+			const AxiomAtom InAxiom,
+			uint64_t& OutPrimaryKeyLHS_UInt64,
+			std::vector<const std::vector<std::string>&> OutProofStack_VecStdStr,
+			std::unordered_map<uint64_t, bool>& OutProofHistoryMap)
+		{
+			if (OutProofHistoryMap.find(InAxiom.GUID_UInt64) != OutProofHistoryMap.begin())
+			{
+				return;
+			}
+			const uint64_t lhs = InAxiom.PrimaryKeyLHS_AtomicUInt64.load(std::memory_order_relaxed);
+			OutProofHistoryMap.insert({ InAxiom.GUID_UInt64,true });
+			bool bTermRewritingCandidateFound_Flag = (OutPrimaryKeyLHS_UInt64 / lhs) % 1 == 0;
+			if (bTermRewritingCandidateFound_Flag)
+			{
+				OutProofStack_VecStdStr.push_back(InAxiom.SubnetRHS_VecStdStrRef);
+				const uint64_t rhs = InAxiom.PrimaryKeyRHS_AtomicUInt64.load(std::memory_order_relaxed);
+				const uint64_t result = OutPrimaryKeyLHS_UInt64 / lhs * rhs;
+				OutPrimaryKeyLHS_UInt64 = result;
+			}
+
+			// Todo: add a barrier or latch here, to improve asynchronous performance
+
+			const uint64_t rhs = InTheorem.PrimaryKeyRHS_AtomicUInt64.load(std::memory_order_relaxed);
+			bool bNoProofFound_Flag = (rhs == OutPrimaryKeyLHS_UInt64);
+			bool bIndirectionAuto_Flag = (InTheorem.Indirection_Enum == Indirection::auto_);
+			if (bIndirectionAuto_Flag)
+			{
+				ThreadPool.emplace_back([&]()
+					{
+						{ // local thread scope 
+							std::lock_guard<std::mutex> lock(Mutex);
+							if (!(ProofsFound_UInt64 < InTheorem.MaxAllowedProofs_UInt64))
+							{
+								CV.notify_one();
+								return;
+							}
+						}
+
+						Expand(InTheorem,
+							InAxiom,
+							OutPrimaryKeyLHS_UInt64,
+							OutProofStack_VecStdStr,
+							OutProofHistoryMap);
+
+						{ // local thread scope 
+							std::lock_guard<std::mutex> lock(Mutex);
+							++AvailableThreads_SizeT;
+							CV.notify_one();
+						}
+
+					});
+			}
+
+			ThreadPool.emplace_back([&]()
+				{
+					{ // local thread scope 
+						std::lock_guard<std::mutex> lock(Mutex);
+						if (!(ProofsFound_UInt64 < InTheorem.MaxAllowedProofs_UInt64))
+						{
+							CV.notify_one();
+							return;
+						}
+					}
+
+					Reduce(InTheorem,
+						InAxiom,
+						OutPrimaryKeyLHS_UInt64,
+						OutProofStack_VecStdStr,
+						OutProofHistoryMap);
+
+					{ // local thread scope 
+						std::lock_guard<std::mutex> lock(Mutex);
+						++AvailableThreads_SizeT;
+						CV.notify_one();
+					}
+
+				});
+		};
+//
+		[[nodiscard]] std::vector<std::vector<std::string>> Auto(const Theorem& InProof_Theorem,
+			const std::vector<AxiomAtom>& InAxioms_AxiomAtomVec,
+			std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec,
+			const Indirection Indir_IndirectionEnum = Indirection::auto_,
+			std::function<uint64_t(uint64_t)> Suspend_callback = nullptr,
+			std::function<bool(uint64_t)> Resume_callback = nullptr)
+		{
+
+		};
+//
+		// Todo: Refactor Auto as a generic EuclidProver::Prove class method, which implements Reduce and Expand, and returns a std::vector<std::vector<std::string>> ProofStacks_2DVecStdStr.
+		class Auto
+		{
+		public:
+			Auto() noexcept {};
+			explicit Auto(const Theorem& InProofLHS_Theorem,
+				const Theorem& InProofRHS_Theorem,
+				const std::vector<AxiomAtom>& InAxioms_AxiomAtomVec, 
+				std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec,
+				const Indirection Indir_IndirectionEnum = Indirection::auto_)
+			{
+				ProofsFound_UInt64 = 0;
+				bProofFoundFlag = false;
+				ThreadPool.reserve(ThreadPoolSize_SizeT);
+
+				{ // local thread scope 
+					std::unique_lock<std::mutex> lock(Mutex);
+					CV.wait(lock, [this]() { return AvailableThreads_SizeT > 1; });
+					AvailableThreads_SizeT -= 2;
+				}
+
+				//std::vector<const std::vector<std::string>> OutProofStack_StdStr2DVec{};
+
+				//uint64_t PrimaryKeyUInt64 = 1;
+				
+				/*
+				std::vector<uint64_t> Numbers;
+
+				Numbers.resize(InAxioms.size());
+
+				// Fill the vector with sequential numbers
+				for (size_t i = 0; i < Numbers.size(); ++i) {
+					Numbers[i] = i;
+				}
+
+				// Compute and process each permutation
+				do {
+					for(const uint64_t i : Numbers)
+					{
+						for (AxiomAtom axiom : InAxioms)
+						{
+
+						}
+					}
+					const bool bProofFoundFlag = ProofsFound_UInt64 < InProofLHS.MaxAllowedProofs_UInt64 ;
+				} while (std::next_permutation(Numbers.begin(), 
+					Numbers.end()) && !bProofFoundFlag);
+				*/
+				for (AxiomAtom axiom : InAxioms_AxiomAtomVec)
+				{
+					axiom.bIsOnlineFlag = true;
+					ProofHistoryMap.insert(std::make_pair(axiom.GUID_UInt64, true));
+
+					ThreadPool.emplace_back([&]()
+						{
+							Expand(InProofRHS_Theorem,
+							axiom,
+							InProofRHS_Theorem.PrimaryKeyRHS_AtomicUInt64,
+							OutProofStack_StdStr2DVec,
+							ProofHistoryMap);
+
+							{
+								std::unique_lock<std::mutex> lock(Mutex);
+								++AvailableThreads_SizeT;
+								CV.notify_one();
+							}
+
+						});
+
+					ThreadPool.emplace_back([&]()
+						{
+							Reduce(InProofLHS_Theorem,
+							axiom,
+							InProofLHS_Theorem.PrimaryKeyLHS_AtomicUInt64,
+							OutProofStack_StdStr2DVec,
+							ProofHistoryMap);
+
+							{ // local thread scope 
+								std::unique_lock<std::mutex> lock(Mutex);
+								++AvailableThreads_SizeT;
+								CV.notify_one();
+							}
+
+						});
+				}
+			}
+
+			[[nodiscard]] uint64_t Suspend()
+			{
+				// Todo: Verify the process is indeed unsuspended
+				// Todo: Serialize the Proof state
+				// Todo: Set the new process state to suspended
+				// Todo: return a guid handle
+			}
+
+			int Resume(const uint64_t guid)
+			{
+				// Todo: Verify the guid handle
+				// Todo: Verify the process is indeed suspended
+				// Todo: DeSerialize the Proof state
+				// Todo: Set the new process state to unsuspended
+				// Todo: Return errorcode ifany
+			}
+
+		private:
+			std::unordered_map<uint64_t, bool> ProofHistoryMap{};
+			std::vector<std::string> ProofStack_StdStrVec{};
+			enum class Indirection Indir_IndirectionEnum = Indirection::auto_;
+			//const uint64_t maxThreadsUInt64 = std::thread::hardware_concurrency();
+			static constexpr size_t ThreadPoolSize_SizeT = 128;
+			std::vector<std::jthread> ThreadPool{};
+			std::mutex Mutex; // A reserved register and scope to perform serial operations
+			std::condition_variable CV; // Used to facilitate communication between threads
+
+			std::atomic<uint64_t> ProofsFound_UInt64 = 0;
+			std::atomic<bool> bProofFoundFlag = false;
+			std::atomic<size_t> AvailableThreads_SizeT = ThreadPoolSize_SizeT;
+
+			void Expand(const Theorem InTheorem,
+				const AxiomAtom InAxiom,
+				uint64_t& OutPrimaryKeyRHS_UInt64,
+				std::vector<const std::vector<std::string>&> OutProofStack_VecStdStr,
+				std::unordered_map<uint64_t, bool>& OutProofHistoryMap)
+			{
+				ThreadPool.emplace_back([&]()
+					{
+						{ // local thread scope 
+							std::unique_lock<std::mutex> lock(Mutex);
+							if (!(ProofsFound_UInt64 < InTheorem.MaxAllowedProofs_UInt64))
+							{
+								CV.notify_one();
+								return;
+							}
+						}
+
+						Expand(InTheorem,
+						InAxiom,
+						OutPrimaryKeyRHS_UInt64,
+						OutProofStack_VecStdStr,
+						OutProofHistoryMap);
+
+						{ // local thread scope 
+							std::unique_lock<std::mutex> lock(Mutex);
+							++AvailableThreads_SizeT;
+							CV.notify_one();
+						}
+
+					});
+
+				if (InTheorem.Indirection_Enum == Indirection::auto_)
+				{
+					ThreadPool.emplace_back([&]()
+						{
+							{ // local thread scope 
+								std::unique_lock<std::mutex> lock(Mutex);
+								if (!(ProofsFound_UInt64 < InTheorem.MaxAllowedProofs_UInt64))
+								{
+									CV.notify_one();
+									return;
+								}
+							}
+
+							Reduce(InTheorem,
+								InAxiom,
+								OutPrimaryKeyRHS_UInt64,
+								OutProofStack_VecStdStr,
+								OutProofHistoryMap);
+
+							{ // local thread scope 
+								std::unique_lock<std::mutex> lock(Mutex);
+								++AvailableThreads_SizeT;
+								CV.notify_one();
+							}
+
+						});
+				}
+			};
+			void Reduce(const Theorem InTheorem,
+				const AxiomAtom InAxiom,
+				uint64_t& OutPrimaryKeyLHS_UInt64,
+				std::vector<const std::vector<std::string>&> OutProofStack_VecStdStr,
+				std::unordered_map<uint64_t, bool>& OutProofHistoryMap)
+			{
+				if (OutProofHistoryMap.find(InAxiom.GUID_UInt64) != OutProofHistoryMap.begin())
+				{
+					return;
+				}
+				const uint64_t lhs = InAxiom.PrimaryKeyLHS_AtomicUInt64.load(std::memory_order_relaxed);
+				OutProofHistoryMap.insert({ InAxiom.GUID_UInt64,true });
+				bool bTermRewritingCandidateFound_Flag = (OutPrimaryKeyLHS_UInt64 / lhs) % 1 == 0 ;
+				if (bTermRewritingCandidateFound_Flag)
+				{
+					OutProofStack_VecStdStr.push_back(InAxiom.SubnetRHS_VecStdStrRef);
+					const uint64_t rhs = InAxiom.PrimaryKeyRHS_AtomicUInt64.load(std::memory_order_relaxed);
+					const uint64_t result = OutPrimaryKeyLHS_UInt64 / lhs * rhs;
+					OutPrimaryKeyLHS_UInt64 = result;
+				}
+
+				// Todo: add a barrier or latch here, to improve performance
+
+				const uint64_t rhs = InTheorem.PrimaryKeyRHS_AtomicUInt64.load(std::memory_order_relaxed);
+				bool bNoProofFound_Flag = (rhs == OutPrimaryKeyLHS_UInt64);
+				bool bIndirectionAuto_Flag = (InTheorem.Indirection_Enum == Indirection::auto_);
+				if (bIndirectionAuto_Flag)
+				{
+					ThreadPool.emplace_back([&]()
+					{
+						{ // local thread scope 
+							std::lock_guard<std::mutex> lock(Mutex);
+							if (!(ProofsFound_UInt64 < InTheorem.MaxAllowedProofs_UInt64))
+							{
+								CV.notify_one();
+								return;
+							}
+						}
+
+						Expand(InTheorem,
+							InAxiom,
+							OutPrimaryKeyLHS_UInt64,
+							OutProofStack_VecStdStr,
+							OutProofHistoryMap);
+
+						{ // local thread scope 
+							std::lock_guard<std::mutex> lock(Mutex);
+							++AvailableThreads_SizeT;
+							CV.notify_one();
+						}
+
+					});
+				}
+
+				ThreadPool.emplace_back([&]()
+				{
+					{ // local thread scope 
+						std::lock_guard<std::mutex> lock(Mutex);
+						if (!(ProofsFound_UInt64 < InTheorem.MaxAllowedProofs_UInt64))
+						{
+							CV.notify_one();
+							return;
+						}
+					}
+
+					Reduce(InTheorem,
+						InAxiom,
+						OutPrimaryKeyLHS_UInt64,
+						OutProofStack_VecStdStr,
+						OutProofHistoryMap);
+
+					{ // local thread scope 
+						std::lock_guard<std::mutex> lock(Mutex);
+						++AvailableThreads_SizeT;
+						CV.notify_one();
+					}
+
+				});
+			};
+		};
+//
+	//#include "../boost/multiprecision/cpp_int.hpp"
+	//#include "../EuclidProverLibDLL/EuclidProverLibDLL.h"
+	//#include "../EuclidProverLibDLL/TestCases.h"
+
+	#include <vector>
+	#include <chrono>
+	#include <iostream>
+	#include <ppl.h> // Parallel Patterns Library
+	#include <thread>
+
+	#include <algorithm>
+	#include <cstdint>
+	/*
+	void CalculateSquares(const std::vector<int>&input, std::vector<int>&output)
+	{
+		// Use parallel_for to perform the calculation concurrently
+		concurrency::parallel_for(size_t(0), input.size(), [&](size_t i) // < 805106000 ns
+			{
+			output.at(i) = input.at(i) * input.at(i);
+			});
+		const size_t I = input.size();
+		for (size_t i = 0; i < I; ++i) // < 403202000 ns
+		{
+			output[i] = input[i] * input[i];
+		}
+	}
+	*/
+	int main()
+	{
+		//using namespace EuclidProverLib;
+
+		// Instantiate Prover (module)
+		/*EuclidProver<BracketType::CurlyBraces> Euclid{};
+
+		const std::vector<std::string>& axiom_0 = { "{", "1", "}","+","{", "1", "}","=","{", "2", "}" };
+		Euclid.Axiom( axiom_0 );*/
+
+		//x86i64IntTestCases{};
+		/*
+		using namespace boost::multiprecision;
+		// Repeat at arbitrary precision:
+		cpp_int u = 1;
+		for (unsigned i = 1; i <= 100; ++i)
+			u *= i;
+
+		// prints 93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000 (i.e. 100!)
+		std::cout << u << std::endl;
+	
+
+		std::vector<int> input{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		std::vector<int> output(input.size());
+		std::vector<std::jthread> workers;
+
+		workers.reserve(1);
+
+		auto start_time_op = std::chrono::high_resolution_clock::now();
+		workers.emplace_back([&input, &output]() {CalculateSquares(input, output); }); // 1115400 ns (vs 11176100 ns w/o workers.reserve(...)
+		auto end_time_op = std::chrono::high_resolution_clock::now();
+		auto duration_op = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time_op - start_time_op).count();
+		std::cout << "CalculateSquares(...) duration: " << duration_op << "_ns" << std::endl;
+
+		std::cout << "Input: ";
+		for (const int& val : input) {
+			std::cout << val << " ";
+		}
+		std::cout << std::endl;
+
+		std::cout << "Output: ";
+		for (const int& val : output) {
+			std::cout << val << " ";
+		}
+		std::cout << std::endl;
+		*/
+
+		std::vector<uint64_t> Numbers;
+		Numbers.resize(4);
+
+		// Fill the vector with sequential numbers
+		for (size_t i = 0; i < Numbers.size(); ++i) {
+			Numbers[i] = i;
+		}
+
+		// Function to process each permutation (e.g., print or store)
+		auto process_permutation = [](const std::vector<uint64_t>& perm) {
+			for (const auto& num : perm) {
+				std::cout << num << ' ';
+			}
+			std::cout << '\n';
+		};
+
+		// Compute and process each permutation
+		do {
+			process_permutation(Numbers);
+		} while (std::next_permutation(Numbers.begin(), Numbers.end()));
+
+		return 0;
+
+	}
+//
+			Theorem ProofLHS_Theorem{};
+			Theorem ProofRHS_Theorem{};
+//
+				ThreadPool.reserve(ThreadPoolSize);
+
+				{
+					// Spawn the initial threads for Expand and Reduce
+					std::unique_lock<std::mutex> lock(Mutex);
+					CV.wait(lock, [this]() { return AvailableThreads >= 2; });
+					AvailableThreads -= 2;
+				}
+
+				ProofLHS = InProofLHS;
+				ProofRHS = InProofRHS;
+
+				ThreadPool.emplace_back([&]()
+					{
+						Expand(ProofLHS, 
+						ProofStack, 
+						ProofHistoryMap);
+						{
+							std::unique_lock<std::mutex> lock(Mutex);
+							++AvailableThreads;
+							CV.notify_one();
+						}
+					});
+//
+		// Constructor
+		__x86i64Int(const std::string& str = "0")
+		{
+			uint64_t tmp = 0;
+			uint64_t digit_count = 0;
+			for (auto it = str.rbegin(); it != str.rend(); ++it)
+			{
+				if (std::isdigit(*it))
+				{
+					tmp = tmp * 10 + (*it - '0');
+					digit_count++;
+
+					if (digit_count == 9)
+					{
+						digits_.push_back(tmp);
+						tmp = 0;
+						digit_count = 0;
+					}
+				}
+				else if (*it == '-')
+				{
+					sign_ = -1;
+				}
+			}
+			//std::cout << "tmp: " << tmp << std::endl;
+			if (tmp != 0 || digits_.empty())
+			{
+				digits_.push_back(tmp);
+			}
+			trimLeadingZeros();
+			//std::cout << "digits_[0]: " << digits_[0] << std::endl;
+		}
+//
+class __x86i64Int {
+	// Assuming existing class members and methods
+	std::vector<uint64_t> digits_;
+	int sign_;
+
+	// Assumed helper methods
+	size_t num_bits() const;
+	void shift_left(size_t n);
+	bool is_zero() const;
+
+public:
+	__x86i64Int operator/ (const __x86i64Int& rhs) const
+	{
+		if (rhs.is_zero())
+		{
+			throw std::invalid_argument("divide by zero");
+		}
+
+		__x86i64Int quotient{ "0" };
+		__x86i64Int remainder{ *this };
+		remainder.sign_ = 1; // Make remainder positive for comparison purposes
+
+		size_t n = rhs.num_bits() - 1;
+		__x86i64Int divisor = rhs;
+		divisor.sign_ = 1; // Make divisor positive for comparison purposes
+		divisor.shift_left(n);
+
+		while (n-- > 0)
+		{
+			quotient.shift_left(1);
+			if (remainder >= divisor)
+			{
+				remainder -= divisor;
+				quotient.digits_[0] |= 1; // Set the least significant bit of quotient
+			}
+			divisor.shift_right(1);
+		}
+
+		quotient.sign_ = sign_ * rhs.sign_;
+		return quotient;
+	}
+};
+
+//
+	__x86i64Int operator+= (const __x86i64Int& rhs)
+		{
+			// Perform addition digit by digit
+			uint64_t carry = 0;
+			const uint64_t& I = rhs.digits_.size();
+			for (
+				uint64_t i = uint64_t{ 0 }; 
+				__x86i64Int{ std::to_string( i ) } < 
+					_max(__x86i64Int{ std::to_string(digits_.size()) }, 
+						__x86i64Int{ std::to_string(I) });
+							++i)
+			{
+				if (i < digits_.size())
+				{
+					carry += digits_[i];
+				}
+				if (i < rhs.digits_.size())
+				{
+					carry += rhs.digits_[i];
+				}
+				if (i < digits_.size())
+				{
+					digits_[i] = carry % BASE;
+				}
+				else
+				{
+					digits_.push_back(carry % BASE);
+				}
+				carry /= BASE;
+			}
+			if (carry > 0)
+			{
+				digits_.push_back(carry);
+			}
+			__x86i64Int result = *this;
+			return result;
+		}
+//
+		std::string to_string(const std::vector<uint64_t>& digits) const
+		{
+			//std::ostringstream oss;
+			std::string value{};
+			for (const auto& num : digits)
+			{
+				std::string temp = std::to_string(num);
+				std::reverse(temp.begin(), temp.end());
+				value += temp;
+				//oss << num;
+			}
+			//std::string temp = oss.str();
+			return value + "n";
+		}
+//
+		std::string to_string(const std::vector<uint64_t>& digits) const
+		{
+			//std::ostringstream oss;
+			std::string value{};
+			for (const auto& num : digits)
+			{
+				std::string temp = std::to_string(num);
+				std::reverse(temp.begin(), temp.end());
+				value += temp;
+				//oss << num;
+			}
+			//std::string temp = oss.str();
+			return value + "n";
+		}
+//
+		friend std::ostream& operator<< (std::ostream& os, const bool& value)
+		{
+			const std::string str = value ? "true" : "false";
+			os << str;
+			return os;
+		}
+//
+		/*
+
+		friend std::ostream& operator<< (std::ostream& os, const __x86i64Int& value)
+		{
+			const std::string str = value.to_string();
+			os << str;
+			return os;
+		}*/
+//
+		virtual __x86i64Int operator- (const __x86i64Int& rhs) const
+		{
+			__x86i64Int result{ "0" };
+			if (sign_ == rhs.sign_)
+			{
+				if (abs() >= rhs.abs())
+				{
+					result.digits_.resize(digits_.size());
+					uint64_t borrow = 0;
+					for (uint64_t i = uint64_t{ 0 }; i < result.digits_.size(); i++)
+					{
+						uint64_t diff = borrow + digits_[i];
+						if (i < rhs.digits_.size())
+						{
+							diff -= rhs.digits_[i];
+						}
+						if (diff < 0)
+						{
+							diff += BASE;
+							borrow = -1;
+						}
+						else
+						{
+							borrow = 0;
+						}
+						result.digits_[i] = diff;
+					}
+					result.trimLeadingZeros();
+					result.sign_ = sign_;
+				}
+				else
+				{
+					result = -(rhs - *this);
+				}
+			}
+			else
+			{
+				result = *this + (-rhs);
+			}
+			return result;
+		}
+//
+		template <typename BoolOrTruthyType = bool>
+		std::string is_bool_type(const T& value)
+		{
+			std::string result{ value };
+			if constexpr (std::is_same_v<T, bool>)
+			{
+				result = value ? "true" : "false";
+			}
+			return result;
+		}
+//
+		std::string to_string() const
+		{
+			std::string str{};
+			for (auto it = digits_.rbegin(); it != digits_.rend(); ++it)
+			{
+				str += char(*it + '0');
+			}
+			return str;
+		}
+//
+		std::string to_string(const std::vector<uint64_t>& digits) const
+		{
+			std::string str{};
+			for (auto it = digits.rbegin(); it != digits.rend(); ++it)
+			{
+				str += char(*it + '0');
+			}
+			return str;
+		}
+//
+		virtual __x86i64Int operator* (const __x86i64Int& rhs) const
+		{
+			__x86i64Int result;
+			// Resize the result vector to fit the result
+			result.digits_.resize(digits_.size() + rhs.digits_.size());
+			// Perform multiplication digit by digit
+			for (uint64_t i = 0; i < digits_.size(); ++i)
+			{
+				uint64_t carry = 0;
+				for (uint64_t j = 0; j < rhs.digits_.size() || carry; ++j)
+				{
+					uint64_t product = result.digits_[i + j] + carry +
+					(j < rhs.digits_.size()) ? digits_[i] * rhs.digits_[j] : 0ull;
+					result.digits_[i + j] = product % BASE;
+					carry = product / BASE;
+				}
+			}
+			// Preserve the sign of the result
+			result.sign_ = sign_ * rhs.sign_;
+			// Remove leading zeros
+			result.trimLeadingZeros();
+			return result;
+		}
+//
+		// Constructor
+		__x86i64Int(const std::string& str = "0")
+		{
+			for (auto it = str.rbegin(); it != str.rend(); ++it)
+			{
+				if (std::isdigit(*it))
+				{
+					digits_.push_back(*it - '0');
+				}
+				else if (*it == '-')
+				{
+					sign_ = -1;
+				}
+			}
+			if (digits_.empty())
+			{
+				digits_.push_back(0);
+			}
+			trimLeadingZeros();
+		}
+//
+		__x86i64Int GetNumberSubrange(size_t start_index, const size_t& length) const
+		{
+			__x86i64Int SubrangeSliceUInt64{ "0" };
+			if (start_index >= digits_.size()) 
+			{
+				// NOP //
+			}
+			else
+			{
+				const __x86i64Int I = _min(
+					__x86i64Int{ std::to_string(start_index + length) }, 
+					__x86i64Int{ std::to_string(digits_.size()) });
+				__x86i64Int StartIndex{ std::to_string(start_index) };
+				for (__x86i64Int i = StartIndex; i < I; i++)
+				{
+					SubrangeSliceUInt64.digits_.push_back(digits_[i]);
+				}
+			}
+			return SubrangeSliceUInt64;
+		}
+//
+
+
+		__x86i64Int operator%= (const __x86i64Int& rhs)
+		{
+			if (rhs == __x86i64Int{ "0" })
+			{
+				throw std::invalid_argument("Division by zero");
+			}
+			// Compute the remainder using long division algorithm
+			__x86i64Int dividend = *this;
+			__x86i64Int divisor = rhs.abs();
+			__x86i64Int quotient{ "0" };
+			__x86i64Int remainder{ "0" };
+			const size_t I = static_cast<size_t>(dividend.digits_.size() - 1);
+			for (size_t i = I; i > 0; i--)
+			{
+				remainder *= __x86i64Int{ std::to_string(BASE) };
+				remainder += __x86i64Int{ std::to_string(dividend.digits_[i - 1]) };
+				const __x86i64Int& result = remainder / divisor;
+				PushAtFront(quotient, result.quotient());
+				remainder %= divisor;
+			}
+			std::reverse(quotient.digits_.begin(), quotient.digits_.end());
+			std::reverse(remainder.digits_.begin(), remainder.digits_.end());
+			__x86i64Int result = *this = remainder;
+			return result;
+		}
+//
+		__x86i64Int operator/ (const __x86i64Int& rhs) const
+		{
+			if (rhs == __x86i64Int{ "0" })
+			{
+				throw std::invalid_argument("divide by zero");
+			}
+			__x86i64Int result{ "0" };
+			__x86i64Int remainder{ "0" };
+			result.digits_.resize(digits_.size());
+			for (int64_t i = digits_.size() - 1; i >= 0; i--)
+			{
+				remainder = remainder * __x86i64Int{ std::to_string(BASE) } + __x86i64Int{ std::to_string(digits_[i]) };
+				int x = 0, y = BASE - 1;
+				while (x < y)
+				{
+					int m = (x + y + 1) / 2;
+					if (rhs * __x86i64Int{ std::to_string(m) } <= remainder)
+					{
+						x = m;
+					}
+					else
+					{
+						y = m - 1;
+					}
+				}
+				result.digits_[i] = x;
+				remainder -= rhs * __x86i64Int{ std::to_string(x) };
+			}
+			result.trimLeadingZeros();
+			result.sign_ = sign_ * rhs.sign_;
+			return result;
+		}
+//
+		/** Knuth implementation...
+		Example:
+		__x86i64Int dividend{ 12n }, divisor{ 12n };
+		std::pair<__x86i64Int, __x86i64Int> result = dividend / divisor;
+		__x86i64Int quotient = result.first;
+		__x86i64Int remainder = result.second;
+		*/
+		std::pair<__x86i64Int, __x86i64Int> operator/ (const __x86i64Int& divisor)
+		{ 
+
+			__x86i64Int dividend{ *this };
+			__x86i64Int quotient{};
+			__x86i64Int remainder{};
+
+			// Step 1. Handle base cases
+
+			// Base case 1: Division by zero
+			if (divisor.digits_.empty())
+			{
+				throw std::runtime_error("Divide by zero");
+			}
+
+			// Base case 2: Dividend is smaller than the divisor
+			if (dividend < divisor)
+			{
+				return std::make_pair(quotient, remainder); // Return zero as the quotient
+			}
+
+			// Base case 6: Dividend is a multiple of the divisor
+			if (dividend == divisor)
+			{
+				quotient.digits_.push_back(1);
+				return std::make_pair(quotient, remainder);
+			}
+
+			// Base case 3: Divisor is a single-digit number
+			if (divisor.digits_.size() == 1)
+			{
+				int single_digit = divisor.digits_[0];
+				return dividend.DivideByDigit(single_digit);
+			}
+
+			// Base case 4: Dividend is a single-digit number
+			if (dividend.digits_.size() == 1)
+			{
+				int single_digit = dividend.digits_[0];
+				quotient.digits_.push_back(single_digit / divisor.digits_[0]);
+				remainder = __x86i64Int{ std::to_string(single_digit % divisor.digits_[0]) };
+				return std::make_pair(quotient, remainder);
+			}
+
+			// Base case 5: Dividend is a power of 10
+			if (dividend.digits_.size() > divisor.digits_.size() &&
+				dividend.digits_.back() == 0)
+			{
+				quotient.digits_.resize(dividend.digits_.size() - divisor.digits_.size(), 0);
+				dividend.digits_.resize(divisor.digits_.size());
+			}
+
+			// Base case 7: Dividend is a power of 10 and a multiple of the divisor
+			if (dividend.digits_.size() == divisor.digits_.size() &&
+				dividend.digits_.back() == 0)
+			{
+				quotient.digits_.resize(dividend.digits_.size() - divisor.digits_.size(), 0);
+				dividend.digits_.resize(divisor.digits_.size());
+			}
+
+			// Step 2: Normalize dividend and divisor
+			/*
+			This implementation multiplies both the dividend and divisor by a normalization factor 
+			to ensure the divisor's most significant digit is greaterThan or equalTo 5 
+			so that the divisor's most significant digit is greater than or equal to half the base 
+			(in our case, base 10). Normalization helps improve the efficiency and accuracy 
+			of the quotient estimation in the algorithm... 
+			The normalization factor is calculated as 10 / (1 + divisor.digits_.back()).
+			*/
+			int normalization_factor = 10 / (1 + divisor.digits_.back());
+			__x86i64Int normalized_dividend = dividend * __x86i64Int{ std::to_string(normalization_factor) };
+			__x86i64Int normalized_divisor = divisor * __x86i64Int{ std::to_string(normalization_factor) };
+
+			// Step 3: Determine the number of chunks and create a loop to iterate through them
+			uint64_t n = uint64_t{ normalized_dividend.digits_.size() };
+			uint64_t m = uint64_t{ normalized_divisor.digits_.size() };
+			uint64_t chunk_count = n - m;
+
+			quotient.digits_.resize(chunk_count + 1, 0);
+
+			// Loop through chunks in reverse (from most significant to least significant)
+			for (int64_t i = chunk_count; i >= 0; i--)
+			{
+				// Step 4: Estimate the quotient using the most significant digits
+				int q_clamp = int{ normalized_dividend.digits_[i + m] * 10 +
+					normalized_dividend.digits_[i + m - 1] } /
+					int{ normalized_divisor.digits_[m - 1] };
+
+				// Clamp the estimate to the maximum value of a single digit (9)
+				if (q_clamp > 9)
+				{
+					q_clamp = 9;
+				}
+
+				// Step 5: Refine the estimated quotient and compute the remainder
+				__x86i64Int r_clamp = normalized_dividend.GetNumberSubrange(i, m + 1) - __x86i64Int{ std::to_string(q_clamp) } * normalized_divisor;
+
+				// Adjust the estimate if necessary
+				while (r_clamp.sign_ < 1)
+				{
+					q_clamp--;
+					r_clamp += normalized_divisor;
+				}
+
+				// Update the dividend with the remainder
+				normalized_dividend.SetNumberSubrange(i, r_clamp);
+
+				// Save the quotient for this chunk
+				quotient.digits_[i] = q_clamp;
+			}
+
+			// Step 6: Finalize the quotient
+			quotient.trimLeadingZeros();
+
+			return std::make_pair(quotient, remainder);
+		}
+//
+		// Constructor
+		template <typename T = std::string,
+		typename std::enable_if<!std::is_arithmetic<T>::value, int>::type = 0>
+		__x86i64Int(const T& str = "0")
+		{
+			for (T it = str.rbegin(); it != str.rend(); ++it)
+			{
+				if (std::isdigit(*it))
+				{
+					digits_.push_back(*it - '0');
+				}
+				else if (*it == '-')
+				{
+					sign_ = -1;
+				}
+			}
+			if (digits_.empty())
+			{
+				digits_.push_back(0);
+			}
+			trimLeadingZeros();
+		}
+//
+		__x86i64Int operator* (const __x86i64Int& other) const
+		{
+			auto rowProductVecUInt64 = [](const __x86i64Int& InDigitsVecUInt64Ref,
+				const int& InOtherUIntRef,
+				__x86i64Int& OutResultVecUInt64Ref)
+			{
+				int carry = 0;
+				const uint64_t& J = OutResultVecUInt64Ref.digits_.size();
+				for (uint64_t j = 0; ((j < J) || (carry > 0)); j++)
+				{
+					int prod = carry +
+						OutResultVecUInt64Ref.digits_[j] +
+						InOtherUIntRef *
+						(j < InDigitsVecUInt64Ref.digits_.size() ?
+							InDigitsVecUInt64Ref.digits_[j] : int{ 0 });
+					OutResultVecUInt64Ref.digits_[j] = prod % BASE;
+					carry = static_cast<int>(prod / BASE);
+				}
+			};
+
+			std::vector<__x86i64Int> IntermediateResultVecUInt64;
+			const uint64_t I = digits_.size();
+			const uint64_t II = digits_.size() + other.digits_.size();
+
+			// Initialize thread pool with a fixed number of threads
+			const size_t MaxConcurrentThreads = std::thread::hardware_concurrency();
+			bool useThreadPoolFlag = (MaxConcurrentThreads > 2U);
+			const size_t numThreads = (useThreadPoolFlag ? MaxConcurrentThreads : 2U) - 1;
+			std::vector<std::future<void>> futures;
+
+			for (uint64_t i = 0; i < I; i++)
+			{
+				__x86i64Int temp{ "0" };
+				temp.digits_.resize(II, 0);
+				IntermediateResultVecUInt64.push_back(temp);
+			}
+
+			auto processChunk = [&](uint64_t start, uint64_t end)
+			{
+				for (uint64_t i = start; i < end; i++)
+				{
+					rowProductVecUInt64(*this, other.digits_[i], IntermediateResultVecUInt64[i]);
+				}
+			};
+
+			for (size_t i = 0; i < numThreads; ++i)
+			{
+				uint64_t startIndex = (I * i) / numThreads;
+				uint64_t endIndex = (I * (i + 1)) / numThreads;
+				futures.push_back(std::async(std::launch::async, processChunk, startIndex, endIndex));
+			}
+
+			for (auto& future : futures)
+			{
+				future.wait();
+			}
+
+			SumArrayRefInParallel(IntermediateResultVecUInt64);
+			IntermediateResultVecUInt64[0].trimLeadingZeros();
+			IntermediateResultVecUInt64[0].sign_ = sign_ * other.sign_;
+			return IntermediateResultVecUInt64[0];
+		}
 //
 
 

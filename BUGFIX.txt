@@ -31,3 +31,55 @@ SYMP: Error: no matching function for call to 'PushAtFront(__x86i64Int&, const _
 SOLU:
 	bool PushAtFront(__x86i64Int& OutVecUInt64Ref, const __x86i64Int& InConstVecUInt64Ref) {...} >>
 	bool PushAtFront(__x86i64Int& OutVecUInt64Ref, const __x86i64Int& InConstVecUInt64Ref) const {...}
+
+SYMP: Error std::jthread parameter must be invokable, evaluates to false. std::jthread t(Auto, Theorem, Axioms_vec); // Auto(Theorem_Struct& InTheorem, std::vector<Axiom_Struct>& InAxioms_vec);
+SOLU: 
+	std::jthread t(Auto, Theorem, Axioms_vec); // Auto(Theorem_Struct InTheorem, std::vector<Axiom_Struct> InAxioms_vec); or
+	std::jthread t(Auto, std::ref(Theorem), std::ref(Axioms_vec)); // Auto(Theorem_Struct& InTheorem, std::vector<Axiom_Struct>& InAxioms_vec); or
+	std::jthread t(Auto, std::ref(Theorem), std::cref(Axioms_vec)); // Auto(Theorem_Struct& InTheorem, const std::vector<Axiom_Struct>& InAxioms_vec);
+
+SYMP: 
+	route map collisions: 
+	if(theorem.SubnetFound_LHS(Axiom.LHSPrimaryKey_UInt64)){ Axiom.RHSCallGraph_UInt64Map[theorem.guid] = true; }
+	if(theorem.SubnetFound_RHS(Axiom.LHSPrimaryKey_UInt64)){ Axiom.RHSCallGraph_UInt64Map[theorem.guid] = true; }
+SOLU: 
+	if(theorem.SubnetFound_LHS(Axiom.LHSPrimaryKey_UInt64)){ Axiom.RHSCallGraph_UInt64Map[RouteSource_EnumClass::_lhs][theorem.guid] = true; }
+	if(theorem.SubnetFound_RHS(Axiom.LHSPrimaryKey_UInt64){ Axiom.RHSCallGraph_UInt64Map[RouteSource_EnumClass::_rhs][theorem.guid] = true; }
+
+SYMP: Error: passing ‘const Axiom_Struct’ argument discards qualifiers [-fpermissive]: Axiom_i.SubnetFound_LHS(Axiom_j.LHSPrimaryKey_UInt64))
+SOLU: bool SubnetFound_LHS(const uint64_t& PKeyFind) noexcept >> bool SubnetFound_LHS(const uint64_t& PKeyFind) const noexcept
+
+SYMP: Axiom_0:{ lhs:0, rhs:0}; // Within the for-loop, Axiom_0 is uninitialized
+SOLU:
+	if (_lhs < _rhs)
+	{
+		lhs = _rhs;
+		rhs = _lhs;
+	}
+	
+	Axiom_Struct Axiom; >>
+
+	if (_lhs < _rhs)
+	{
+		lhs = _rhs;
+		rhs = _lhs;
+	}
+	
+	if(GUID < 1)
+	{
+		Theorem.guid = GUID++;
+		Theorem.LHSPrimaryKey_UInt64 = lhs;
+		Theorem.RHSPrimaryKey_UInt64 = rhs;
+		continue;
+	}
+	
+	Axiom_Struct Axiom;
+
+SYMP:
+	Error	C2908	explicit specialization; 'void Auto<RouteSource_EnumClass::_lhs,Indirection_EnumClass::_reduce>(Theorem_Struct,const Axiom_Struct &,const bool &,const bool &)' has already been instantiated	main.cpp	Line 1226	
+	Error	C2908	explicit specialization; 'void Auto<RouteSource_EnumClass::_lhs,Indirection_EnumClass::_expand>(Theorem_Struct,const Axiom_Struct &,const bool &,const bool &)' has already been instantiated	main.cpp	Line 1458	
+SOLU:
+
+SYMP: InAxiomCallGraph_Map["lhs_reduce"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] == false // ...Proof not found.
+SOLU: PopulateAxiomCallGraph : if (Axiom_i[LHS] % Axiom_i[LHS] == 0) {...} >> if (Axiom_i[LHS] % Axiom_jLHS] == 0)
+

@@ -17,11 +17,11 @@ To deploy the prover in your game logic, you provide it with axioms and lemmas r
 
 [ ] = Brackets
 
-( ) = Brackets
+( ) = General Use Brackets
 
 { variable } = Variable
 
-Example expressed as plain text: 
+Example pseudo code: 
 
 ```c++
 	// Axiom
@@ -58,7 +58,7 @@ Example expressed as plain text:
 	Prove = { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled }
 ```
 
-Example expressed as C++ Code:
+Example C++ Code:
 
 ```c++
 	// Create empty ProofStep[lineNumber][proofStep] vector to store proof
@@ -66,53 +66,73 @@ Example expressed as C++ Code:
 
  	// Instantiate Prover (module)
 	EuclidProver<BracketType::CurlyBraces> Euclid;
+	
+	Euclid.Axiom
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" },  // lhs
+		 {"{", "StyxBoat", "}", "IsIn", "{", "StyxRiver", "}" } // rhs
+	);
+	Euclid.Axiom
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}"}, // lhs
+		{ "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}", "and", "{", "Vehicle", "{", "QuadUtilityVehicle", "{", "VehicleDriveDisabled", "}", "}", "}" } // rhs
+	);
+	Euclid.Axiom
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "EuropaLand", "}" }, // lhs
+		{ "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}" } // rhs
+	);
+	Euclid.Axiom
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}" }, // lhs
+		{ "{", "Vehicle", "{", "QuadUtilityVehicle", "{", "VehicleDriveDisabled", "}", "}" } // rhs
+	);
+	Euclid.Axiom
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsNotIn", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}" }, // lhs
+		{ "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}" } // rhs
+	);
+	Euclid.Axiom
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}" }, // lhs
+		{ "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" } // rhs
+	);
+	
+	Euclid.Lemma
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" }, // lhs
+		{ "{", "StyxBoat", "}", "IsNotIn", "{", "StyxRiver", "}" } // rhs
+	); // These are axiom rewrite helpers
+	
+	const bool ProofFound_Flag = 
+	Euclid.Prove
+	(
+		{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}" }, // rhs
+		{ "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" }, // lhs
+		ProofStep // Result
+	);
 
-	// Axiom
-	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}", "=", "{", "StyxBoat", "}", "IsIn", "{", "StyxRiver", "}" }); // Current Game State
-	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "=", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}", "and", "{", "Vehicle", "{", "QuadUtilityVehicle", "{", "VehicleDriveDisabled", "}", "}", "}" });
-	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "EuropaLand", "}", "=", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}" });
-	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}", "=", "{", "Vehicle", "{", "QuadUtilityVehicle", "{", "VehicleDriveDisabled", "}", "}" });
-	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsNotIn", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "=", "{", "Vehicle", "{", "QuadUtilityVehicle", "}", "}", "IsIn", "{", "EuropaLand", "}" });
-	Euclid.Axiom({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}", "=", "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" });
-
-	// Lemma
-	Euclid.Lemma({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}", "=", "{", "StyxBoat", "}", "IsNotIn", "{", "StyxRiver", "}" }); // These are connectives, and axiom helpers
-
-	// Theorem
-	Euclid.Prove({ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}", "=", "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" });
-
-	if (Euclid.Prove(Prove, ProofStep))
+	if (ProofFound_Flag))
 	{
 		std::cout << "Proof found:\n";
 		Euclid.PrintPath(ProofStep);
 	}
-	else
+	else if (ProofStep.size())
 	{
+		std::cout << "Partial Proof found:\n";
+		Euclid.PrintPath(ProofStep);
+	} else {
 		std::cout << "Proof failed\n";
 	}
 
-	// Optional Solver: Expand
-	std::vector<std::vector<std::string>> ProofStep;
-	if (Euclid.ProveViaExpand(Prove, ProofStep))
-	{
-		std::cout << "Proof via Expand:\n";
-		Euclid.PrintPath(ProofStep);
-	}
-	else
-	{
-		std::cout << "Proof via Expand failed\n";
-	}
+	// Suspend a proof for current (GUID)
+	const uint64_t guid = Euclid.Suspend(); 
+	std::cout << "Proof suspended for: guid_" << guid << std::endl;
 
-	// Optional Solver: Reduce
-	std::vector<std::vector<std::string>> ProofStep;
-	if (Euclid.ProveViaReduce(Prove, ProofStep))
+	// Resume a proof for (GUID)
+	if(Euclid.Resume(guid))
 	{
-		std::cout << "Proof via Reduce:\n";
-		Euclid.PrintPath(ProofStep);
-	}
-	else
-	{
-		std::cout << "Proof via Reduce failed\n";
+		std::cout << "Proof resumed for: guid_" << guid << std::endl;
 	}
 
 ```
@@ -121,7 +141,7 @@ Example expressed as C++ Code:
 
 The required format for the expressions is as follows:
 
-{ LHS }... = { RHS }..., where LHS and RHS are properly-formed expressions.
+{ LHS }... = { RHS }..., where LHS and RHS are properly-formed sets of expressions.
 
 The "=" is the equality operator, is required, and should be interpreted as a connective, used to delimit and or separate the LHS and RHS. 
 The equality operator is the only builtin operator that is reserved. All other symbols may be used in your expressions.
@@ -130,13 +150,13 @@ The equality operator can also be used to separate multiple expressions, as show
 
 { LHS }... = { RHS_0000 }... = { RHS_0001 }... = { RHS_N }..., where LHS and RHS_N are properly-formed expressions.
 
-If you have any questions, please contact me at: https://github.com/Seagat2011NOTES
+If you have any questions, please contact me at: https://github.com/Seagat2011/UnrealEngine-Seagat2011-2023
 
-Compatibility C++20 (Windows)
+Compatibility C++20 (Windows x86 i64)
 
 STYLEGUIDE
 
-    POOR FORMATTING EXAMPLE
+    POOR FORMATTING
 
         TEST CASE: RENDER [PASS], PROOF [FAIL]
         {{a}raised{2}}plus{2ab}plus{b raised{2}}<==({a}plus{b})raised{2}
@@ -181,18 +201,18 @@ PROOFGUIDE
 
     AXIOM FORMAT
 
-        { LHS... } = { RHS... } [ = { RHS_N... } ]+
+        { LHS... }... = { RHS... }... [ = { RHS_N... }... ]*
         .
         .
 
     LEMMA SUBSTITUTION FORMAT
 
-        { LHS... } <== or <==> or ==> { RHS... }
+        { LHS... }... <== or <==> or ==> { RHS... }... [ <== or <==> or ==> { RHS_N... }... ]*
         .
         .
 
     PROOF FORMAT
-        Prove { LHS... } = { RHS... } [ = { RHS_N... } ]+
+        Prove { LHS... }... = { RHS... }... [ = { RHS_N... }... ]*
 
     QUICK FORMAT
 
