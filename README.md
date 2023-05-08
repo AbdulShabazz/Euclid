@@ -32,35 +32,35 @@ Compiler flags: ```/permissive- /Yu"pch.h" /ifcOutput "x64\Release\" /GS /GL /W3
 Usage Example pseudo code: 
 
 ```
-	// Axioms
-	{ PlayerCharacterSideKick } IsIn { StyxBoat } = { StyxBoat } IsIn { StyxRiver } // Current Game State
-	{ PlayerCharacterSideKick } IsIn { Vehicle { QuadUtilityVehicle } } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand } and { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
-	{ PlayerCharacterSideKick } IsIn { EuropaLand } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand }
-	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
-	{ PlayerCharacterSideKick } IsNotIn { Vehicle { QuadUtilityVehicle } } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand }
-	.
-	. Other available but non-relavant Game States, in the current environment, for the PlayerCharacterSideKick to choose from
-	.
-	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled } 
+  // Axioms
+  { PlayerCharacterSideKick } IsIn { StyxBoat } = { StyxBoat } IsIn { StyxRiver } // Current Game State
+  { PlayerCharacterSideKick } IsIn { Vehicle { QuadUtilityVehicle } } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand } and { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
+  { PlayerCharacterSideKick } IsIn { EuropaLand } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand }
+  { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
+  { PlayerCharacterSideKick } IsNotIn { Vehicle { QuadUtilityVehicle } } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand }
+  .
+  . Other available but non-relavant Game States, in the current environment, for the PlayerCharacterSideKick to choose from
+  .
+  { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled } 
 
-	// Lemmas
-	{ PlayerCharacterSideKick } IsIn { StyxBoat } ==> { StyxBoat } IsNotIn { StyxRiver } // These are connectives, and axiom rewrite helpers
-	{ PlayerCharacterSideKick } IsOn { Vehicle } <== { VehicleDriveDisabled }
-	{ PlayerCharacterSideKick } IsIn { Vehicle { QuadUtilityVehicle } } ==> { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle }
-	{ PlayerCharacterSideKick } IsNotIn { StyxBoat } <==> { StyxBoat } IsNotIn { StyxRiver }
+  // Lemmas
+  { PlayerCharacterSideKick } IsIn { StyxBoat } ==> { StyxBoat } IsNotIn { StyxRiver } // These are connectives, and axiom rewrite helpers
+  { PlayerCharacterSideKick } IsOn { Vehicle } <== { VehicleDriveDisabled }
+  { PlayerCharacterSideKick } IsIn { Vehicle { QuadUtilityVehicle } } ==> { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle }
+  { PlayerCharacterSideKick } IsNotIn { StyxBoat } <==> { StyxBoat } IsNotIn { StyxRiver }
 
-	// Theorem to prove
-	Prove { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled } // Goal Game State
+  // Theorem to prove
+  Prove { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled } // Goal Game State
 
-	// Proof-Step
-	{ PlayerCharacterSideKick } IsIn { StyxBoat } = { StyxBoat } IsIn { StyxRiver }
-	{ PlayerCharacterSideKick } IsIn { StyxBoat } = { StyxBoat } IsNotIn { StyxRiver }
-	{ PlayerCharacterSideKick } IsNotIn { StyxBoat } = { StyxBoat } IsNotIn { StyxRiver }
-	{ PlayerCharacterSideKick } IsIn { EuropaLand } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand }
-	{ PlayerCharacterSideKick } IsNotIn { Vehicle { QuadUtilityVehicle } } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand }
-	{ PlayerCharacterSideKick } IsIn { Vehicle { QuadUtilityVehicle } } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand } and { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
-	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
-	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled }
+  // Proof-Step
+  { PlayerCharacterSideKick } IsIn { StyxBoat } = { StyxBoat } IsIn { StyxRiver }
+  { PlayerCharacterSideKick } IsIn { StyxBoat } = { StyxBoat } IsNotIn { StyxRiver }
+  { PlayerCharacterSideKick } IsNotIn { StyxBoat } = { StyxBoat } IsNotIn { StyxRiver }
+  { PlayerCharacterSideKick } IsIn { EuropaLand } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand }
+  { PlayerCharacterSideKick } IsNotIn { Vehicle { QuadUtilityVehicle } } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand }
+  { PlayerCharacterSideKick } IsIn { Vehicle { QuadUtilityVehicle } } = { Vehicle { QuadUtilityVehicle } } IsIn { EuropaLand } and { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
+  { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
+  { PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled }
 ```
 
 Usage Example C++20 Code:
@@ -74,73 +74,73 @@ Usage Example C++20 Code:
 
 int main()
 {
-	using EuclidProverClass = 
+  using EuclidProverClass = 
 
-	Euclid_Prover::EuclidProver<
-	Euclid_Prover::BracketType::CurlyBraces>;
+  Euclid_Prover::EuclidProver<
+  Euclid_Prover::BracketType::CurlyBraces>;
 
-	// Instantiate Prover (module)
-	EuclidProverClass Euclid;
+  // Instantiate Prover (module)
+  EuclidProverClass Euclid;
 
-	Euclid.Axioms
-	(
-		{
-			// Axiom_1
-			{
-				{"1", "+", "1"}, // (lhs) Prime Composite: 8303 //
-				{"2"} // (rhs) Prime Composite: 31 //
-			},
+  Euclid.Axioms
+  (
+    {
+      // Axiom_1
+      {
+        {"1", "+", "1"}, // (lhs) Prime Composite: 8303 //
+        {"2"} // (rhs) Prime Composite: 31 //
+      },
 
-			// Axiom_2
-			{
-				{"2", "+", "2"}, // (lhs) Prime Composite: 22103 //
-				{"4"} // (rhs) Prime Composite: 29 //
-			}
-		}
-	);
+      // Axiom_2
+      {
+        {"2", "+", "2"}, // (lhs) Prime Composite: 22103 //
+        {"4"} // (rhs) Prime Composite: 29 //
+      }
+    }
+  );
 
-	std::vector<
-	std::vector<
-	std::vector<
-	std::vector<
-	std::string>>>>
+  std::vector<
+  std::vector<
+  std::vector<
+  std::vector<
+  std::string>>>>
 
-	// Instantiate ProofStep_4DStdStrVec[line][step][lhs/rhs][token]
-	ProofStep_4DStdStrVec;
-	
-	std::vector<
-	std::string>>
+  // Instantiate ProofStep_4DStdStrVec[line][step][lhs/rhs][token]
+  ProofStep_4DStdStrVec;
+  
+  std::vector<
+  std::string>>
 
-	// Instantiate AxiomCommitLog_StdStrVec[step]
-	AxiomCommitLog_StdStrVec;
-	
-	const bool ProofFound_Flag = 
+  // Instantiate AxiomCommitLog_StdStrVec[step]
+  AxiomCommitLog_StdStrVec;
+  
+  const bool ProofFound_Flag = 
 
-	Euclid.Prove
-	(
-		{
-			{"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
-			{"4"}, // (rhs) Prime Composite: 29 //
-		},
+  Euclid.Prove
+  (
+    {
+      {"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
+      {"4"}, // (rhs) Prime Composite: 29 //
+    },
 
-		ProofStep_4DStdStrVec,
-		AxiomCommitLog_StdStrVec
-	);
-	
-	if (ProofFound_Flag)
-	{
-		std::cout << "Proof Found." << std::endl;
-		ProofStep_4DStdStrVec;
-		AxiomCommitLog_StdStrVec;
-	} else if (ProofStep_4DStdStrVec.size()) {
-		std::cout << "Partial Proof Found." << std::endl;
-		ProofStep_4DStdStrVec;
-		AxiomCommitLog_StdStrVec;
-	} else {
-		std::cout << "No Proof Found." << std::endl;
-	}
+    ProofStep_4DStdStrVec,
+    AxiomCommitLog_StdStrVec
+  );
+  
+  if (ProofFound_Flag)
+  {
+    std::cout << "Proof Found." << std::endl;
+    ProofStep_4DStdStrVec;
+    AxiomCommitLog_StdStrVec;
+  } else if (ProofStep_4DStdStrVec.size()) {
+    std::cout << "Partial Proof Found." << std::endl;
+    ProofStep_4DStdStrVec;
+    AxiomCommitLog_StdStrVec;
+  } else {
+    std::cout << "No Proof Found." << std::endl;
+  }
 
-	return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
 
 /*
@@ -148,38 +148,38 @@ Output:
 
 ProofStep_4DStdStrVec:
 {
-	{
-		// Step 1 (Original).
-		{
-			{"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
-			{"4"} // (rhs) Prime Composite: 29 //
-		},
+  {
+    // Step 1 (Original).
+    {
+      {"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
+      {"4"} // (rhs) Prime Composite: 29 //
+    },
 
-		// Step 2. (rhs_expand via Axiom_2)
-		{
-			{"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
-			{"2", "+", "2"} // (rhs) Prime Composite: 22103 //
-		},
-		
-		// Step 3. (rhs_expand via Axiom_1)
-		{
-			{"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
-			{"1", "+", "1", "+", "2"} // (rhs) Prime Composite: 5920039 //
-		},
-		
-		// Step 4. (rhs_expand via Axiom_1)
-		{
-			{"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
-			{"1", "+", "1", "+", "1", "+", "1"} // (rhs) Prime Composite: 1585615607 (QED) //
-		}
-	}
+    // Step 2. (rhs_expand via Axiom_2)
+    {
+      {"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
+      {"2", "+", "2"} // (rhs) Prime Composite: 22103 //
+    },
+    
+    // Step 3. (rhs_expand via Axiom_1)
+    {
+      {"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
+      {"1", "+", "1", "+", "2"} // (rhs) Prime Composite: 5920039 //
+    },
+    
+    // Step 4. (rhs_expand via Axiom_1)
+    {
+      {"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
+      {"1", "+", "1", "+", "1", "+", "1"} // (rhs) Prime Composite: 1585615607 (QED) //
+    }
+  }
 }
 
 AxiomCommitLog_StdStrVec:
 {
-	{"rhs_expand via Axiom_2"},
-	{"rhs_expand via Axiom_1"},
-	{"rhs_expand via Axiom_1"}
+  {"rhs_expand via Axiom_2"},
+  {"rhs_expand via Axiom_1"},
+  {"rhs_expand via Axiom_1"}
 }
 */
 
@@ -190,51 +190,51 @@ Usage Example C++20 code
 ```c++
 Euclid.Axioms
 (
-	{
-		// Axiom_1
-		{
-			{
-				"{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" 
-			}, // lhs //
-		
-			{
-				"{", "StyxBoat", "}", "IsIn", "{", "StyxRiver", "}" 
-			} // rhs //
-		}, 
-	.
-	.
-	}
+  {
+    // Axiom_1
+    {
+      {
+        "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" 
+      }, // lhs //
+    
+      {
+        "{", "StyxBoat", "}", "IsIn", "{", "StyxRiver", "}" 
+      } // rhs //
+    }, 
+  .
+  .
+  }
 );
-	
+  
 Euclid.Lemmas
 (
-	{
-		// Lemma_1
-		{
-			{
-				"{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" 
-			}, // lhs //
-	
-			{				
-				"{", "StyxBoat", "}", "IsNotIn", "{", "StyxRiver", "}" // These are connectives, and axiom helpers
-			} // rhs //
-		},
-	.
-	.
-	}
+  {
+    // Lemma_1
+    {
+      {
+        "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" 
+      }, // lhs //
+  
+      {        
+        "{", "StyxBoat", "}", "IsNotIn", "{", "StyxRiver", "}" // These are connectives, and axiom helpers
+      } // rhs //
+    },
+  .
+  .
+  }
 );
 
 Euclid.Prove
 (
-	{
-		{
-			"{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}"
-		}, // lhs//
-	
-		{
-			"{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}"
-		} // rhs //
-	}
+  {
+    {
+      "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}"
+    }, // lhs//
+  
+    {
+      "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}"
+    } // rhs //
+  }
 );
 ```
 ## Format
@@ -269,10 +269,10 @@ STYLEGUIDE
 
         TEST CASE [PASS]
 
-		// Axioms
+    // Axioms
         ( { a } plus { b } ) raised { 2 } = { { c } raised { 2 } } plus { 2ab }
 
-		// Lemmas
+    // Lemmas
         { { a } raised { 2 } } plus { 2ab } plus { b raised { 2 } } <== ( { a } plus { b } ) raised { 2 }
         ( { a } plus { b } ) raised { 2 } minus { 2ab } = { c } raised { 2 } <== ( { a } plus { b } ) raised { 2 } = { { c } raised { 2 } } plus { 2ab }
         { { a } raised { 2 } } plus { 2ab } minus { 2ab } plus { b raised { 2 } } ==> { { a } raised { 2 } } plus { { b } raised { 2 } }
