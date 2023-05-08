@@ -3,4 +3,5 @@
 
 #include "pch.h"
 #include "framework.h"
-#include "EuclidProverLibDLL.h"
+#include "Euclid.h"
+
