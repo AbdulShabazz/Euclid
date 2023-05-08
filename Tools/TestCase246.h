@@ -1,4 +1,6 @@
 #include <vector>
+#include <string>
+
 /*
 std::vector<uint64_t> Primes = 
 { 
@@ -22,8 +24,7 @@ const
 std::vector<
 std::vector<
 std::vector<
-std::vector<
-uint64_t>>>>
+std::string>>>
 
 Axioms_StdStrVec = 
 
@@ -315,4 +316,4 @@ Theorem_StdStrVec =
 	{ 
 		"246"
 	} // rhs
-}
+};
