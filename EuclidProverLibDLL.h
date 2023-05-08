@@ -223,7 +223,7 @@
 #include <functional>
 #include <future>
 #include <limits>
-#include <_boost/multiprecision/cpp_int.hpp>
+#include <_boost/multiprecision/cpp_int.hpp> /* Project > [ProjectName] Properties > VC++ Directories > General > Include Directories > $(Local[ProjectName]WorkingDirectory) */
 
 namespace Euclid_Prover
 {
@@ -1457,3 +1457,8 @@ namespace Euclid_Prover
 		}
 	};
 }
+
+using EuclidProverClass =
+
+Euclid_Prover::EuclidProver<
+Euclid_Prover::BracketType::CurlyBraces>;
