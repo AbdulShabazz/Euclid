@@ -109,7 +109,7 @@ int main()
   ProofStep_4DStdStrVec;
   
   std::vector<
-  std::string>>
+  std::string>
 
   // Instantiate AxiomCommitLog_StdStrVec[step]
   AxiomCommitLog_StdStrVec;
@@ -235,6 +235,9 @@ Euclid.Prove
       "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}"
     } // rhs //
   }
+
+  ProofStep_4DStdStrVec,
+  AxiomCommitLog_StdStrVec
 );
 ```
 ## Format
