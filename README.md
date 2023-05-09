@@ -9,11 +9,13 @@ Additionally, Euclid can be beneficial in debugging game logic.
 
 ## Instructions
 
-To deploy the prover in your game logic, you must provide it with axioms and lemmas related to the current state of your game, and request it to prove a theorem or desired outcome. Each proof-step can be used to perhaps update a state-machine, or update the game state; or in more advanced implementations, its proof-steps can be utilized by helper A.I. that aim to achieve the proof-step as a desired outcome in your game. This feeding process is repeated until the game state reflects the final proof, as a final outcome (i.e., the theorem is proven). The prover can also produce a path of proof-steps using the available Expand- and Reduce- solvers.
+To deploy the prover in your game logic, you must provide it with axioms and lemmas related to the current state of your game, and request it to prove a theorem or desired outcome. Each proof-step can be used to perhaps invalidate a state-machine, or update the game state; or in more advanced implementations, its proof-steps can be utilized by helper A.I. that aim to achieve the proof-step as a desired outcome in your game. This feeding process is repeated until the game state reflects the final proof, as a final outcome (i.e., the theorem is proven). The prover can also produce a path of proof-steps using the available Expand- and Reduce- solvers.
 
 To compile the boost library, in for example Visual Studio, go to Project > [ProjectName] Properties > VC++ Directories > General > Include Directories > and include one of the macros: `$(Local[ProjectName]WorkingDirectory)` or `$(ProjectDirectory)`. If you do not have the latest boost library in your local directory, you must first download the boost library from https://www.boost.org/ and extract it to the local directory. 
 
 Compiler flags: ```/permissive- /Yu"pch.h" /ifcOutput "x64\Release\" /GS /GL /W3 /Gy /Zc:wchar_t /Zi /Gm- /O2 /Ob2 /sdl /Fd"x64\Release\vc143.pdb" /Zc:inline /fp:precise /D "NDEBUG" /D "EUCLIDPROVERLIBDLL_EXPORTS" /D "_WINDOWS" /D "_USRDLL" /D "_WINDLL" /D "_UNICODE" /D "UNICODE" /errorReport:prompt /WX- /Zc:forScope /std:c17 /Gd /Oy /Oi /MD /std:c++20 /FC /Fa"x64\Release\" /EHsc /nologo /Fo"x64\Release\" /Ot /Fp"x64\Release\EuclidProverLibDLL.pch" /diagnostics:column```
+
+You won't need Euclid.cpp until you intend to compile the header file as part of a .DLL, in which case you will need to add both files to you .DLL project, enable the EUCLIDPROVERLIBDLL_EXPORTS preprocessor directive in your project, and then uncomment all occurences of the API_EXPORT directive in the header file.
 
 ## Formatting
 
