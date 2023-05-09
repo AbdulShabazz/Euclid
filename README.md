@@ -99,22 +99,46 @@ int main()
     }
   );
 
+  /*
+
+  // OR...
+
+  Euclid.Axiom
+  (
+    // Axiom_1
+    {
+      {"1", "+", "1"}, // (lhs) Prime Composite: 8303 //
+      {"2"} // (rhs) Prime Composite: 31 //
+    },
+  );
+
+  Euclid.Axiom
+  (
+    // Axiom_2
+    {
+      {"2", "+", "2"}, // (lhs) Prime Composite: 22103 //
+      {"4"} // (rhs) Prime Composite: 29 //
+    }
+  );
+  */
+
   std::vector<
   std::vector<
   std::vector<
   std::vector<
   std::string>>>>
 
-  // Instantiate ProofStep_4DStdStrVec[line][step][lhs/rhs][token]
+  // Instantiate ProofStep_4DStdStrVec[proof][step][lhs/rhs][token]
   ProofStep_4DStdStrVec;
-  
-  std::vector<
-  std::string>
 
-  // Instantiate AxiomCommitLog_StdStrVec[step]
+  std::vector<
+  std::vector<
+  std::string>>
+
+  // Instantiate AxiomCommitLog_StdStrVec[proof][step]
   AxiomCommitLog_StdStrVec;
-  
-  const bool ProofFound_Flag = 
+
+  const auto start_time_chrono = std::chrono::high_resolution_clock::now();
 
   Euclid.Prove
   (
@@ -126,8 +150,15 @@ int main()
     ProofStep_4DStdStrVec,
     AxiomCommitLog_StdStrVec
   );
+
   
-  if (ProofFound_Flag)
+  while (!Euclid.StatusReady)
+  {
+    //std::cout << "Performing some other work..." << std::endl;
+    //std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+
+  if (Euclid.ProofFound_Flag)
   {
     std::cout << "Proof Found." << std::endl;
     ProofStep_4DStdStrVec;
@@ -139,6 +170,15 @@ int main()
   } else {
     std::cout << "No Proof Found." << std::endl;
   }
+
+  std::cout << std::endl;
+  const auto end_time_chrono = std::chrono::high_resolution_clock::now();
+  const auto duration_chrono = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time_chrono - start_time_chrono).count();
+  std::cout << "Total Duration (nanoseconds): " << duration_chrono << std::endl;
+
+  // Hold for user-input //
+  std::string inChar;
+  std::cin >> inChar;
 
   return EXIT_SUCCESS;
 }
@@ -177,9 +217,11 @@ ProofStep_4DStdStrVec:
 
 AxiomCommitLog_StdStrVec:
 {
-  {"rhs_expand via Axiom_2"},
-  {"rhs_expand via Axiom_1"},
-  {"rhs_expand via Axiom_1"}
+  {
+    "rhs_expand via Axiom_2",
+    "rhs_expand via Axiom_1",
+    "rhs_expand via Axiom_1"
+  }
 }
 */
 
@@ -188,150 +230,131 @@ AxiomCommitLog_StdStrVec:
 Usage Example C++20 code
 
 ```c++
-Euclid.Axioms
+#include <cstdlib>
+#include <string>
+#include <vector>
+#include <iostream>
+#include <Euclid.h>
+
+using EuclidProverClass = 
+
+Euclid_Prover::EuclidProver<
+Euclid_Prover::BracketType::CurlyBraces>;
+
+void SkipTaskForNow
 (
+  const
+  EuclidProverClass&
+  EuclidConstRefObj,
+  
+  const
+  auto&
+  InProofStep_4DStdStrVec,
+  
+  const
+  auto&
+  InAxiomCommitLog_StdStrVec
+)
+{
+  // Perform some other work... //
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+
+  while (!EuclidConstRefObj.StatusReady)
   {
-    // Axiom_1
+    //std::cout << "Performing some other work..." << std::endl;
+    //std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+
+  if (EuclidConstRefObj.ProofFound_Flag)
+  {
+    std::cout << "Proof Found." << std::endl;
+    InProofStep_4DStdStrVec;
+    InAxiomCommitLog_StdStrVec;
+  } else if (ProofStep_4DStdStrVec.size()) {
+    std::cout << "Partial Proof Found." << std::endl;
+    InProofStep_4DStdStrVec;
+    InAxiomCommitLog_StdStrVec;
+  } else {
+    std::cout << "No Proof Found." << std::endl;
+  }
+}
+
+int main()
+{
+  // Instantiate Prover (module)
+  EuclidProverClass Euclid;
+
+  Euclid.Axioms
+  (
+    {
+      // Axiom_1
+      {
+        {
+          "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" 
+        }, // lhs //
+        
+        {
+          "{", "StyxBoat", "}", "IsIn", "{", "StyxRiver", "}" 
+        } // rhs //
+      }, 
+    .
+    .
+    }
+  );
+  
+  Euclid.Lemmas
+  (
+    {
+      // Lemma_1
+      {
+        {
+          "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" 
+        }, // lhs //
+      
+        {
+          "{", "StyxBoat", "}", "IsNotIn", "{", "StyxRiver", "}" // These are connectives, and axiom helpers
+        } // rhs //
+      },
+    .
+    .
+    }
+  );
+
+  Euclid.Prove
+  (
     {
       {
-        "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" 
-      }, // lhs //
+        "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}"
+      }, // lhs//
     
       {
-        "{", "StyxBoat", "}", "IsIn", "{", "StyxRiver", "}" 
+        "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}"
       } // rhs //
-    }, 
-  .
-  .
-  }
-);
-  
-Euclid.Lemmas
-(
-  {
-    // Lemma_1
-    {
-      {
-        "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" 
-      }, // lhs //
-  
-      {        
-        "{", "StyxBoat", "}", "IsNotIn", "{", "StyxRiver", "}" // These are connectives, and axiom helpers
-      } // rhs //
-    },
-  .
-  .
-  }
-);
+    }
 
-Euclid.Prove
-(
+    ProofStep_4DStdStrVec,
+    AxiomCommitLog_StdStrVec
+  );
+  .
+  .
+  if (Euclid.StatusReady)
   {
+    if (Euclid.ProofFound_Flag)
     {
-      "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}"
-    }, // lhs//
-  
-    {
-      "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}"
-    } // rhs //
+      std::cout << "Proof Found." << std::endl;
+      ProofStep_4DStdStrVec;
+      AxiomCommitLog_StdStrVec;
+    } else if (ProofStep_4DStdStrVec.size()) {
+      std::cout << "Partial Proof Found." << std::endl;
+      ProofStep_4DStdStrVec;
+      AxiomCommitLog_StdStrVec;
+    } else {
+      std::cout << "No Proof Found." << std::endl;
+    }
+  } else {
+    SkipTaskForNow(Euclid, ProofStep_4DStdStrVec, AxiomCommitLog_StdStrVec); // recheck later //
   }
 
-  ProofStep_4DStdStrVec,
-  AxiomCommitLog_StdStrVec
-);
+  return EXIT_SUCCESS;
+}
 ```
-## Format
-
-The required format for the expressions is as follows:
-
-{ LHS }... = { RHS }..., where LHS and RHS are properly-formed sets of expressions.
-
-The "=" is the equality operator, its required, and should be interpreted as a connective, used to delimit and or separate the LHS and RHS. 
-The equality operator is the only builtin operator that is reserved. All other symbols may be used in your expressions.
-
-The equality operator can also be used to separate multiple expressions, as shown:
-
-{ LHS }... = { RHS_0000 }... = { RHS_0001 }... = { RHS_N }..., where LHS and RHS_N are properly-formed expressions.
-
-If you have any questions, please contact me at: https://github.com/Seagat2011/UnrealEngine-Seagat2011-2023
-
-Compatibility: C++20 (Windows x86 i64)
-
-STYLEGUIDE
-
-    POOR FORMATTING
-
-        TEST CASE: RENDER [PASS], PROOF [FAIL]
-        {{a}raised{2}}plus{2ab}plus{b raised{2}}<==({a}plus{b})raised{2}
-        ({a}plus{b})raised{2}minus{2ab}={c}raised{2}<==({a}plus{b})raised{2}={{c}raised{2}}plus{2ab}
-        {{a}raised{2}}plus{2ab}minus{2ab}plus{b raised{2}}==>{{a}raised{2}}plus{{b}raised{2}}
-        ({a}plus{b})raised{2}={{c}raised{2}}plus{2ab}
-        Prove {{a}raised{2}}plus{{b}raised{2}}={c}raised{2}
-
-    GOOD FORMATTING
-
-        TEST CASE [PASS]
-
-    // Axioms
-        ( { a } plus { b } ) raised { 2 } = { { c } raised { 2 } } plus { 2ab }
-
-    // Lemmas
-        { { a } raised { 2 } } plus { 2ab } plus { b raised { 2 } } <== ( { a } plus { b } ) raised { 2 }
-        ( { a } plus { b } ) raised { 2 } minus { 2ab } = { c } raised { 2 } <== ( { a } plus { b } ) raised { 2 } = { { c } raised { 2 } } plus { 2ab }
-        { { a } raised { 2 } } plus { 2ab } minus { 2ab } plus { b raised { 2 } } ==> { { a } raised { 2 } } plus { { b } raised { 2 } }
-
-        Prove { { a } raised { 2 } } plus { { b } raised { 2 } } = { c } raised { 2 }
-
-        TEST CASE [PASS]
-        primes = { a } raised { 2 } + { b } raised { 2 } , where (a,b) in setz
-        { 1 } mod { 4 } = { a } raised { 2 } + { b } raised { 2 }
-        Prove primes = { 1 } mod { 4 }
-
-        TEST CASE [PASS]
-        { 1 } { + } { 1 } = { 2 }
-        { 2 } { + } { 2 } = { 4 }
-        { 4 } { + } { 2 } = { 6 }
-        { 1 } { + } { 1 } { + } { 1 } { + } { 1 } { + } { 1 } { + } { 1 } = { 2 }
-        Prove { 1 } { + } { 2 } { + } { 2 } { + } { 1 } = { 6 }
-
-        TEST CASE [PASS]
-        ( { a } + { b } ) ^ { 2 } = { { c } ^ { 2 } } + { 2ab }
-        { { a } ^ { 2 } } + { 2ab } + { b ^ { 2 } } = ( { a } + { b } ) ^ { 2 }
-        ( { a } + { b } ) ^ { 2 } - { 2ab } = { c } ^ { 2 }
-        { { a } ^ { 2 } } + { 2ab } + { b ^ { 2 } } - { 2ab } = { { a } ^ { 2 } } + { { b } ^ { 2 } }
-        Prove { { a } ^ { 2 } } + { { b } ^ { 2 } } = { c } ^ { 2 }
-
-    SYMBOL LIBRARY
-
-        ref: https://documentation.libreoffice.org
-
-PROOFGUIDE
-
-    AXIOM FORMAT
-
-        { LHS... }... = { RHS... }... [ = { RHS_N... }... ]*
-        .
-        .
-
-    LEMMA SUBSTITUTION FORMAT
-
-        { LHS... }... <== or <==> or ==> { RHS... }... [ <== or <==> or ==> { RHS_N... }... ]*
-        .
-        .
-
-    PROOF FORMAT
-        Prove { LHS... }... = { RHS... }... [ = { RHS_N... }... ]*
-
-    QUICK FORMAT
-
-        TEST CASE [PASS]
-        primes = a raised 2 + b raised 2
-        1 mod 4 = a raised 2 + b raised 2
-        Prove primes = 1 mod 4
-
-    EFFICIENT SCOPED FORMAT
-
-        TEST CASE [PASS]
-        { a } raised { 2 } + { b } raised { 2 } = primes
-        { a } raised { 2 } + { b } raised { 2 } = { 1 } mod { 4 }
-        Prove { 1 } mod { 4 } = primes
