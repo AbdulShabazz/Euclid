@@ -78,7 +78,7 @@ SOLU:
 SYMP:
 	Error	C2908	explicit specialization; 'void Auto<RouteSource_EnumClass::_lhs,Indirection_EnumClass::_reduce>(Theorem_Struct,const Axiom_Struct &,const bool &,const bool &)' has already been instantiated	main.cpp	Line 1226	
 	Error	C2908	explicit specialization; 'void Auto<RouteSource_EnumClass::_lhs,Indirection_EnumClass::_expand>(Theorem_Struct,const Axiom_Struct &,const bool &,const bool &)' has already been instantiated	main.cpp	Line 1458	
-SOLU:
+SOLU: Specialization Templates do not support non-deterministic template parameters which are specified at runtime. Use a function instead.
 
 SYMP: InAxiomCallGraph_Map["lhs_reduce"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] == false // ...Proof not found.
 SOLU: PopulateAxiomCallGraph : if (Axiom_i[LHS] % Axiom_i[LHS] == 0) {...} >> if (Axiom_i[LHS] % Axiom_jLHS] == 0)
