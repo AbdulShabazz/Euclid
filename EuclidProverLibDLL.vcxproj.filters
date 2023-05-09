@@ -35,7 +35,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>Private</Filter>
     </ClCompile>
-    <ClCompile Include="EuclidProverLibDLL.cpp">
+    <ClCompile Include="Euclid.cpp">
       <Filter>Private</Filter>
     </ClCompile>
   </ItemGroup>
