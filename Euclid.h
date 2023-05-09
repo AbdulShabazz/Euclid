@@ -309,7 +309,8 @@ namespace Euclid_Prover
 		bool&
 		OutProofFound_FlagRef,
 
-		/*std::future<bool>& OutProofFound_PromiseFlag,*/
+		bool& 
+		OutStatusReadyFlag,
 
 		std::vector<
 		std::vector<
@@ -658,7 +659,7 @@ namespace Euclid_Prover
 					);
 
 					std::cout << "InAxiomCallGraph_Map[\"lhs_reduce\"][Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] = " <<
-						std::boolalpha << InAxiomCallGraph_Map["lhs_reduce"][Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] << std::endl;
+					std::boolalpha << InAxiomCallGraph_Map["lhs_reduce"][Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] << std::endl;
 				}
 
 				if (Theorem_UInt64Vec[LHS] % Axiom_i[RHS] == 0)
@@ -674,7 +675,7 @@ namespace Euclid_Prover
 					);
 
 					std::cout << "InAxiomCallGraph_Map[\"lhs_expand\"][Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] = " <<
-						std::boolalpha << InAxiomCallGraph_Map["lhs_expand"][Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] << std::endl;
+					std::boolalpha << InAxiomCallGraph_Map["lhs_expand"][Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] << std::endl;
 				}
 
 				if (Theorem_UInt64Vec[RHS] % Axiom_i[LHS] == 0)
@@ -690,7 +691,7 @@ namespace Euclid_Prover
 					);
 
 					std::cout << "InAxiomCallGraph_Map[\"rhs_reduce\"][Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] = " <<
-						std::boolalpha << InAxiomCallGraph_Map["rhs_reduce"][Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] << std::endl;
+					std::boolalpha << InAxiomCallGraph_Map["rhs_reduce"][Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] << std::endl;
 				}
 
 				if (Theorem_UInt64Vec[RHS] % Axiom_i[RHS] == 0)
@@ -706,7 +707,7 @@ namespace Euclid_Prover
 					);
 
 					std::cout << "InAxiomCallGraph_Map[\"rhs_expand\"][Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] = " <<
-						std::boolalpha << InAxiomCallGraph_Map["rhs_expand"][Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] << std::endl;
+					std::boolalpha << InAxiomCallGraph_Map["rhs_expand"][Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] << std::endl;
 				}
 
 				for (const std::vector<BigInt128_t>& Axiom_j : Axioms_UInt64Vec)
@@ -727,7 +728,7 @@ namespace Euclid_Prover
 						);
 
 						std::cout << "InAxiomCallGraph_Map[\"lhs_reduce\"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] = " <<
-							std::boolalpha << InAxiomCallGraph_Map["lhs_reduce"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] << std::endl;
+						std::boolalpha << InAxiomCallGraph_Map["lhs_reduce"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] << std::endl;
 					}
 
 					if (Axiom_i[LHS] % Axiom_j[RHS] == 0)
@@ -743,7 +744,7 @@ namespace Euclid_Prover
 						);
 
 						std::cout << "InAxiomCallGraph_Map[\"lhs_expand\"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] = " <<
-							std::boolalpha << InAxiomCallGraph_Map["lhs_expand"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] << std::endl;
+						std::boolalpha << InAxiomCallGraph_Map["lhs_expand"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] << std::endl;
 					}
 
 					if (Axiom_i[RHS] % Axiom_j[LHS] == 0)
@@ -759,7 +760,7 @@ namespace Euclid_Prover
 						);
 
 						std::cout << "InAxiomCallGraph_Map[\"rhs_reduce\"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] = " <<
-							std::boolalpha << InAxiomCallGraph_Map["rhs_reduce"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] << std::endl;
+						std::boolalpha << InAxiomCallGraph_Map["rhs_reduce"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] << std::endl;
 					}
 
 					if (Axiom_i[RHS] % Axiom_j[RHS] == 0)
@@ -775,7 +776,7 @@ namespace Euclid_Prover
 						);
 
 						std::cout << "InAxiomCallGraph_Map[\"rhs_expand\"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] = " <<
-							std::boolalpha << InAxiomCallGraph_Map["rhs_expand"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] << std::endl;
+						std::boolalpha << InAxiomCallGraph_Map["rhs_expand"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] << std::endl;
 					}
 				} // end for (...Axiom_j : Axioms_UInt64Vec)
 			} // end for (...Axiom_i : Axioms_UInt64Vec)
@@ -810,11 +811,11 @@ namespace Euclid_Prover
 
 		Tasks_Thread.push(Theorem_UInt64Vec);
 
-		// Todo: Create a .DLL interface
-		// Todo: Support Remove and SendOffline operations for individual axioms
-		// Todo: Add Resume and Suspend Proof operations
-		// Todo: Create a proof statement hash which can be used as a file handle to a proofstep solution when it posts to a file (stateless)
-		// Todo: Prevent Tasks_Thread stack overflow by deferring unprocessed axiom rewrites onto a deferred thread
+		// Todo: Develop an artificial neural network that can infer a solution and proofsteps from an axiom CallGraph 
+		// Todo: Add Remove, SendOffline operations for individual axioms
+		// Todo: Add Resume, Suspend Proof operations
+		// Todo: Create a proof-statement hash which can be used as a file handle to a proofstep solution when it posts to a file (stateless)
+		// Todo: Prevent Tasks_Thread (stack) overflows by deferring unprocessed axiom rewrites onto a deferred thread
 
 		//*** Core Proof Engine (Loop) *** //
 		while (!Tasks_Thread.empty() && !QED)
@@ -845,6 +846,22 @@ namespace Euclid_Prover
 				TempProofSteps.emplace_back(InTheorem_UInt64Vec);
 
 				std::vector<std::string> TempAxiomCommitLog_StdStrVec {};
+
+				/*
+				if 
+					(
+						!ScopeSatisfied
+						(
+							TempAxiomCommitLog_StdStrVec, 
+							TempProofSteps
+						)
+					)
+				{
+					ProofFound_Flag = false;
+					break;
+				}
+
+				*/
 				for
 					(
 						uint64_t ProofStep_UInt64 = ProofStack_UInt64;
@@ -1046,6 +1063,7 @@ namespace Euclid_Prover
 				} // end for (...Axiom : InAxioms_UInt64Vec)
 			} // end test (...Theorem[LHS] == Theorem[RHS])
 		} // end for (...!Tasks_Thread.empty() && !QED))
+		//*** End: Core Proof Engine (Loop) *** //
 
 		if (!QED)
 		{
@@ -1058,9 +1076,9 @@ namespace Euclid_Prover
 			}
 		}
 
-		//OutProofFound_PromiseFlag.set_value(QED);
-
 		OutProofFound_FlagRef = QED;
+
+		OutStatusReadyFlag = true; /* Set last */
 
 		return EXIT_SUCCESS;
 	}
@@ -1095,7 +1113,7 @@ namespace Euclid_Prover
 	{
 	public:
 		/**
-		Example:
+		Usage Example:
 		std::vector<std::string> input = { "{", "{", "{", "1", "}", "}", "+", "{", "{", "1", "}", "}", "}", "=", "{", "{", "2", "}", "}" };
 		const auto& output = CurlyBraceElide::Elide<BracketType::CurlyBraces>(input); // { "{", "1", "}", "+", "{", "1", "}", "=", "{", "2", "}" }
 		*/
@@ -1132,8 +1150,13 @@ namespace Euclid_Prover
 			return output;
 		}
 		/**
-		Example:
-		const auto& output = CurlyBraceElide::Elide<BracketType::CurlyBraces>({ "{", "{", "{", "1", "}", "}", "+", "{", "{", "1", "}", "}", "}", "=", "{", "{", "2", "}", "}" }); // { "{", "1", "}", "+", "{", "1", "}", "=", "{", "2", "}" }
+		Usage Example:
+		const auto& output = CurlyBraceElide::Elide<BracketType::CurlyBraces>
+		(
+			{ 
+				"{", "{", "{", "1", "}", "}", "+", "{", "{", "1", "}", "}", "}", "=", "{", "{", "2", "}", "}" 
+			}
+		); // Output: { "{", "1", "}", "+", "{", "1", "}", "=", "{", "2", "}" }
 		*/
 		template <BracketType type>
 		static std::vector<std::string> Elide(const std::initializer_list<std::string>& input)
@@ -1162,6 +1185,9 @@ namespace Euclid_Prover
 		{
 
 		}
+
+		bool StatusReady{};
+		bool ProofFound_Flag{};
 
 		bool Axiom
 		(
@@ -1344,7 +1370,7 @@ namespace Euclid_Prover
 			return Lemmas(TempInLemmasConstStdStrVecRef);
 		}
 
-		bool Prove
+		void Prove
 		(
 			const
 			std::vector<
@@ -1364,12 +1390,10 @@ namespace Euclid_Prover
 			std::string>>&
 			OutAxiomCommitLog_StdStrVecRef
 		)
-		{
-			bool ProofFoundFlag = true;
-
-			/*
+		{			
 			Reset();
 
+			/*
 			// Call the main proof function with the default Indirection::auto_
 			Auto
 			(
@@ -1396,20 +1420,20 @@ namespace Euclid_Prover
 				__Prove__,
 				std::cref(Theorem_UInt64Vec),
 				std::cref(Axioms_UInt64Vec),
-				std::ref(ProofFoundFlag),
-				/*std::ref(promise),*/
+				std::ref(ProofFound_Flag),
+				std::ref(StatusReady),
 				std::ref(ProofStep_4DStdStrVec),
 				std::ref(OutAxiomCommitLog_StdStrVecRef)
 			);
 
-			th.join();
+			th.detach();
 
 			// bProofFound_FlagFuture.get();
 
-			return ProofFoundFlag;
+			return;
 		}
 
-		bool Prove
+		void Prove
 		(
 			const
 			std::initializer_list<
@@ -1436,7 +1460,7 @@ namespace Euclid_Prover
 			std::string>>&
 			InProofVecConstCharRef { InProofInitListConstCharRef };
 
-			return Prove 
+			Prove 
 			(
 				InProofVecConstCharRef,
 				OutPath4DStdStrVecRef,
@@ -1466,6 +1490,12 @@ namespace Euclid_Prover
 		std::vector<
 		std::string>>>>
 		ProofStep_4DStdStrVec{};
+
+		void Reset()
+		{
+			StatusReady = false;
+			ProofFound_Flag = false;
+		};
 	};
 
 	template<>
