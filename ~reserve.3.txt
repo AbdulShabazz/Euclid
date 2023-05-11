@@ -1,5 +1,110 @@
 
+bool PeekScopeSatisfied
+(
+    auto& th,
+    
+    auto& th_idx, 
+    
+    const auto& from
+)
+{
+    uint64_t j {};
+    const uint64_t I = th.size();
+    const uint64_t J = from.size();
+    
+    for (uint64_t i = th_idx; i < I; ++i)
+    {
+        if (th[i] == from[j])
+        {
+            th[i] = "";
+            ++j;
+            /*
+            if (j < J)
+            {
+                //continue;
+            } else {
+                break;
+            }
+            */
+        } else {
+            break;
+        }
+    }
+    
+    return (j == J);
+}
 
+bool Rewrite
+(
+    auto& th, 
+    
+    const auto& from, 
+    
+    const auto& to
+)
+{
+    bool bSuccessFlag {};
+    
+    if (th.size() < from.size())
+        return false;
+        
+    std::unordered_map<std::string, std::string>
+    
+    end_scope {{"(", ")"}, {"{", "}"}, {"[", "]"}};
+    
+    std::vector<
+    std::string> result {};
+        
+    uint64_t i {};
+    
+    for (const auto& val : th )
+    {
+        auto tmp {result};
+        uint64_t k {i};
+        
+        if (
+            val == from[0] /*&& 
+            PeekScopeSatisfied
+            (tmp, k, from)*/
+            ) // &tmp, &k //
+        {
+            /*
+            i = k;
+        
+            uint64_t j {};
+            
+            for (const auto& u : tmp)
+            {
+                if(j < i)
+                {
+                    result.emplace_back(u);
+                } else if (j == i) {
+                    for (const auto& u2 : to)
+                    {
+                        result.emplace_back (u2);
+                    }
+                }
+                ++j;
+            }
+            */
+            result = tmp;
+            bSuccessFlag = true;
+            std::cout << "Match found";
+        } else {
+            std::cout << "No Match found" << val << std::endl;
+            result.emplace_back (val);
+        }
+        ++i;
+    }
+    
+    //RemoveEmptyStrings(result);
+    
+    th = result;
+    
+    return bSuccessFlag;
+}
+
+//
 bool _scope_satisfied
 (
     const
