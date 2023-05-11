@@ -1,0 +1,144 @@
+
+
+bool _scope_satisfied
+(
+    const
+    std::string&
+    etok_lhs,
+    
+    const
+    std::vector<
+    std::string>&
+    lhs,
+    
+    const
+    uint64_t&
+    lhs_idx,
+    
+    const
+    std::vector<
+    std::string>&
+    rhs,
+    
+    const
+    uint64_t&
+    rhs_idx
+)
+{
+    uint64_t i = 1;
+    std::unordered_map<std::string, std::string> end_scope{{"(", ")"}, {"{", "}"}, {"[", "]"}};
+    bool sat = true;
+    if (lhs[lhs_idx] != rhs[rhs_idx]) {
+        sat = false;
+    } else if (end_scope.find(etok_lhs) != end_scope.end()) {
+        if (
+            (lhs_idx + i) < lhs.size() && 
+            (rhs_idx + i) < rhs.size()
+            )
+        {
+            std::string ltok = lhs[lhs_idx + i];
+            std::string rtok = rhs[rhs_idx + i];
+            uint64_t I = rhs.size(); // Math.min(lhs.size,rhs.size) //
+            const std::string& etok_rhs = end_scope[etok_lhs];
+            while (i++ < I) {
+                if (ltok != rtok) {
+                    sat = false;
+                    break;
+                }
+                if (rtok == etok_rhs) {
+                    break;
+                }
+                ltok = lhs[lhs_idx + i];
+                rtok = rhs[rhs_idx + i];
+            }
+        } else {
+            sat = false;
+        }
+    } // test(etok_lhs) //
+    return sat;
+}
+/*
+  vector<string> tokens;
+
+  // Iterate over the tokens.
+  for (const auto& token : tokens) {
+    // If the token is an equals sign and the compound flag is not set,
+    // reset the index.
+    if (token == "=" && !COMPOUND) {
+      jdx = 0;
+    }
+
+    // If the scope is satisfied,
+    if (_scope_satisfied(token, me, idx, from, jdx)) {
+      // Add the index to the vector of keys.
+      vkeys.push_back(idx);
+
+      // If the index is equal to the size of the from array,
+      if (++jdx == from.size) {
+        // Set the subnetFOUND flag to true.
+        _subnetFOUND = true;
+
+        // Iterate over the keys.
+        for (const auto& kdx : vkeys) {
+          // Add the sub tag to the HTML pre element at the key index.
+          tmpHTML.pre[kdx] += _id.addTAG("sub");
+
+          // Set the HTML post element at the key index to null.
+          tmpHTML.post[kdx] = nullptr;
+
+          // Set the HTMLR post element at the key index to null.
+          tmpHTMLR.post[kdx] = nullptr;
+
+          // Set the Proof element at the key index to null.
+          Proof[kdx] = nullptr;
+
+          // If the index is equal to 0,
+          if (ii == 0) {
+            // Set the HTML post element at the key index to the result of
+            // joining the to array with the sub tag.
+            tmpHTML.post[kdx] = to.map([](const auto& atok) {
+              return (atok + _id.addTAG("sub"));
+            }).join(" ");
+
+            // Set the HTMLR post element at the key index to the result of
+            // joining the to array with a space.
+            tmpHTMLR.post[kdx] = to.join(' ');
+
+            // Set the Proof element at the key index to the result of
+            // joining the to array with a space.
+            Proof[kdx] = to.join(" ");
+          }
+        }
+
+        // Reset the index.
+        jdx = 0;
+
+        // Clear the vector of keys.
+        vkeys.clear();
+      }
+    }
+  }
+*/
+
+    bool bRewriteFlag {true};
+
+        if (
+            val == from[I] /*&& 
+            end_scope.find(val) == end_scope.end()*/
+            )
+        {
+            if (bRewriteFlag)
+            {
+                i = I;
+                bRewriteFlag = false;
+                /*
+                for (const auto& val2 : to)
+                {
+                    ++j;
+                    result.emplace_back (val2);
+                }*/
+            }
+            ++I;
+        } else {
+            result.emplace_back (val);
+        }
