@@ -1,4 +1,120 @@
 
+
+bool TentativeProofVerified
+(
+    const
+    std::vector<
+    std::string>&
+    Theorem, 
+    
+    const
+    std::vector<
+    std::vector<
+    std::string>>&
+    InTheorem_StdStrVec, 
+    
+    const
+    std::vector<
+    std::vector<
+    std::vector<
+    std::string>>>&
+    InAxioms_StdStrVec,
+    
+    std::vector<
+    std::vector<
+    std::string>>&
+    OutAxiomCommitLog_StdStrVecRef
+)
+{
+  // Clone InTheorem_StdStrVec as OutTheorem_StdStrVec. //
+  std::vector<
+  std::vector<
+  std::vector<
+  std::string>>>
+  OutTheorem_StdStrVec {InTheorem_StdStrVec};
+  
+  std::vector<
+  std::vector<
+  std::string>>
+  TempTheorem_StdStrVec {InTheorem_StdStrVec};
+
+  /**
+    Loop through Theorem, starting at Theorem[ProofStack_UInt64],
+    and read two values from the vector at a time: Theorem[ProofStack_UInt64 + i++],
+    Theorem[ProofStack_UInt64 + i++] - 1.
+  
+    The first value read out, const auto& opcode = Theorem[ProofStack_UInt64 + i++],
+    is an opcode whose hexadecimal value may range from 0x00 to 0x03.
+  
+    The second value read out, const auto& guid = Theorem[ProofStack_UInt64 + i++] - 1,
+    is an index into InAxioms_StdStrVec.
+  */
+  
+  uint64_t i {ProofStack_UInt64};
+  while (i < Theorem.size()) {
+    const auto& opcode = Theorem[i++];
+    const auto& guid = Theorem[i++] - 1;
+
+    switch (opcode)
+    {
+        case 0x00: { // "lhs_reduce" operation
+            if (TempTheorem_StdStrVec[LHS].size() < InAxioms_StdStrVec[guid][LHS].size())
+                return false;
+            uint64_t k {};
+            for (uint64_t j = 0; j < TempTheorem_StdStrVec[LHS].size(); j++) {
+                if (TempTheorem_StdStrVec[LHS][j] == InAxioms_StdStrVec[guid][LHS][k]) {
+                    TempTheorem_StdStrVec[LHS][j] = InAxioms_StdStrVec[guid][RHS][k++];
+                }
+            }
+            TempAxiomCommitLog_StdStrVecRef.emplace_back("lhs_reduce via Axiom_" + guid/*.str()*/ );
+            break;
+        }
+        case 0x01: { // "lhs_expand" operation
+          if (TempTheorem_StdStrVec[LHS].size() < InAxioms_StdStrVec[guid][RHS].size())
+            return false;
+            uint64_t k {};
+          for (uint64_t j = 0; j < TempTheorem_StdStrVec[RHS].size(); j++) {
+            if (TempTheorem_StdStrVec[RHS][j] == InAxioms_StdStrVec[guid][LHS][k]) {
+              TempTheorem_StdStrVec[RHS][j] = InAxioms_StdStrVec[guid][RHS][k++];
+            }
+          }
+          break;
+        }
+        case 0x02: { // "rhs_reduce" operation
+          if (TempTheorem_StdStrVec[RHS].size() < InAxioms_StdStrVec[guid][LHS].size())
+            return false;
+            uint64_t k {};
+          for (uint64_t j = 0; j < TempTheorem_StdStrVec[LHS].size(); j++) {
+            if (TempTheorem_StdStrVec[LHS][j] == InAxioms_StdStrVec[guid][RHS][k]) {
+              TempTheorem_StdStrVec[LHS][j] = InAxioms_StdStrVec[guid][LHS][k++];
+            }
+          }
+          break;
+        }
+        case 0x03: { // "rhs_expand" operation
+          if (TempTheorem_StdStrVec[RHS].size() < InAxioms_StdStrVec[guid][RHS].size())
+            return false;
+            uint64_t k {};
+          for (uint64_t j = 0; j < TempTheorem_StdStrVec[RHS].size(); j++) {
+            if (TempTheorem_StdStrVec[RHS][j] == InAxioms_StdStrVec[guid][RHS][k]) {
+              TempTheorem_StdStrVec[RHS][j] = InAxioms_StdStrVec[guid][LHS][k++];
+            }
+          }
+          break;
+        }
+        default: {
+          // Invalid opcode.
+          return false;
+        }
+    } // end switch(opcode)
+    OutAxiomCommitLog_StdStrVecRef.emplace_back(TempAxiomCommitLog_StdStrVecRef);
+    OutTheorem_StdStrVec.emplace_back(TempTheorem_StdStrVec);
+  }
+
+  // If TentativeProofVerified is unable to complete the loop, the algorithm returns false.
+  return true;
+}
+//
 bool PeekScopeSatisfied
 (
     auto& th,
