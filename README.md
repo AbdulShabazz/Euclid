@@ -3,7 +3,7 @@ C++23 Edition
 
 ## Description
 
-Euclid is a proof engine that operates symbolically and does not support library calls or built-in libraries. However, it can be utilized in game development to derive any achievable game-state, given the current state without pre-training, which is typically required for A.I. If successful, the prover will provide a path of proof-steps that prove the theorem, if it is provable, which can be used in your game.
+Euclid is a proof engine that operates symbolically and does not support library calls or have built-in libraries. However, it can be utilized in game development to derive any achievable game-state, given the current state without pre-training, which is typically required for A.I. If successful, the prover will provide a path of proof-steps that prove the theorem, if it is provable, which can be used in your game.
 
 Additionally, Euclid can be beneficial in debugging game logic.
 
@@ -152,7 +152,6 @@ int main()
     ProofStep_4DStdStrVec,
     AxiomCommitLog_StdStrVec
   );
-
   
   while (!Euclid.StatusReady)
   {
@@ -243,44 +242,6 @@ using EuclidProverClass =
 Euclid_Prover::EuclidProver<
 Euclid_Prover::BracketType::CurlyBraces>;
 
-void SkipTaskForNow
-(
-  const
-  EuclidProverClass&
-  EuclidConstRefObj,
-  
-  const
-  auto&
-  InProofStep_4DStdStrVec,
-  
-  const
-  auto&
-  InAxiomCommitLog_StdStrVec
-)
-{
-  // Perform some other work... //
-  std::this_thread::sleep_for(std::chrono::seconds(1));
-
-  while (!EuclidConstRefObj.StatusReady)
-  {
-    //std::cout << "Performing some other work..." << std::endl;
-    //std::this_thread::sleep_for(std::chrono::seconds(1));
-  }
-
-  if (EuclidConstRefObj.ProofFound_Flag)
-  {
-    std::cout << "Proof Found." << std::endl;
-    InProofStep_4DStdStrVec;
-    InAxiomCommitLog_StdStrVec;
-  } else if (ProofStep_4DStdStrVec.size()) {
-    std::cout << "Partial Proof Found." << std::endl;
-    InProofStep_4DStdStrVec;
-    InAxiomCommitLog_StdStrVec;
-  } else {
-    std::cout << "No Proof Found." << std::endl;
-  }
-}
-
 int main()
 {
   // Instantiate Prover (module)
@@ -337,8 +298,13 @@ int main()
     ProofStep_4DStdStrVec,
     AxiomCommitLog_StdStrVec
   );
-  .
-  .
+  
+  while (!Euclid.StatusReady)
+  {
+    //std::cout << "Performing some other work..." << std::endl;
+    //std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+  
   if (Euclid.StatusReady)
   {
     if (Euclid.ProofFound_Flag)
@@ -353,10 +319,8 @@ int main()
     } else {
       std::cout << "No Proof Found." << std::endl;
     }
-  } else {
-    SkipTaskForNow(Euclid, ProofStep_4DStdStrVec, AxiomCommitLog_StdStrVec); // recheck later //
   }
-
+  
   return EXIT_SUCCESS;
 }
 ```
