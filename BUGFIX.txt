@@ -83,3 +83,15 @@ SOLU: Specialization Templates do not support non-deterministic template paramet
 SYMP: InAxiomCallGraph_Map["lhs_reduce"][Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] == false // ...Proof not found.
 SOLU: PopulateAxiomCallGraph : if (Axiom_i[LHS] % Axiom_i[LHS] == 0) {...} >> if (Axiom_i[LHS] % Axiom_jLHS] == 0)
 
+SYMP: Error no matching function for call to ‘construct_at(std::vector >*&, const char*)’
+SOLU: 
+    std::vector<
+    std::vector<
+    std::string>>
+    TempAxiomCommitLogStdStrVecRef;
+
+	>>
+	
+    std::vector<
+    std::string>
+    TempAxiomCommitLogStdStrVecRef;
