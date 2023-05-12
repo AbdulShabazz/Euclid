@@ -297,14 +297,14 @@ namespace Euclid_Prover
 		std::vector<
 		std::vector<
 		std::string>>&
-		InTheorem_StdStrVec,
+		InTheoremStdStrVec,
 
 		const
 		std::vector<
 		std::vector<
 		std::vector<
 		std::string>>>&
-		InAxioms_StdStrVec,
+		InAxiomsStdStrVec,
 
 		bool&
 		OutProofFound_FlagRef,
@@ -317,12 +317,12 @@ namespace Euclid_Prover
 		std::vector<
 		std::vector<
 		std::string>>>>&
-		OutProofStep_StdStrVecRef,
+		OutProofStepStdStrVecRef,
 
 		std::vector<
 		std::vector<
 		std::string>>&
-		OutAxiomCommitLog_StdStrVecRef
+		OutAxiomCommitLogStdStrVecRef
 	)
 	{
 
@@ -340,7 +340,7 @@ namespace Euclid_Prover
 			]
 		() -> void
 		{
-			for (const std::vector<std::string>& Subnet_StdStrVec : InTheorem_StdStrVec)
+			for (const std::vector<std::string>& Subnet_StdStrVec : InTheoremStdStrVec)
 			{
 				BigInt128_t PrimeProduct_UInt64Vec{ 1 };
 				for (const std::string& Symbol_StdStr : Subnet_StdStrVec)
@@ -383,7 +383,7 @@ namespace Euclid_Prover
 					std::vector<
 					std::vector<
 					std::string>>&Subnet_StdStrVec :
-					InAxioms_StdStrVec
+					InAxiomsStdStrVec
 				)
 			{
 				std::vector<BigInt128_t> TempInnerAxiom_UInt64Vec{};
@@ -427,9 +427,9 @@ namespace Euclid_Prover
 		[RHS]
 		[guid_UInt64]
 		[last_UInt64]
-		[ProofStack_UInt64]
+		[ProofStackUInt64]
 
-		Axiom_N
+		Axiom
 		[LHS]
 		[RHS]
 		[guid_UInt64]
@@ -439,7 +439,7 @@ namespace Euclid_Prover
 		constexpr int RHS = 1;
 		constexpr int guid_UInt64 = 2;
 		constexpr int last_UInt64 = 3;
-		constexpr int ProofStack_UInt64 = 4;
+		constexpr int ProofStackUInt64 = 4;
 
 		auto RebalanceTheoremVec =
 			[
@@ -562,126 +562,271 @@ namespace Euclid_Prover
 			const bool TentativeProofFound_Flag = (Theorem[LHS] == Theorem[RHS]);
 			if (TentativeProofFound_Flag)
 			{
-				// OK, we've used prime number fields to quickly narrow the solution space, 
-				// now we will need to verify the solution space converges on a valid routemap...
+				/** 
+				Alright, we have successfully employed prime number fields
+				to effectively and swiftly reduce the size of our potential solution set. 
+				
+				Now, our next step is to confirm that this narrowed down solution space 
+				indeed leads us to a valid routing map...
+				*/
 
 				std::cout << "Tentative Proof Found" << std::endl;
 				std::cout << "Theorem {" << Theorem[LHS] << ", " << Theorem[RHS] << "} " << std::endl;
 
-				bool ProofFound_Flag{ true };
+				bool ProofFoundFlag{ true };
 
-				TempProofSteps.emplace_back(InTheorem_StdStrVec);
+				TempProofSteps.emplace_back(InTheoremStdStrVec);
+
+				auto Rewrite = [&]
+				(
+					auto& th,
+
+					const auto& from,
+
+					const auto& to
+				) -> bool
+				{
+					bool bSuccessFlag{};
+
+					if (th.size () < from.size ())
+						return false;
+
+					std::unordered_map<std::string, std::string>
+
+						endscope{ {"(", ")"}, {"{", "}"}, {"[", "]"} };
+
+					std::vector<
+						std::string> result{};
+
+					uint64_t i{};
+
+					const uint64_t I{ from.size () };
+
+					for (const auto& val : th)
+					{
+						std::cout << "Next val: " << val << std::endl;
+
+						if (!bSuccessFlag && val == from[i])
+						{
+							++i;
+
+							std::cout << "Match found: " << val << " >> ";
+
+							if (i == I)
+							{
+								for (const auto& u2 : to)
+								{
+									std::cout << u2 << " ";
+									result.emplace_back (u2);
+								}
+
+								bSuccessFlag = true;
+
+								std::cout << ">> Substitution made" << std::endl;
+
+								i = 0;
+
+								continue;
+							}
+						} else {
+							i = 0; // reset //
+
+							std::cout << "No Match found: " << val << std::endl;
+
+							result.emplace_back (val);
+						}
+						std::cout << std::endl;
+					}
+
+					th = result;
+
+					return bSuccessFlag;
+				};
+
+				/**
+				Q: Write a c++20 algorithm, ProofVerified, which accepts Theorem,
+				InTheoremStdStrVec, and InAxiomsStdStrVec, as parameters and returns a bool type.
+
+				ProofVerified clones InTheoremStdStrVec as OutTheoremStdStrVec, and performs
+				the following operations:
+
+				ProofVerified loops through Theorem, starting at Theorem[ProofStackUInt64],
+				and reads two values from the vector at a time: Theorem[ProofStackUInt64 + i++],
+				Theorem[ProofStackUInt64 + i++] - 1.
+
+				The first value read out,
+				const auto& opcode = Theorem[ProofStackUInt64 + i++], is an opcode
+				whose hexadecimal value may range from 0x00 to 0x03.
+
+				The second value read out, const auto& guid = Theorem[ProofStackUInt64 + i++] - 1,
+				is an index into InAxiomsStdStrVec.
+
+				An opcode of 0x00 indicates a "lhsreduce" operation, which replaces all occurrences
+				of InAxiomsStdStrVec[guid][LHS] in OutTheoremStdStrVec[LHS] with InAxiomsStdStrVec[guid][RHS],
+				resizing OutTheoremStdStrVec, as required.
+
+				An opcode of 0x01 indicates a "lhsexpand" operation, which replaces all occurrences
+				of InAxiomsStdStrVec[guid][LHS] in OutTheoremStdStrVec[RHS] with InAxiomsStdStrVec[guid][LHS],
+				resizing OutTheoremStdStrVec, as required.
+
+				An opcode of 0x02 indicates a "rhsreduce" operation, which replaces all occurrences
+				of InAxiomsStdStrVec[guid][RHS] in OutTheoremStdStrVec[LHS] with InAxiomsStdStrVec[guid][RHS],
+				resizing OutTheoremStdStrVec, as required.
+
+				An opcode of 0x03 indicates a "rhsexpand" operation, which replaces all occurrences
+				of InAxiomsStdStrVec[guid][RHS] in OutTheoremStdStrVec[RHS] with InAxiomsStdStrVec[guid][LHS],
+				resizing OutTheoremStdStrVec, as required.
+
+				If ProofVerified is unable to complete the loop, the algorithm returns false.
+				*/
+				auto ProofVerified = [&]
+				(
+					const
+					std::vector<
+					BigInt128_t>&
+					InTheoremUInt64,
+
+					const
+					std::vector<
+					std::vector<
+					std::string>>&
+					InTheoremStdStrVec,
+
+					const
+					std::vector<
+					std::vector<
+					std::vector<
+					std::string>>>&
+					InAxiomsStdStrVec,
+
+					std::vector<
+					std::vector<
+					std::string>>&
+					OutAxiomCommitLogStdStrVecRef,
+
+					std::vector<
+					std::vector<
+					std::vector<
+					std::string>>>&
+					OutTheoremStdStrVec
+				) -> bool
+				{
+					bool ReturnStatusFlag{ true };
+
+					OutTheoremStdStrVec.emplace_back (InTheoremStdStrVec);
+
+					std::vector<
+					std::vector<
+					std::string>>
+					TempTheoremStdStrVec{ InTheoremStdStrVec };
+
+					std::vector<
+					std::string>
+					TempAxiomCommitLogStdStrVecRef;
+
+					/**
+					Loop through Theorem, starting at Theorem[ProofStackUInt64],
+					and read two values from the vector at a time.
+
+					The first value read out, is an opcode whose hexadecimal value
+					ranges from 0x00 to 0x03.
+
+					The second value read out, is an index into InAxiomsStdStrVec.
+					*/
+
+					uint64_t i { ProofStackUInt64 };
+
+					while (i < InTheoremUInt64.size ())
+					{
+						if (!ReturnStatusFlag)
+							return ReturnStatusFlag;
+
+						const uint64_t& opcode = uint64_t{ InTheoremUInt64[i++] };
+						const uint64_t& guid = uint64_t{ InTheoremUInt64[i++] - 1 };
+
+						//TempTheoremStdStrVec = OutTheoremStdStrVec.back();
+
+						switch (opcode)
+						{
+							case 0x00:
+							{ // "lhsreduce" operation //
+								std::cout << "lhs_reduce via Axiom_" << guid/*.str()*/ << std::endl;
+								ReturnStatusFlag =
+									Rewrite (TempTheoremStdStrVec[LHS], InAxiomsStdStrVec[guid][LHS], InAxiomsStdStrVec[guid][RHS]);
+								TempAxiomCommitLogStdStrVecRef.emplace_back ("lhs_reduce via Axiom_" + guid/*.str()*/);
+								break;
+							}
+							case 0x01:
+							{ // "lhsexpand" operation //
+								std::cout << "lhs_expand via Axiom_" << guid/*.str()*/ << std::endl;
+								ReturnStatusFlag =
+									Rewrite (TempTheoremStdStrVec[LHS], InAxiomsStdStrVec[guid][RHS], InAxiomsStdStrVec[guid][LHS]);
+								TempAxiomCommitLogStdStrVecRef.emplace_back ("lhs_expand via Axiom_" + guid/*.str()*/);
+								break;
+							}
+							case 0x02:
+							{ // "rhsreduce" operation //
+								std::cout << "rhs_reduce via Axiom_" << guid/*.str()*/ << std::endl;
+								ReturnStatusFlag =
+									Rewrite (TempTheoremStdStrVec[RHS], InAxiomsStdStrVec[guid][LHS], InAxiomsStdStrVec[guid][RHS]);
+								TempAxiomCommitLogStdStrVecRef.emplace_back ("rhs_reduce via Axiom_" + guid/*.str()*/);
+								break;
+							}
+							case 0x03:
+							{ // "rhsexpand" operation //
+								std::cout << "rhs_expand via Axiom_" << guid/*.str()*/ << std::endl;
+								ReturnStatusFlag =
+									Rewrite (TempTheoremStdStrVec[RHS], InAxiomsStdStrVec[guid][RHS], InAxiomsStdStrVec[guid][LHS]);
+								TempAxiomCommitLogStdStrVecRef.emplace_back ("rhs_expand via Axiom_" + guid/*.str()*/);
+								break;
+							}
+							default:
+							{
+								// Invalid opcode. //
+								ReturnStatusFlag = false;
+								break; false;
+							}
+						} // end switch(opcode)
+						OutTheoremStdStrVec.emplace_back (TempTheoremStdStrVec);
+					}
+					OutAxiomCommitLogStdStrVecRef.emplace_back (TempAxiomCommitLogStdStrVecRef);
+
+					// If TentativeProofVerified is unable to complete the loop, the algorithm returns false.
+					return true;
+				};
 
 				std::vector<std::string> TempAxiomCommitLog_StdStrVec {};
 
-				/*
-				if 
-					(
-						!ScopeSatisfied
+				//QED = true;
+				//break;
+				
+				std::vector<
+				std::vector<
+				std::vector<
+				std::string>>>
+				OutTheoremStdStrVec;
+
+				if (
+						ProofVerified
 						(
-							TempAxiomCommitLog_StdStrVec, 
-							TempProofSteps
+							Theorem,
+							InTheoremStdStrVec,
+							InAxiomsStdStrVec,
+							OutAxiomCommitLogStdStrVecRef,
+							OutTheoremStdStrVec
 						)
 					)
 				{
-					ProofFound_Flag = false;
-					break;
-				}
-
-				*/
-				for
-					(
-						uint64_t ProofStep_UInt64 = ProofStack_UInt64;
-						ProofStep_UInt64 < Theorem.size();
-						ProofStep_UInt64 += 2
-					)
-				{/*
-					if
-					(
-						!RewriteInstruction_Map
-						[uint64_t { Theorem[ProofStep_UInt64] }] // provide opcode //
-						(uint64_t { Theorem[ProofStep_UInt64 + 1] }) // provide Axiom_N //
-					)
-					{
-						ProofFound_Flag = false;
-						break;
-					}*/
-
-					std::string TempVal {};
-					switch (uint64_t{ Theorem[ProofStep_UInt64] })
-					{
-					case 0x00:
-						TempVal = "lhs_reduce via "; break;
-					case 0x01:
-						TempVal = "lhs_expand via "; break;
-					case 0x02:
-						TempVal = "rhs_reduce via "; break;
-					case 0x03:
-						TempVal = "rhs_expand via "; break;
-					}
-					TempVal += Theorem[ProofStep_UInt64 + 1].str();
-					TempAxiomCommitLog_StdStrVec.emplace_back(TempVal);
-					std::cout << TempVal << std::endl;
-				}
-
-				OutAxiomCommitLog_StdStrVecRef.emplace_back(TempAxiomCommitLog_StdStrVec);
-
-				QED = true;
-				break;
-
-				if (ProofFound_Flag)
-				{
-					std::cout << std::endl;
-					std::cout << "Proof Found" << std::endl;
-
-					bool lhs_Flag = false;
-					for
-						(
-							const
-							std::vector<
-							std::string>& Subnet_StdStrVec :
-							InTheorem_StdStrVec
-						)
-					{
-						if (lhs_Flag)
-						{
-							std::cout << "= ";
-						}
-
-						lhs_Flag = true;
-
-						for (const std::string& Symbol_StdStr : Subnet_StdStrVec)
-						{
-							std::cout << Symbol_StdStr << " ";
-						}
-					}
-
-					std::cout << std::endl;
-
-					if (ProofStack_UInt64 < Theorem.size())
-					{
-						for
-							(
-								uint64_t ProofStep_UInt64 = ProofStack_UInt64;
-								ProofStep_UInt64 < Theorem.size();
-								++ProofStep_UInt64
-								)
-						{
-							std::cout << "Axiom_" << Theorem[ProofStep_UInt64] << std::endl;
-						}
-					}
-					std::cout << "Theorem_0000 {" << Theorem[LHS] << ", " << Theorem[RHS] << "}" << std::endl;
-					std::cout << std::endl;
-					std::cout << "Q.E.D." << std::endl;
-
 					++TotalProofsFound_UInt64;
+
+					std::cout << "Proof Found" << std::endl;
+					std::cout << "Theorem {" << Theorem[LHS] << ", " << Theorem[RHS] << "} " << std::endl;
 
 					if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64)
 					{
 						QED = true;
 						break;
 					}
-
 				} else {
 					// Retain Partial-proof //
 					continue;
@@ -737,7 +882,7 @@ namespace Euclid_Prover
 						Tasks_Thread.push(Theorem_0003);
 					}
 					std::cout << std::endl;
-				} // end for (...Axiom : InAxioms_StdStrVec)
+				} // end for (...Axiom : InAxiomsStdStrVec)
 			} // end test (...Theorem[LHS] == Theorem[RHS])
 		} // end for (...!Tasks_Thread.empty() && !QED))
 		//*** End: Core Proof Engine (Loop) *** //
@@ -864,7 +1009,7 @@ namespace Euclid_Prover
 		}
 
 		bool StatusReady{};
-		bool ProofFound_Flag{};
+		bool ProofFoundFlag{};
 
 		bool Axiom
 		(
@@ -899,7 +1044,7 @@ namespace Euclid_Prover
 			InAxiomsConstStdStrVec
 		)
 		{
-			Axioms_StdStrVec =
+			AxiomsStdStrVec =
 
 			{
 				{
@@ -1009,12 +1154,12 @@ namespace Euclid_Prover
 			std::vector<
 			std::vector<
 			std::string>>&
-			OutAxiomCommitLog_StdStrVecRef
+			OutAxiomCommitLogStdStrVecRef
 		)
 		{			
 			Reset();
 
-			Theorem_StdStrVec =
+			TheoremStdStrVec =
 
 			{
 				{"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
@@ -1024,12 +1169,12 @@ namespace Euclid_Prover
 			std::thread th
 			(
 				__Prove__,
-				std::cref(Theorem_StdStrVec),
-				std::cref(Axioms_StdStrVec),
-				std::ref(ProofFound_Flag),
+				std::cref(TheoremStdStrVec),
+				std::cref(AxiomsStdStrVec),
+				std::ref(ProofFoundFlag),
 				std::ref(StatusReady),
-				std::ref(ProofStep_4DStdStrVec),
-				std::ref(OutAxiomCommitLog_StdStrVecRef)
+				std::ref(ProofStep4DStdStrVec),
+				std::ref(OutAxiomCommitLogStdStrVecRef)
 			);
 
 			th.detach();
@@ -1055,7 +1200,7 @@ namespace Euclid_Prover
 			std::vector<
 			std::vector<
 			std::string>>&
-			OutAxiomCommitLog_StdStrVecRef
+			OutAxiomCommitLogStdStrVecRef
 		)
 		{
 			const
@@ -1068,7 +1213,7 @@ namespace Euclid_Prover
 			(
 				InProofVecConstCharRef,
 				OutPath4DStdStrVecRef,
-				OutAxiomCommitLog_StdStrVecRef
+				OutAxiomCommitLogStdStrVecRef
 			);
 		}
 
@@ -1081,24 +1226,24 @@ namespace Euclid_Prover
 		std::vector<
 		std::vector<
 		std::string>>>
-		Axioms_StdStrVec{};
+		AxiomsStdStrVec{};
 
 		std::vector<
 		std::vector<
 		std::string>>
-		Theorem_StdStrVec{};
+		TheoremStdStrVec{};
 
 		std::vector<
 		std::vector<
 		std::vector<
 		std::vector<
 		std::string>>>>
-		ProofStep_4DStdStrVec{};
+		ProofStep4DStdStrVec{};
 
 		void Reset()
 		{
 			StatusReady = false;
-			ProofFound_Flag = false;
+			ProofFoundFlag = false;
 		};
 	};
 
