@@ -1,4 +1,116 @@
 
+				/*
+				if (ProofFoundFlag)
+				{
+					std::cout << std::endl;
+					std::cout << "Proof Found" << std::endl;
+
+					bool lhs_Flag = false;
+					for
+						(
+							const
+							std::vector<
+							std::string>& Subnet_StdStrVec :
+							InTheoremStdStrVec
+						)
+					{
+						if (lhs_Flag)
+						{
+							std::cout << "= ";
+						}
+
+						lhs_Flag = true;
+
+						for (const std::string& Symbol_StdStr : Subnet_StdStrVec)
+						{
+							std::cout << Symbol_StdStr << " ";
+						}
+					}
+
+					std::cout << std::endl;
+
+					if (ProofStack_UInt64 < Theorem.size())
+					{
+						for
+							(
+								uint64_t ProofStep_UInt64 = ProofStack_UInt64;
+								ProofStep_UInt64 < Theorem.size();
+								++ProofStep_UInt64
+								)
+						{
+							std::cout << "Axiom_" << Theorem[ProofStep_UInt64] << std::endl;
+						}
+					}
+					std::cout << "Theorem_0000 {" << Theorem[LHS] << ", " << Theorem[RHS] << "}" << std::endl;
+					std::cout << std::endl;
+					std::cout << "Q.E.D." << std::endl;
+
+					++TotalProofsFound_UInt64;
+
+					if (TotalProofsFound_UInt64 >= MaxAllowedProofs_UInt64)
+					{
+						QED = true;
+						break;
+					}
+
+				} else {
+					// Retain Partial-proof //
+					continue;
+				}
+				*/
+//
+				for
+					(
+						uint64_t ProofStep_UInt64 = ProofStack_UInt64;
+						ProofStep_UInt64 < Theorem.size();
+						ProofStep_UInt64 += 2
+					)
+				{/*
+					if
+					(
+						!RewriteInstruction_Map
+						[uint64_t { Theorem[ProofStep_UInt64] }] // provide opcode //
+						(uint64_t { Theorem[ProofStep_UInt64 + 1] }) // provide Axiom_N //
+					)
+					{
+						ProofFoundFlag = false;
+						break;
+					}*/
+
+					std::string TempVal {};
+					switch (uint64_t{ Theorem[ProofStep_UInt64] })
+					{
+					case 0x00:
+						TempVal = "lhs_reduce via "; break;
+					case 0x01:
+						TempVal = "lhs_expand via "; break;
+					case 0x02:
+						TempVal = "rhs_reduce via "; break;
+					case 0x03:
+						TempVal = "rhs_expand via "; break;
+					}
+					TempVal += Theorem[ProofStep_UInt64 + 1].str();
+					TempAxiomCommitLog_StdStrVec.emplace_back(TempVal);
+					std::cout << TempVal << std::endl;
+				}
+
+				//OutAxiomCommitLogStdStrVecRef.emplace_back(TempAxiomCommitLog_StdStrVec);
+//
+				/*
+				if 
+					(
+						!ScopeSatisfied
+						(
+							TempAxiomCommitLog_StdStrVec, 
+							TempProofSteps
+						)
+					)
+				{
+					ProofFoundFlag = false;
+					break;
+				}
+
+				*/
 // Add new rewrites to the task queue //
 				for (const std::vector<BigInt128_t>& Axiom : Axioms_UInt64Vec)
 				{
