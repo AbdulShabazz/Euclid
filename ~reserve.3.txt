@@ -1,5 +1,18 @@
 
 
+void RemoveEmptyStrings(auto& vec)
+{
+    // Remove empty strings from-, and resize-, the vec.
+    vec.erase(
+        std::remove_if(
+            vec.begin(), 
+            vec.end(), 
+            [](const std::string& s)
+            {
+                return s.empty();
+            }), vec.end());
+}
+//
 bool TentativeProofVerified
 (
     const
