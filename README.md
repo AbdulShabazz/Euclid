@@ -159,7 +159,7 @@ int main()
     //std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 
-  if (Euclid.ProofFound_Flag)
+  if (Euclid.ProofFoundFlag)
   {
     std::cout << "Proof Found." << std::endl;
     ProofStep_4DStdStrVec;
@@ -307,7 +307,7 @@ int main()
   
   if (Euclid.StatusReady)
   {
-    if (Euclid.ProofFound_Flag)
+    if (Euclid.ProofFoundFlag)
     {
       std::cout << "Proof Found." << std::endl;
       ProofStep_4DStdStrVec;
