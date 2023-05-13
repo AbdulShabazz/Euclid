@@ -99,15 +99,25 @@
 	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { Vehicle { QuadUtilityVehicle { VehicleDriveDisabled } } }
 	{ PlayerCharacterSideKick } IsIn { QuadUtilityVehicle } = { QuadUtilityVehicle } and { VehicleDriveDisabled }
 
-	Usage Example C++.
+	Usage Example C++
 
 	```c++
-		// Create ProofStepProofStep[proof][lineNumber][LHS/RHS][SYMBOL] placeholder to store the proof
+
 		std::vector<
+			std::vector<
+			std::vector<
+			std::vector<
+			std::string>>>>
+
+			// Instantiate ProofStep_4DStdStrVec[proof][step][lhs/rhs][token]
+			ProofStep_4DStdStrVec;
+
 		std::vector<
-		std::vector<
-		std::vector<
-		std::string>>>> ProofStep;
+			std::vector<
+			std::string>>
+
+			// Instantiate AxiomCommitLog_StdStrVec[proof][step]
+			AxiomCommitLog_StdStrVec;
 
 		// Instantiate Prover (module)
 		EuclidProver<BracketType::CurlyBraces> Euclid;
@@ -155,30 +165,35 @@
 
 		Euclid.Lemmas
 		(
-			// Lemma (rewrite helper) 00
+			// Lemma_00 (rewrite helper)
 			{
 				{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "StyxBoat", "}" }, // lhs
 				{ "{", "StyxBoat", "}", "IsNotIn", "{", "StyxRiver", "}" } // rhs
 			}
 		);
 
-		const bool ProofFound_Flag =
-
 		Euclid.Prove
 		(
-			{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}" }, // rhs
-			{ "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" }, // lhs
+			{
+				{ "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}", }, // lhs
+				{ "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}" } // rhs
+			},
 
-			ProofStep // Storage for the Result
+			ProofStep_4DStdStrVec,
+			AxiomCommitLog_StdStrVec
 		);
 
-		if (ProofFound_Flag)
+		while (!Euclid.StatusReady)
+		{
+			//std::cout << "Performing some other work..." << std::endl;
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+		}
+
+		if (Euclid.ProofFoundFlag)
 		{
 			std::cout << "Proof found:" << std::endl;
 			Euclid.PrintPath(ProofStep);
-		}
-		else if (ProofStep.size())
-		{
+		} else if (ProofStep.size()) {
 			std::cout << "Partial Proof found:\n" << std::endl;
 			Euclid.PrintPath(ProofStep);
 		} else {
