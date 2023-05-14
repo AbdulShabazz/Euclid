@@ -183,21 +183,22 @@
 			AxiomCommitLog_StdStrVec
 		);
 
-		while (!Euclid.StatusReady)
+		if (Euclid.StatusReady())
 		{
-			//std::cout << "Performing some other work..." << std::endl;
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-		}
-
-		if (Euclid.ProofFoundFlag)
-		{
-			std::cout << "Proof found:" << std::endl;
-			Euclid.PrintPath(ProofStep);
-		} else if (ProofStep.size()) {
-			std::cout << "Partial Proof found:\n" << std::endl;
-			Euclid.PrintPath(ProofStep);
+			if (Euclid.ProofFoundFlag)
+			{
+				std::cout << "Proof Found." << std::endl;
+				ProofStep_4DStdStrVec;
+				AxiomCommitLog_StdStrVec;
+			} else if (ProofStep_4DStdStrVec.size ()) {
+				std::cout << "Partial Proof Found." << std::endl;
+				ProofStep_4DStdStrVec;
+				AxiomCommitLog_StdStrVec;
+			} else {
+				std::cout << "No Proof Found." << std::endl;
+			}
 		} else {
-			std::cout << "Proof failed\n";
+			std::cout << "No Proof Found." << std::endl;
 		}
 
 		// Suspend a proof for current (GUID)
@@ -235,9 +236,8 @@
 #include <queue>
 #include <string>
 #include <unordered_map>
-#include <functional>
 #include <future>
-#include <limits>
+#include <atomic>
 #include <boost/multiprecision/cpp_int.hpp> 
 
 namespace Euclid_Prover
@@ -850,8 +850,8 @@ namespace Euclid_Prover
 			} else {
 
 				// Add new rewrites to the task queue //
-				const auto theoremLHS = Theorem[LHS];
-				const auto theoremRHS = Theorem[RHS];
+				const auto& theoremLHS = Theorem[LHS];
+				const auto& theoremRHS = Theorem[RHS];
 
 				for (const auto& Axiom : Axioms_UInt64Vec)
 				{
@@ -1025,7 +1025,6 @@ namespace Euclid_Prover
 
 		}
 
-		bool StatusReady{};
 		bool ProofFoundFlag{};
 
 		bool Axiom
@@ -1061,8 +1060,8 @@ namespace Euclid_Prover
 			InAxiomsConstStdStrVec
 		)
 		{
-			AxiomsStdStrVec =
-
+			AxiomsStdStrVec = InAxiomsConstStdStrVec;
+			/*
 			{
 				{
 					{"1", "+", "1"}, // (lhs) Prime Composite: 8303 //
@@ -1074,7 +1073,7 @@ namespace Euclid_Prover
 					{"4"} // (rhs) Prime Composite: 29 //
 				}
 			};
-
+			*/
 			return true;
 		}
 
@@ -1176,27 +1175,25 @@ namespace Euclid_Prover
 		{			
 			Reset();
 
-			TheoremStdStrVec =
-
+			TheoremStdStrVec = InProofVecConstCharRef;
+			ProofStep4DStdStrVec = OutPath4DStdStrVecRef;
+			/*
 			{
 				{"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
 				{"4"} // (rhs) Prime Composite: 29 //
 			};
-
-			std::thread th
+			*/
+			th = std::thread
 			(
 				__Prove__,
 				std::cref(TheoremStdStrVec),
 				std::cref(AxiomsStdStrVec),
 				std::ref(ProofFoundFlag),
-				std::ref(StatusReady),
+				std::ref(StatusReadyFlag),
 				std::ref(ProofStep4DStdStrVec),
 				std::ref(OutAxiomCommitLogStdStrVecRef)
 			);
 
-			th.detach();
-
-			return;
 		}
 
 		void Prove
@@ -1234,10 +1231,22 @@ namespace Euclid_Prover
 			);
 		}
 
+		bool StatusReady ()
+		{
+			if (th.joinable())
+				th.join();
+
+			return true;
+		}
+
 	private:
 		const std::string _openBrace;
 		const std::string _openBraceST;
 		const std::string _closeBrace;
+
+		std::thread th;
+
+		bool StatusReadyFlag{};
 
 		std::vector<
 		std::vector<
@@ -1259,7 +1268,7 @@ namespace Euclid_Prover
 
 		void Reset()
 		{
-			StatusReady = false;
+			StatusReadyFlag = false;
 			ProofFoundFlag = false;
 		};
 	};
