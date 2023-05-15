@@ -98,3 +98,6 @@ SOLU:
 
 SYMP: Arithmetic overflow, recommend casting to a larger type before calling the operator+
 SOLU: divide.hpp:555: const double_limb_type two_n_mod = static_cast<limb_type>(1u) + (~static_cast<limb_type>(0u) - mod) % mod; >> const double_limb_type two_n_mod = static_cast<double_limb_type>(1u) + (~static_cast<double_limb_type>(0u) - mod) % mod;
+
+SYMP: queue<>, stack<>, vector<> show poor stack performance
+SOLU: recommend using priority_queue<>, deque<> instead.
