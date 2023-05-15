@@ -1,4 +1,209 @@
 
+
+		// Prevent next round call loops to improve Performance
+		std::unordered_map<BigInt128_t,
+		std::unordered_map<BigInt128_t, bool>>
+
+		CallHistory{},
+		NextRoundCallHistory{};
+
+		//CallHistory.reserve (100'000); // (Max expected elements for Performance)
+//
+#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_set>
+#include <unordered_map>
+#include <cstdlib>
+#include <chrono>
+#include <initializer_list>
+    
+std::vector<std::string> TraceCallStackStdStrVec {"EuclidProver"};
+    
+void __stdlog__(const std::initializer_list<std::string>& msg, const bool AddNewlineFlag = true)
+{
+	auto it = msg.begin();
+	auto IT = msg.end();
+	std::cout << *it;
+	++it; // Advance the iterator by 1 position //
+	for (it; it != IT; ++it)
+	{
+		std::cout << " " << *it;
+	}
+	if (AddNewlineFlag)
+		std::cout << std::endl;
+};
+
+void __stdtracein__(const std::string& msg)
+{
+	TraceCallStackStdStrVec.emplace_back (msg);
+	const std::size_t I = TraceCallStackStdStrVec.size ();
+	std::cout << TraceCallStackStdStrVec[0];
+	for (std::size_t i = 1; i < I; ++i)
+	{
+		std::cout << " >> " << TraceCallStackStdStrVec[i];
+	}
+	std::cout << std::endl;
+};
+
+void __stdtraceout__(const std::string& msg)
+{
+	TraceCallStackStdStrVec.pop_back ();
+	const std::size_t I = TraceCallStackStdStrVec.size ();
+	std::string buff{TraceCallStackStdStrVec[0]};
+	for (std::size_t i = 1; i < I; ++i)
+	{
+	    buff.append(" >> " + TraceCallStackStdStrVec[i]);
+	}
+	std::cout << buff << " << " << msg << std::endl;
+	std::cout << buff << std::endl;
+};
+
+int main()
+{
+    constexpr std::size_t LHS {};
+    constexpr std::size_t RHS {1};
+    constexpr std::size_t guid_UInt64 {2};
+	constexpr std::size_t last_UInt64 {3};
+	constexpr std::size_t ProofStack_UInt64 {4};
+	
+	std::unordered_map<
+	/*BigInt128_t*/
+	std::size_t,
+	std::unordered_map<
+	/*BigInt128_t*/
+	std::size_t, 
+	bool>>
+	
+	AxiomCallGraphMap;
+    
+    const
+    std::vector<
+    std::size_t>
+    
+    Theorem_UInt64Vec =
+    {
+    	1585615607, // {"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
+    	29, // {"4"} // (rhs) Prime Composite: 29 //
+    	0, // guid
+    	0, // last_guid
+    	// begin proofstack
+    };
+    
+    const
+    std::vector<
+    std::vector<
+    std::size_t>>
+    
+    Axioms_UInt64Vec = 
+    {
+        // Axiom_0
+    	{
+    		8303,   // {"1", "+", "1"}, // (lhs) Prime Composite: 8303 //
+    		31,     // {"2"} // (rhs) Prime Composite: 31
+    		1       // guid
+    	},
+    
+        // Axiom_1
+    	{
+    		22103,  // {"2", "+", "2"}, // (lhs) Prime Composite: 22103 //
+    		29,      // {"4"} // (rhs) Prime Composite: 29 //
+    		2       // guid
+    	}
+    };
+    
+    /**
+    PopulateAxiomCallGraph
+    (
+        std::unordered_map<
+    	/BigInt128_t/
+    	std::size_t,
+    	std::unordered_map<
+    	/BigInt128_t/
+    	std::size_t, 
+    	bool>>&
+    	InAxiomCallGraphMap
+    )
+    
+    Description: Adds qualifying axiom subnet netlists to the outbound route map.
+    
+    The modulus (%) operator which checks for divisibility requires 40-70 CPU microinstructions
+    so it is more efficient to perform this expensive operation once.
+    
+    Note: The following indirection labels are arbitrary: The chief goal is a standard sytem and method which adequately describes
+    the indirection of incoming & outgoing subnets. Reduce : LHS ==> RHS; Expand : LHS <== RHS.
+    */
+    auto PopulateAxiomCallGraph =
+    	[&]
+    (
+        std::unordered_map<
+    	/*BigInt128_t*/
+    	std::size_t,
+    	std::unordered_map<
+    	/*BigInt128_t*/
+    	std::size_t, 
+    	bool>>&
+    	InAxiomCallGraphMap
+    )
+    {
+        __stdtracein__("PopulateAxiomCallGraph");
+    	for (const std::vector</*BigInt128_t*/std::size_t>& Axiom_i : Axioms_UInt64Vec)
+    	{
+    		if
+    		(
+    		    !InAxiomCallGraphMap[Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] &&
+    		    (
+    		        Theorem_UInt64Vec[LHS] % Axiom_i[LHS] == 0 ||
+    		        Theorem_UInt64Vec[LHS] % Axiom_i[RHS] == 0 ||
+    		        Theorem_UInt64Vec[RHS] % Axiom_i[LHS] == 0 ||
+    		        Theorem_UInt64Vec[RHS] % Axiom_i[RHS] == 0
+	            )
+    		)
+    		{
+			    InAxiomCallGraphMap[Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]] = true;
+    
+    			__stdlog__({ "InAxiomCallGraphMap[Theorem_UInt64Vec_"+std::to_string(Theorem_UInt64Vec[guid_UInt64])+"][Axiom_"+std::to_string(Axiom_i[guid_UInt64])+"] =", 
+    			std::to_string(InAxiomCallGraphMap[Theorem_UInt64Vec[guid_UInt64]][Axiom_i[guid_UInt64]]) });
+    		}
+    
+    		for (const std::vector</*BigInt128_t*/std::size_t>& Axiom_j : Axioms_UInt64Vec)
+    		{
+    			if (Axiom_i[guid_UInt64] == Axiom_j[guid_UInt64])
+    				continue;
+    
+    			if 
+        		(
+        		    !InAxiomCallGraphMap[Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] &&
+        		    (
+        		        Axiom_i[LHS] % Axiom_j[LHS] == 0 ||
+        		        Axiom_i[LHS] % Axiom_j[RHS] == 0 ||
+        		        Axiom_i[RHS] % Axiom_j[LHS] == 0 ||
+        		        Axiom_i[RHS] % Axiom_j[RHS] == 0
+    	            )
+        		)
+    			{
+			        InAxiomCallGraphMap[Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]] = true;
+    
+    				__stdlog__({ "InAxiomCallGraphMap[Axiom_"+std::to_string(Axiom_i[guid_UInt64])+"][Axiom_"+std::to_string(Axiom_j[guid_UInt64])+"] =", 
+    				std::to_string(InAxiomCallGraphMap[Axiom_i[guid_UInt64]][Axiom_j[guid_UInt64]]) });
+    			}
+    		} // end for (...Axiom_j : Axioms_UInt64Vec)
+    	} // end for (...Axiom_i : Axioms_UInt64Vec)
+    	__stdtraceout__("PopulateAxiomCallGraph");
+    };
+	
+    const auto start_time_chrono = std::chrono::high_resolution_clock::now();
+    
+	PopulateAxiomCallGraph(AxiomCallGraphMap);
+
+    const auto end_time_chrono = std::chrono::high_resolution_clock::now();
+    const auto duration_chrono = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time_chrono - start_time_chrono).count();
+    std::cout << "Total Duration (nanoseconds): " << duration_chrono << std::endl;
+	
+    return EXIT_SUCCESS;
+}
+
+//
 #include <cstdlib>
 #include <iostream>
 #include <chrono>
