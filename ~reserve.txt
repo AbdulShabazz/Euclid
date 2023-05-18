@@ -1,5 +1,26 @@
 
+//
+					auto it = InTheoremUInt64.begin() + ProofStackUInt64;
+					const auto IT = InTheoremUInt64.end();
 
+					/*
+					std::cout << "Theorem = {";
+					for(it; it != IT; ++it)
+					//for (const BigInt128_t& u : InTheoremUInt64)
+					{
+						//std::cout << u.str() << ", ";
+						std::cout << ( *it ).str() << ", ";
+					}
+					std::cout << "}\n";
+					return true;
+					*/
+//
+						if (TimeoutEntropyQueue.find(Theorem_0000[LHS]) == TimeoutEntropyQueue.end())
+						{
+							TimeoutEntropyQueue[Theorem_0000[LHS]] = true;
+							bTimeoutFlag = false;
+						}
+//
 	std::unordered_map<uint64_t, std::vector<uint64_t>> LHSPrimaryKeyHistory_VecMap;
 	std::unordered_map<uint64_t, std::vector<uint64_t>> RHSPrimaryKeyHistory_VecMap;
 //
