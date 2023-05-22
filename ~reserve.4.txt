@@ -1,0 +1,58 @@
+
+
+				auto FastForwardFound = [&]
+				(
+					PROOF_REWRITE Theorem_,
+					const std::string& OpcodeIndirectionStdStr,
+					PROOF_STEP TempProofStep3DStdStrVec_0000,
+					const BigInt512_t PrimaryKeyUInt64,
+					const BigInt512_t FromPrimaryKeyUInt64,
+					const BigInt512_t ToPrimaryKeyUInt64,
+
+				) -> bool {
+					CallGraphMap[last_GUID][ii] = true;
+
+					//__stdlog__({"lhs_reduce_ via ",axiom_name, i});
+					Theorem_[opcode_field][opcode] = OpcodeIndirectionStdStr;
+					Theorem_[opcode_field][axiom_label] = axiom_name;
+					Theorem_[opcode_field][guid_UInt64] = ii;
+
+					TempProofStep3DStdStrVec_0000.emplace_back(Theorem_);
+
+					// Commit for later fast-forward //
+					const BigInt512_t UpdatePrimaryKeyUInt64 = PrimaryKeyUInt64 / FromPrimaryKeyUInt64 * ToPrimaryKeyUInt64;
+					if (LHSRouteHistoryMap.find(UpdatePrimaryKeyUInt64) == LHSRouteHistoryMap.end())
+						LHSRouteHistoryMap.emplace(UpdatePrimaryKeyUInt64, TempProofStep3DStdStrVec_0000);
+
+					PROOF_STRUCT TempProofStruct_0000;
+					TempProofStruct_0000._ = TempProofStep3DStdStrVec_0000;
+					TempProofStruct_0000.LHSPrimaryKeyUInt64 = UpdatePrimaryKeyUInt64;
+					TempProofStruct_0000.RHSPrimaryKeyUInt64 = TempProofStruct.RHSPrimaryKeyUInt64;
+					TempProofStruct_0000.last_guid = ii;
+
+					// Attempt fast-forward //
+					if (RHSRouteHistoryMap.find(UpdatePrimaryKeyUInt64) != RHSRouteHistoryMap.end()) {
+						std::cout << "Proof found in Module_000" << << " via Fast-Forward (FF)" << std::endl;
+						__stdlog__({ "Proof found in Module_000",," via Fast-Forward (FF)" });
+						auto iProofStep2DStdStrVec = RHSRouteHistoryMap[UpdatePrimaryKeyUInt64].begin();
+						const auto iProofStepEND = RHSRouteHistoryMap[UpdatePrimaryKeyUInt64].end();
+						const auto& LHS_SOLU = Theorem_[LHS];
+						// Skip root element //
+						for (++iProofStep2DStdStrVec; iProofStep2DStdStrVec != iProofStepEND; ++iProofStep2DStdStrVec) {
+							( *iProofStep2DStdStrVec )[LHS] = LHS_SOLU;
+							TempProofStep3DStdStrVec_0000.emplace_back(*iProofStep2DStdStrVec);
+						}
+						TempProofStruct_0000._ = TempProofStep3DStdStrVec_0000;
+						TempProofStruct_0000.RHSPrimaryKeyUInt64 = UpdatePrimaryKeyUInt64;
+						// Is the FF queue still empty? //
+						if (FastForwardTask_Thread.empty()) {
+							bFastForwardFlag = true;
+							FastForwardTask_Thread.push(TempProofStruct_0000);
+							QED = true;
+							return true;
+						}
+					}
+
+					Tasks_Thread.push(TempProofStruct_0000);
+					return false;
+				};
