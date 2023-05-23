@@ -9,7 +9,7 @@ Additionally, Euclid can be beneficial in debugging game logic.
 
 ## Instructions
 
-To deploy the prover in your game logic, you must provide it with axioms and lemmas related to the current state of your game, and request it to prove a theorem or desired outcome. Each proof-step can be used to perhaps invalidate a state-machine, or update the game state; or in more advanced implementations, its proof-steps can be utilized by helper A.I. that aim to achieve the proof-step as a desired outcome in your game. This feeding process is repeated until the game state reflects the final proof, as a final outcome (i.e., the theorem is proven). The prover can also produce a path of proof-steps using the available Expand- and Reduce- solvers.
+To deploy the prover in your game logic, you must provide it with axioms and lemmas related to the current state of your game, and request it to prove a theorem or desired outcome. Each proof-step can be used to perhaps invalidate a state-machine, or update the game state; or in more advanced implementations, its proof-steps can be utilized by helper A.I. that aim to achieve the proof-step as a desired outcome in your game. This feeding process is repeated until the game state reflects the final proofstep in the game (i.e. the theorem is proven). The prover can also produce a path of proof-steps using the available Expand- and Reduce- solvers.
 
 To compile the boost library, in for example Visual Studio, go to Project > [ProjectName] Properties > VC++ Directories > General > Include Directories > and include one of the macros: `$(Local[ProjectName]WorkingDirectory)` or `$(ProjectDirectory)`. If you do not have the latest boost library in your local directory, you must first download the boost library from https://www.boost.org/ and extract it to the local directory. 
 
@@ -72,116 +72,130 @@ Usage Example C++20 Code:
 #include <string>
 #include <vector>
 #include <iostream>
+#include <chrono>
+#include <thread>
 #include <Euclid.h>
 
 int main()
 {
-  using EuclidProverClass = 
+    using EuclidProverClass =
 
-  Euclid_Prover::EuclidProver<
-  Euclid_Prover::BracketType::CurlyBraces>;
+        Euclid_Prover::EuclidProver<
+        Euclid_Prover::BracketType::CurlyBraces>;
 
-  // Instantiate Prover (module)
-  EuclidProverClass Euclid;
+    // Instantiate Prover (module)
+    EuclidProverClass Euclid;
 
-  Euclid.Axioms
-  (
-    {
+    Euclid.Axioms
+    (
+        {
+            // Axiom_1
+            {
+              {"1", "+", "1"}, // (lhs) Prime Composite: 8303 //
+              {"2"} // (rhs) Prime Composite: 31 //
+            },
+
+            // Axiom_2
+            {
+              {"2", "+", "2"}, // (lhs) Prime Composite: 22103 //
+              {"4"} // (rhs) Prime Composite: 29 //
+            }
+        }
+    );
+
+    /*
+
+    // OR...
+
+    Euclid.Axiom
+    (
       // Axiom_1
       {
         {"1", "+", "1"}, // (lhs) Prime Composite: 8303 //
         {"2"} // (rhs) Prime Composite: 31 //
       },
+    );
 
+    Euclid.Axiom
+    (
       // Axiom_2
       {
         {"2", "+", "2"}, // (lhs) Prime Composite: 22103 //
         {"4"} // (rhs) Prime Composite: 29 //
       }
+    );
+    */
+
+    const auto start_time_chrono = std::chrono::high_resolution_clock::now();
+
+    Euclid.Prove
+    (
+        {
+          {"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
+          {"4"}, // (rhs) Prime Composite: 29 //
+        }
+    );
+
+    std::cout << "Performing some other task..." << std::endl; // std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    /*
+    if (Euclid.StatusReady())
+    {
+        if (Euclid.ProofFoundFlag)
+        {
+            std::cout << "Proof Found. (QED)" << std::endl;
+            Euclid.PrintPath(Euclid.ProofStep3DStdStrVec);
+            Euclid.PrintPath(Euclid.AxiomCommitLogStdStrVecRef);
+        } else if (Euclid.ProofStep3DStdStrVec.size()) {
+            std::cout << "Partial Proof Found." << std::endl;
+            Euclid.PrintPath(Euclid.ProofStep3DStdStrVec);
+            Euclid.PrintPath(Euclid.AxiomCommitLogStdStrVecRef);
+        } else {
+            std::cout << "No Proof Found." << std::endl;
+        }
+    } else {
+        std::cout << "No Proof Found." << std::endl;
     }
-  );
+    */
 
-  /*
-
-  // OR...
-
-  Euclid.Axiom
-  (
-    // Axiom_1
+    while (!Euclid.StatusReadyFlag)
     {
-      {"1", "+", "1"}, // (lhs) Prime Composite: 8303 //
-      {"2"} // (rhs) Prime Composite: 31 //
-    },
-  );
-
-  Euclid.Axiom
-  (
-    // Axiom_2
-    {
-      {"2", "+", "2"}, // (lhs) Prime Composite: 22103 //
-      {"4"} // (rhs) Prime Composite: 29 //
+        std::this_thread::yield();
     }
-  );
-  */
 
-  std::vector<
-  std::vector<
-  std::vector<
-  std::vector<
-  std::string>>>>
-
-  // Instantiate ProofStep_4DStdStrVec[proof][step][lhs/rhs][token]
-  ProofStep_4DStdStrVec;
-
-  std::vector<
-  std::vector<
-  std::string>>
-
-  // Instantiate AxiomCommitLog_StdStrVec[proof][step]
-  AxiomCommitLog_StdStrVec;
-
-  const auto start_time_chrono = std::chrono::high_resolution_clock::now();
-
-  Euclid.Prove
-  (
+    if (Euclid.ProofFoundFlag)
     {
-      {"1", "+", "1", "+", "1", "+", "1"}, // (lhs) Prime Composite: 1585615607 //
-      {"4"}, // (rhs) Prime Composite: 29 //
-    },
+        std::cout << "Proof Found. (QED)" << std::endl;
+        Euclid.PrintPath(Euclid.ProofStep3DStdStrVec);
+        Euclid.PrintPath(Euclid.AxiomCommitLogStdStrVecRef);
+    } else if (Euclid.ProofStep3DStdStrVec.size()) {
+        std::cout << "Partial Proof Found." << std::endl;
+        Euclid.PrintPath(Euclid.ProofStep3DStdStrVec);
+        Euclid.PrintPath(Euclid.AxiomCommitLogStdStrVecRef);
+    } else {
+        std::cout << "No Proof Found." << std::endl;
+    }
 
-    ProofStep_4DStdStrVec,
-    AxiomCommitLog_StdStrVec
-  );
-  
-  while (!Euclid.StatusReady)
-  {
-    //std::cout << "Performing some other work..." << std::endl;
-    //std::this_thread::sleep_for(std::chrono::seconds(1));
-  }
+    // Suspend a proof for current (GUID)
+    const BigInt128_t guid = Euclid.Suspend();
+    std::cout << "Proof suspended for: guid_" << guid << std::endl;
 
-  if (Euclid.ProofFoundFlag)
-  {
-    std::cout << "Proof Found." << std::endl;
-    ProofStep_4DStdStrVec;
-    AxiomCommitLog_StdStrVec;
-  } else if (ProofStep_4DStdStrVec.size()) {
-    std::cout << "Partial Proof Found." << std::endl;
-    ProofStep_4DStdStrVec;
-    AxiomCommitLog_StdStrVec;
-  } else {
-    std::cout << "No Proof Found." << std::endl;
-  }
+    // Resume a proof for (GUID)
+    if(Euclid.Resume(guid))
+    {
+        std::cout << "Proof resumed for: guid_" << guid << std::endl;
+    }
 
-  std::cout << std::endl;
-  const auto end_time_chrono = std::chrono::high_resolution_clock::now();
-  const auto duration_chrono = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time_chrono - start_time_chrono).count();
-  std::cout << "Total Duration (nanoseconds): " << duration_chrono << std::endl;
+    std::cout << std::endl;
+    const auto end_time_chrono = std::chrono::high_resolution_clock::now();
+    const auto duration_chrono = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time_chrono - start_time_chrono).count();
+    std::cout << "Total Duration (nanoseconds): " << duration_chrono << std::endl;
 
-  // Hold for user-input //
-  std::string inChar;
-  std::cin >> inChar;
+    // Hold for user-input //
+    std::string inChar;
+    std::cin >> inChar;
 
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 /*
@@ -286,40 +300,51 @@ int main()
   Euclid.Prove
   (
     {
-      {
-        "{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}"
-      }, // lhs//
+      {"{", "PlayerCharacterSideKick", "}", "IsIn", "{", "QuadUtilityVehicle", "}"}, // lhs//
     
-      {
-        "{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}"
-      } // rhs //
+      {"{", "QuadUtilityVehicle", "}", "and", "{", "VehicleDriveDisabled", "}"} // rhs //
     }
-
-    ProofStep_4DStdStrVec,
-    AxiomCommitLog_StdStrVec
   );
-  
-  while (!Euclid.StatusReady)
-  {
-    //std::cout << "Performing some other work..." << std::endl;
-    //std::this_thread::sleep_for(std::chrono::seconds(1));
-  }
-  
-  if (Euclid.StatusReady)
-  {
+
+    std::cout << "Performing some other task..." << std::endl; // std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    /*
+    if (Euclid.StatusReady())
+    {
+        if (Euclid.ProofFoundFlag)
+        {
+            std::cout << "Proof Found. (QED)" << std::endl;
+            Euclid.PrintPath(Euclid.ProofStep3DStdStrVec);
+            Euclid.PrintPath(Euclid.AxiomCommitLogStdStrVecRef);
+        } else if (Euclid.ProofStep3DStdStrVec.size()) {
+            std::cout << "Partial Proof Found." << std::endl;
+            Euclid.PrintPath(Euclid.ProofStep3DStdStrVec);
+            Euclid.PrintPath(Euclid.AxiomCommitLogStdStrVecRef);
+        } else {
+            std::cout << "No Proof Found." << std::endl;
+        }
+    } else {
+        std::cout << "No Proof Found." << std::endl;
+    }
+    */
+
+    while (!Euclid.StatusReadyFlag)
+    {
+        std::this_thread::yield();
+    }
+    
     if (Euclid.ProofFoundFlag)
     {
-      std::cout << "Proof Found." << std::endl;
-      ProofStep_4DStdStrVec;
-      AxiomCommitLog_StdStrVec;
-    } else if (ProofStep_4DStdStrVec.size()) {
-      std::cout << "Partial Proof Found." << std::endl;
-      ProofStep_4DStdStrVec;
-      AxiomCommitLog_StdStrVec;
+        std::cout << "Proof Found. (QED)" << std::endl;
+        Euclid.PrintPath(Euclid.ProofStep3DStdStrVec);
+        Euclid.PrintPath(Euclid.AxiomCommitLogStdStrVecRef);
+    } else if (Euclid.ProofStep3DStdStrVec.size()) {
+        std::cout << "Partial Proof Found." << std::endl;
+        Euclid.PrintPath(Euclid.ProofStep3DStdStrVec);
+        Euclid.PrintPath(Euclid.AxiomCommitLogStdStrVecRef);
     } else {
-      std::cout << "No Proof Found." << std::endl;
+        std::cout << "No Proof Found." << std::endl;
     }
-  }
   
   return EXIT_SUCCESS;
 }
