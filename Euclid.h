@@ -88,7 +88,7 @@ print_path(const T& vector) noexcept {
 
   VERSION
 	  Major.Minor.Bugfix.Patch
-	  12.0.0.0 // Euclid.9.h // Euclid.4.h //
+	  12.0.0.0
 
   DESCRIPTION
 	Theorem prover written in C++23. Ported from ECMA-262 JavaScript (A grammar reduction term-rewriting system)
@@ -322,7 +322,7 @@ print_path(const T& vector) noexcept {
 
 	```
 
-  TEST CASE 246: nanoseconds elapsed: 134036600
+  TEST CASE 246: nanoseconds elapsed: 161800
 
   REFERENCES
 	  OpenAI GPT-4-32k-0314 ( { max_tokens:32000, temperature:1.0, top_p:1.0, N:1,
