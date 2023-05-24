@@ -15,7 +15,7 @@ To compile the boost library, in for example Visual Studio, go to Project > [Pro
 
 Compiler flags: ```/permissive- /Yu"pch.h" /ifcOutput "x64\Release\" /GS /GL /W3 /Gy /Zc:wchar_t /Zi /Gm- /O2 /Ob2 /sdl /Fd"x64\Release\vc143.pdb" /Zc:inline /fp:precise /D "NDEBUG" /D "EUCLIDPROVERLIBDLL_EXPORTS" /D "_WINDOWS" /D "_USRDLL" /D "_WINDLL" /D "_UNICODE" /D "UNICODE" /errorReport:prompt /WX- /Zc:forScope /std:c17 /Gd /Oy /Oi /MD /std:c++20 /FC /Fa"x64\Release\" /EHsc /nologo /Fo"x64\Release\" /Ot /Fp"x64\Release\EuclidProverLibDLL.pch" /diagnostics:column```
 
-You won't need Euclid.cpp until you intend to compile the header file as part of a .DLL, in which case you will need to add both files to you .DLL project, enable the EUCLIDPROVERLIBDLL_EXPORTS preprocessor directive in your project, and then uncomment all occurences of the API_EXPORT directive in the header file.
+You won't need Euclid.cpp until you intend to compile the header file as part of a .DLL, in which case you will need to add both files to your .DLL project, then enable the EUCLIDPROVERLIBDLL_EXPORTS preprocessor directive in your project, and uncomment all occurences of the API_EXPORT directive in the header file.
 
 ## Formatting
 
