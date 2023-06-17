@@ -661,6 +661,7 @@ namespace Euclid_Prover
 		// Todo: Implement thread-safe LHSFastForwardMap, RHSFastForwardMap for parrallel access via atomics
 		// Todo: Develop a proofstep generator that can infer solutions and their proofsteps from an axiom's CallGraph
 		// Todo: Add a distance metric or (performance) penalty for employing certain axioms or chains of proofsteps (eg. traversal through mountains vs fording a river)
+		// Todo: Experiment with Google's flat_hash_map for CallGraphUInt64Map (lower unsuccessful lookup penalty, smaller memory footprint, fastersuccessful lookups, slower insertions)
 		// Todo: Add Remove, SendOffline support for Axioms
 		// Todo: Add Resume, Suspend support for Proofs
 		// Todo: Create a proof-statement hash which can be used as a file handle to a proofstep solution when it posts to a file (stateless)
