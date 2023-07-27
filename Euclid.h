@@ -666,6 +666,7 @@ namespace Euclid_Prover
 		// Todo: Add Resume, Suspend support for Proofs
 		// Todo: Create a proof-statement hash which can be used as a file handle to a proofstep solution when it posts to a file (stateless)
 		// Todo: Prevent Tasks_Thread (stack) overflows by including a timeout or deferring unprocessed axiom rewrites to a standby thread
+		// Todo: Rather than cache the PrimeProduct[BigIntA, BigIntB] and PrimeProduct[BigIntB, BigIntA], sort the values and cache PrimeProduct[BigIntA, BigIntB] once (reduce memory footprint)
 
 		// *** Core Proof Engine (Loop) *** //
 
